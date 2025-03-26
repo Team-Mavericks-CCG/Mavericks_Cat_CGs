@@ -1,0 +1,32 @@
+{
+  "name": "login-demo-app",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A basic login demo application using React, Node.js, and SQL.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "@node-rs/argon2": "2.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mariadb": "^3.4.0",
+    "@sequelize/mariadb": "^7.0.0-alpha.46",
+    "sequelize": "^6.37.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.3",
+    "prettier-eslint": "^16.3.0"
+  },
+  "author": "",
+  "license": "UNLICENSED"
+}
