@@ -1,4 +1,4 @@
-# Login Demo Application - Server
+# CS390 - Server Backend
 
 This is the server-side of the Login Demo Application built with Node.js, Express, and SQL. The server handles authentication and user management.
 
@@ -44,6 +44,8 @@ This is the server-side of the Login Demo Application built with Node.js, Expres
    DB_PASSWORD=<password for database>
    DB_HOST=localhost
    JWT_SECRET=<some random string>
+   # optional, port for backend (default = 5000)
+   PORT=<port number>
    ```
 
    > [!CAUTION]

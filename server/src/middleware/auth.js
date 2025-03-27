@@ -28,7 +28,7 @@ export const auth = (req, res, next) => {
       id: decoded.id,
     };
     next();
-  } catch (error) {
+  } catch {
     res.status(401).json({ message: "Token is not valid" });
   }
 };
@@ -67,7 +67,7 @@ export const verifyToken = async (req, res, next) => {
     };
 
     next();
-  } catch (error) {
+  } catch {
     // If token is invalid or expired
     res.status(401).json({ message: "Invalid token" });
   }
