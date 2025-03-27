@@ -5,8 +5,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-if (process.env.JWT_SECRET === undefined) {
-  console.error("JWT_SECRET is not set");
+// exit if JWT_SECRET is not set, needed for login functionality
+if (process.env.JWT_SECRET === undefined || process.env.JWT_SECRET === "") {
+  console.error("JWT_SECRET is not set, check your .env file");
   process.exit(1);
 }
 
@@ -57,7 +58,7 @@ export async function login(req, res) {
     checkPassword(username, password)
       // if user is found and password is correct
       .then((user) => {
-        // update last login time
+        // update last login time, silent is used to stop changes in updatedAt
         user.update({ lastLogin: new Date() }, { silent: true });
 
         // create a token with user id and secret key for following requests
@@ -66,7 +67,7 @@ export async function login(req, res) {
         });
 
         // send the token as response
-        res.json({ token });
+        res.status(200).json({ token });
       })
       // if user is not found or password is incorrect
       .catch((error) => {
@@ -93,13 +94,21 @@ export async function register(req, res) {
     const hashedPassword = await argon2.hash(password);
 
     // user is created with username and hashed password, shouldn't change other fields
-    await User.create(
+    const user = await User.create(
       { username: username, password: hashedPassword },
       { fields: ["username", "password"] }
     );
 
+    // create a token with user id and secret key for following requests
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
     // send success message
-    res.status(201).json({ message: "User registered successfully" });
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+    });
   } catch (error) {
     // only username is a unique field, if there is a unique constraint error, username exists
     if (error.name === "SequelizeUniqueConstraintError") {
@@ -109,29 +118,6 @@ export async function register(req, res) {
     else {
       res.status(500).json({ message: "Server error" });
     }
-  }
-}
-
-// TODO Not Fully Implemented
-export async function verifyToken(req, res) {
-  // get token from request header
-  const token = req.header("Authorization");
-  console.log(req);
-
-  // if token is not provided
-  if (!token) {
-    return res.status(401).json({ message: "Access denied" });
-  }
-
-  try {
-    // verify the token with the secret key
-    jwt.verify(token, process.env.JWT_SECRET);
-
-    // if token is valid, send success message
-    res.status(200).json({ message: "Token is valid" });
-  } catch {
-    // if token is invalid or expired, send error message
-    res.status(401).json({ message: "Invalid token" });
   }
 }
 

@@ -1,8 +1,8 @@
 {
-  "name": "login-demo-app",
+  "name": "cs390-backend",
   "version": "1.0.0",
   "type": "module",
-  "description": "A basic login demo application using React, Node.js, and SQL.",
+  "description": "",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -14,8 +14,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mariadb": "^3.4.0",
-    "@sequelize/mariadb": "^7.0.0-alpha.46",
+    "pg": "^8.14.1",
     "sequelize": "^6.37.6"
   },
   "devDependencies": {

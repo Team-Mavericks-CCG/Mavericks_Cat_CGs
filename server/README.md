@@ -17,27 +17,37 @@ This is the server-side of the Login Demo Application built with Node.js, Expres
 
 ## Getting Started
 
-1. **Clone the repository**:
-
-   ```bash
-   git clone <repository-url>
-   ```
-
-2. **Navigate to the server directory**:
+1. **Navigate to the server directory**:
 
    ```bash
    cd server
    ```
 
-3. **Install dependencies**:
+2. **Install dependencies**:
 
    ```bash
    npm install
    ```
 
-4. **Set up the database**:
+3. **Set up the database**:
 
-   - Ensure you have a SQL database set up and update the `dbConfig.js` file with your database connection details.
+   - Ensure that you have postgres installed and running
+
+4. **Populate .env**
+
+   - Ensure .env exists in the server/src directory
+   - Populate .env
+
+   ```env
+   DB_NAME=<name of database>
+   DB_USER=<user with correct permissions>
+   DB_PASSWORD=<password for database>
+   DB_HOST=localhost
+   JWT_SECRET=<some random string>
+   ```
+
+   > [!CAUTION]
+   > The example above assumes you are configuring for testing, ensure the JWT_SECRET is long, secure, and random for production and database configuration will likely be different
 
 5. **Run the server**:
 
@@ -50,3 +60,4 @@ This is the server-side of the Login Demo Application built with Node.js, Expres
 - **POST /api/login**: Authenticate a user and return a token.
 - **POST /api/register**: Register a new user.
 - **GET /api/auth/verify** Verify Login Token
+- **GET /api/auth/test** test if auth middleware is working

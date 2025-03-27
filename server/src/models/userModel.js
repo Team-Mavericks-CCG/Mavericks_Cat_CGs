@@ -3,7 +3,7 @@ import sequelize from "../config/dbConfig.js";
 
 const User = sequelize.define(
   // name of table
-  "users",
+  "players",
   // table columns
   {
     id: {
@@ -19,11 +19,6 @@ const User = sequelize.define(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-    },
-    // TODO remove email? make optional?
-    email: {
-      type: DataTypes.STRING,
-      allowNull: true,
     },
     // to track inactive accounts
     lastLogin: {
