@@ -57,7 +57,8 @@ This is the server-side of the Login Demo Application built with Node.js, Expres
 
 ## API Endpoints
 
-- **POST /api/login**: Authenticate a user and return a token.
-- **POST /api/register**: Register a new user.
-- **GET /api/auth/verify** Verify Login Token
-- **GET /api/auth/test** test if auth middleware is working
+- **POST /api/auth/login**: Authenticate a user and return a token. Provide username and password in request body. Returns JWT with 1 hour ttl with the token property.
+- **POST /api/auth/register**: Register a new user. Provide username and password in request body. Returns JWT with 1 hour ttl with the token property.
+- **POST /api/auth/change-password** Change password for an existing user, provide username, password, and newPassword in request body.
+- **GET /api/auth/verify** Verify Login Token. Include JWT recieved from login/register in the Authorization header.
+- **GET /api/auth/test** test if auth middleware is working and a token is valid. Include JWT recieved from login/register in the Authorization header.
