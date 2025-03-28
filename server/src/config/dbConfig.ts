@@ -3,6 +3,16 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+if (
+  !process.env.DB_NAME ||
+  !process.env.DB_USER ||
+  !process.env.DB_PASSWORD ||
+  !process.env.DB_HOST
+) {
+  console.error("Database configuration missing, check your .env file");
+  process.exit(1);
+}
+
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
@@ -13,7 +23,7 @@ const sequelize = new Sequelize(
   }
 );
 
-const testConnection = async () => {
+const testConnection = async (): Promise<void> => {
   try {
     await sequelize.authenticate();
     console.log("Connection has been established successfully.");
@@ -22,6 +32,6 @@ const testConnection = async () => {
   }
 };
 
-testConnection();
+await testConnection();
 
 export default sequelize;
