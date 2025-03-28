@@ -25,11 +25,10 @@ export class Deck {
       }
     }
 
-    // Add jokers if specified - would need to extend Card class to handle jokers properly
-    // This is just a placeholder
-    for (let i = 0; i < jokers; i++) {
-      // Using any suit and rank for joker as placeholder
-      this.cards.push(new Card(Suit.SPADES, Rank.ACE));
+    // TODO: Add joker support
+    if (jokers > 0) {
+      throw new Error("Jokers are not supported yet");
+      // add 2 jokers to the deck, 1 red and 1 black
     }
   }
 
