@@ -34,6 +34,16 @@ export default tseslint.config(
         "warn",
         { allowConstantExport: true },
       ],
+      // Allow @ts-ignore comments
+      "@typescript-eslint/ban-ts-comment": [
+        "warn",
+        {
+          "ts-ignore": false,
+          "ts-nocheck": "allow-with-description",
+          "ts-expect-error": "allow-with-description",
+          minimumDescriptionLength: 3,
+        },
+      ],
     },
   }
 );
