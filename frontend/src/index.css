@@ -27,8 +27,8 @@ body {
 
 
 .container {
-  width: 100%; /* Adjust this to make it even wider */
-  max-width: 1200px; /* Ensures it doesn't get too large on big screens */
+  width: 150%; /* Adjust this to make it even wider */
+  max-width: 650px; /* Ensures it doesn't get too large on big screens */
   padding: 20px;
 }
 
