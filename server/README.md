@@ -35,7 +35,7 @@ This is the server-side of the Login Demo Application built with Node.js, Expres
 
 4. **Populate .env**
 
-   - Ensure .env exists in the server/src directory
+   - Ensure .env exists in the server directory
    - Populate .env
 
    ```env
