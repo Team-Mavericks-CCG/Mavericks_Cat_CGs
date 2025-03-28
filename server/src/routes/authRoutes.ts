@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Request, Response, Router } from "express";
 import {
   login,
   register,
@@ -20,7 +20,11 @@ router.post("/register", register);
 router.post("/change-password", changePassword);
 
 // Route for jwt verification
-router.get("/verify", verifyToken, (req, res) => {
+router.get("/verify", verifyToken, (req: Request, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ message: "Token is not valid" });
+    return;
+  }
   res.status(200).json({
     message: "Token is valid",
     user: {
@@ -31,7 +35,7 @@ router.get("/verify", verifyToken, (req, res) => {
 });
 
 // Route for testing auth middleware
-router.get("/test", auth, (_req, res) => {
+router.get("/test", auth, (_req, res: Response) => {
   res.status(202).json({ message: "Auth middleware works" });
 });
 
