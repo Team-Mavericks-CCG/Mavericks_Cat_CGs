@@ -5,7 +5,7 @@ declare module '@mui/material/styles' {
     vars?: {
       palette: MuiTheme['palette'];
       shape: MuiTheme['shape'];
-      spacing: MuiTheme['spacing'];
+      spacing: MuiTheme['spacing'];  
     };
   }
 }
