@@ -1,0 +1,50 @@
+
+/* styling */ 
+body {
+    margin: 0;
+    background-color: green;
+    overflow: hidden;
+  }
+  
+  #board {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+  }
+  .card {  /* the card */
+    width: 80px;
+    height: 120px;
+    background-color: white;
+    border-radius: 10px;
+    border: 2px solid black;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+  }
+  .top-row {  /* the card */
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 40px;
+  }
+
+  .foundations {  /* the card placements */
+    display: flex;
+    gap: 20px;
+    margin-right: 20px;
+  }
+
+  .tableau {  
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .column { /* the columns of */
+    position: relative;
+    width: 80px;
+    height: 600px;
+  }
+  
+ 
