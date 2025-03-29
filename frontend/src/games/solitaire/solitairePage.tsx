@@ -1,7 +1,7 @@
 
 /* styling html and pionts to the model  */ 
 
-/* on the call of on click of solitaire go here  */
+/* on the call of start solitaire go here  */
 
 import React, { useEffect, useState } from 'react';
 import './styles.css';
@@ -11,7 +11,8 @@ const CARD_WIDTH = 80;
 const CARD_HEIGHT = 120;
 const TABLEAU_COLUMNS = 7;
 
-
+// logic pulled from online 
+// 2d array [which col][where in col]
 const generateTableau = () => {
     const tableau = [];
     for (let i = 0; i < TABLEAU_COLUMNS; i++) {
