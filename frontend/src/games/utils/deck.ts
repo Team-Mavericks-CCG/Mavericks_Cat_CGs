@@ -40,7 +40,6 @@ export class Deck {
       // Generate a random index j such that 0 ≤ j ≤ i
       const j = Math.floor(Math.random() * (i + 1));
 
-      // eslint-disable-next-line security/detect-object-injection
       [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
     }
     return this;

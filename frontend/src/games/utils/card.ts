@@ -1,4 +1,4 @@
-export interface CardValueOptions {
+export interface CardRankOptions {
   aceHigh?: boolean;
 }
 
@@ -38,7 +38,7 @@ export class Card {
   /**
    * Creates a new card instance
    * @param suit - The card suit from Suit enum
-   * @param value - The card rank from Rank enum
+   * @param rank - The card rank from Rank enum
    */
   constructor(suit: Suit, rank: Rank) {
     this.suit = suit;
@@ -53,7 +53,7 @@ export class Card {
    * @param options - Options for value calculation (e.g., aceHigh)
    * @returns The numeric value of the card
    */
-  getValue(options: CardValueOptions = {}): number {
+  getRank(options: CardRankOptions = {}): number {
     const { aceHigh = false } = options;
 
     if (this.rank === Rank.ACE) {
@@ -88,7 +88,7 @@ export class Card {
   toJSON(): Record<string, string> {
     return {
       suit: this.suit,
-      value: this.rank,
+      rank: this.rank,
       color: this.color,
     };
   }
