@@ -6,7 +6,7 @@ export interface DeckOptions {
   jokers?: number;
 }
 
-export class Deck {
+export default class Deck {
   cards: Card[];
 
   constructor(options: DeckOptions = {}) {
@@ -30,6 +30,7 @@ export class Deck {
       throw new Error("Jokers are not supported yet");
       // add 2 jokers to the deck, 1 red and 1 black
     }
+    this.shuffle();
   }
 
   /**
@@ -40,7 +41,6 @@ export class Deck {
       // Generate a random index j such that 0 ≤ j ≤ i
       const j = Math.floor(Math.random() * (i + 1));
 
-      // eslint-disable-next-line security/detect-object-injection
       [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
     }
     return this;
