@@ -81,10 +81,7 @@ export class SolitaireGame {
     }
   }
   // move card from tableau to foundation
-  moveCard(source: Stock, target: Foundation): boolean;
-  moveCard(source: Stock, target: Tableau): boolean;
-  moveCard(source: Tableau, target: Tableau): boolean;
-  moveCard(source: Tableau, target: Foundation): boolean {
+  moveCard(source: Tableau | Stock, target: Foundation | Tableau): boolean {
     if (
       !this.isValidMove(
         source.cards[source.cards.length - 1],
@@ -109,18 +106,29 @@ export class SolitaireGame {
     target: Foundation | Tableau
   ): boolean {
     if (!sourceCard) return false;
-    if (!targetCard && target instanceof Foundation) {
+
+    // target card must be different color and one value higher
+    if (targetCard && target instanceof Tableau) {
+      return (
+        sourceCard.getColor() !== targetCard.getColor() &&
+        sourceCard.getValue() === targetCard.getValue() - 1
+      );
+    }
+
+    if (targetCard && target instanceof Foundation) {
+      return (
+        sourceCard.getValue() === targetCard.getValue() + 1 &&
+        sourceCard.getSuit() === targetCard.getSuit()
+      );
+    }
+
+    if (target instanceof Foundation) {
       return sourceCard.getRank() === Rank.ACE; // Only Ace can be placed on an empty foundation pile
     }
-    if (!targetCard && target instanceof Tableau) {
+    if (target instanceof Tableau) {
       return true; // Any card can be placed on an empty tableau pile
     }
-    if (!targetCard) return false;
-    // Check if the source card can be placed on the target card
-    return (
-      sourceCard.getColor() !== targetCard.getColor() &&
-      sourceCard.getValue() === targetCard.getValue() - 1
-    );
+    return false;
   }
 
   checkWin(): boolean {
