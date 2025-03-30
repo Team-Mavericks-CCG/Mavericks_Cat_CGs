@@ -1,6 +1,8 @@
-import { Card, Suit, Rank } from "./card.js";
+import { Card, Suit, Rank, CardRankOptions } from "./card.js";
 
+// TODO: add multiple deck support
 export interface DeckOptions {
+  cardOptions?: CardRankOptions;
   suits?: Suit[];
   ranks?: Rank[];
   jokers?: number;
@@ -18,10 +20,11 @@ export class Deck {
 
     this.cards = [];
 
+    const cardOptions = options.cardOptions ?? {};
     // Generate standard deck
     for (const suit of suits) {
       for (const rank of ranks) {
-        this.cards.push(new Card(suit, rank));
+        this.cards.push(new Card(suit, rank, cardOptions));
       }
     }
 

@@ -1,12 +1,13 @@
-import { Card, Suit, Rank } from "./card.js";
+import { Card, Suit, Rank, CardRankOptions } from "./card.js";
 
 export interface DeckOptions {
+  cardOptions?: CardRankOptions;
   suits?: Suit[];
   ranks?: Rank[];
   jokers?: number;
 }
 
-export default class Deck {
+export class Deck {
   cards: Card[];
 
   constructor(options: DeckOptions = {}) {
@@ -18,10 +19,11 @@ export default class Deck {
 
     this.cards = [];
 
+    const cardOptions = options.cardOptions ?? {};
     // Generate standard deck
     for (const suit of suits) {
       for (const rank of ranks) {
-        this.cards.push(new Card(suit, rank));
+        this.cards.push(new Card(suit, rank, cardOptions));
       }
     }
 
@@ -30,7 +32,6 @@ export default class Deck {
       throw new Error("Jokers are not supported yet");
       // add 2 jokers to the deck, 1 red and 1 black
     }
-    this.shuffle();
   }
 
   /**

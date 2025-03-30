@@ -1,5 +1,6 @@
-export interface CardValueOptions {
+export interface CardRankOptions {
   aceHigh?: boolean;
+  faceCardUniqueValues?: boolean;
 }
 
 export enum Suit {
@@ -34,13 +35,15 @@ export class Card {
   suit: Suit;
   rank: Rank;
   color: Color;
+  options: CardRankOptions;
 
   /**
    * Creates a new card instance
    * @param suit - The card suit from Suit enum
-   * @param value - The card rank from Rank enum
+   * @param rank - The card rank from Rank enum
    */
-  constructor(suit: Suit, rank: Rank) {
+  constructor(suit: Suit, rank: Rank, options: CardRankOptions = {}) {
+    this.options = options;
     this.suit = suit;
     this.rank = rank;
     //specify color based on suit
@@ -53,16 +56,23 @@ export class Card {
    * @param options - Options for value calculation (e.g., aceHigh)
    * @returns The numeric value of the card
    */
-  getValue(options: CardValueOptions = {}): number {
-    const { aceHigh = false } = options;
+  getValue(): number {
+    const { aceHigh = false, faceCardUniqueValues = false } = this.options;
 
+    // TODO: Should Ace be 14 when high to match faceCardUniqueValues?
     if (this.rank === Rank.ACE) {
       return aceHigh ? 11 : 1;
+    } else if (faceCardUniqueValues && ["J", "Q", "K"].includes(this.rank)) {
+      return 11 + ["J", "Q", "K"].indexOf(this.rank);
     } else if (["J", "Q", "K"].includes(this.rank)) {
       return 10;
     } else {
       return parseInt(this.rank, 10);
     }
+  }
+
+  getRank(): Rank {
+    return this.rank;
   }
 
   /**
@@ -88,7 +98,7 @@ export class Card {
   toJSON(): Record<string, string> {
     return {
       suit: this.suit,
-      value: this.rank,
+      rank: this.rank,
       color: this.color,
     };
   }
