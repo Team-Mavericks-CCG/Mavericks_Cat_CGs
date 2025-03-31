@@ -38,18 +38,36 @@ export class Foundation {
 }
 
 export class Stock {
+  stock: Card[];
+  // waste pile
   cards: Card[];
 
   constructor() {
+    this.stock = [];
     this.cards = [];
   }
 
   addCard(card: Card) {
-    this.cards.push(card);
+    this.stock.push(card);
+  }
+
+  draw(): void {
+    if (this.stock.length > 0) {
+      this.cards.push(this.stock.pop()!);
+    } else {
+      for (const card of this.cards) {
+        this.stock.push(card);
+      }
+      this.cards = [];
+
+      this.stock.reverse();
+      // Draw the top card from the stock
+      this.cards.push(this.stock.pop()!);
+    }
   }
 
   removeCard(): Card | null {
-    return this.cards.pop() ?? null;
+    return this.stock.pop() ?? null;
   }
 }
 
@@ -86,17 +104,25 @@ export class SolitaireGame {
 
   // move card from tableau to foundation
   moveCard(source: Column | Stock, target: Foundation | Column): boolean {
+    // check if the source is empty
+    if (source.cards.length === 0) {
+      return false;
+    }
+
+    //get target card, null if empty target
+    const targetCard =
+      target.cards.length === 0 ? null : target.cards[target.cards.length - 1];
+
+    // check if the move is valid
     if (
       !this.isValidMove(
         source.cards[source.cards.length - 1],
-        target.cards[target.cards.length - 1],
+        targetCard,
         target
       )
     ) {
       return false;
     }
-
-    const card = source.removeCard();
 
     if (
       source instanceof Column &&
@@ -106,12 +132,12 @@ export class SolitaireGame {
       source.cards[source.cards.length - 1].flip(); // Flip the last card face up if it's a column
     }
 
-    if (card) {
-      target.addCard(card);
-      return true;
-    }
+    // remove from source
+    const card = source.removeCard()!;
 
-    return false;
+    // add the card to target, if should never fail
+    target.addCard(card);
+    return true;
   }
 
   isValidMove(
@@ -119,6 +145,7 @@ export class SolitaireGame {
     targetCard: Card | null,
     target: Foundation | Column
   ): boolean {
+    console.log("isValidMove", sourceCard, targetCard, target);
     if (!sourceCard) return false;
 
     // target card must be different color and one value higher
