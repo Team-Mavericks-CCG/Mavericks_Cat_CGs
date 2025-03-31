@@ -22,7 +22,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignSelf: "center",
-  width: "150%",
+  width: "100%",
+  minHeight: "75%",
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: "auto",
@@ -181,7 +182,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               gap: 2,
             }}
           >
-            <FormControl>
+            <FormControl sx={{ height: '90px', mb: 1 }}>
               <FormLabel htmlFor="username">Username</FormLabel>
               <TextField
                 error={usernameError}
@@ -197,9 +198,15 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 variant="outlined"
                 onChange={validateUsername}
                 color={usernameError ? "error" : "primary"}
+                sx={{ 
+                  '& .MuiFormHelperText-root': {
+                    minHeight: '20px',
+                    margin: '3px 14px 0'
+                  }
+                }}
               />
             </FormControl>
-            <FormControl>
+            <FormControl sx={{ height: '90px', mb: 1 }}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
                 error={passwordError}
@@ -215,6 +222,12 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 variant="outlined"
                 onChange={validatePassword}
                 color={passwordError ? "error" : "primary"}
+                sx={{ 
+                  '& .MuiFormHelperText-root': {
+                    minHeight: '20px',
+                    margin: '3px 14px 0'
+                  }
+                }}
               />
             </FormControl>
             <FormControlLabel
@@ -236,7 +249,12 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </Link>
           </Box>
           <Divider>or</Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              gap: 2,
+              marginTop: "auto" // Added marginTop
+            }}>
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
               <Link
