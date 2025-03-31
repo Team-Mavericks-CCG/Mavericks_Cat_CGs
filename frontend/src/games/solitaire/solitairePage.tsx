@@ -82,7 +82,7 @@ export const SolitairePage: React.FC = () => {
           onClick={() => handleStockClick(stock)}
         >
           {" "}
-          +{" "}
+          blank card clickable{" "}
         </div>
       ) : (
         <div className="card clickable" onClick={() => handleStockClick(stock)}>

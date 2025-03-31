@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
@@ -17,6 +18,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import axios, { AxiosError } from "axios";
+
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -75,6 +77,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     setOpen(false);
   };
 
+  const navigate = useNavigate(); /*handleSubmit must use the nav func*/
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -104,7 +108,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       localStorage.setItem("authToken", response.data.token);
 
-      window.location.href = "/solitaire";
+      /*window.location.href = "/solitaire";  full page reload, rm */
+      navigate("/solitaire"); /* routes to the solitaire page*/
     } catch (error) {
       console.error("Error during login:", error);
 
