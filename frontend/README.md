@@ -1,54 +1,118 @@
-# React + TypeScript + Vite
+# Mavericks Cat CGs Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder contains the frontend code for the Mavericks Cat CGs project. It is built using **React**, **TypeScript**, and **Vite** for a fast and modern development experience.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React**: A JavaScript library for building user interfaces.
+- **TypeScript**: Adds static typing to JavaScript for better developer experience and fewer runtime errors.
+- **Vite**: A fast build tool and development server with Hot Module Replacement (HMR).
+- **ESLint**: Configured for linting and enforcing code quality.
 
-## Expanding the ESLint configuration
+## Prerequisites
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Before setting up the project, ensure you have the following installed:
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Node.js** (v16 or later)
+- **npm** or **yarn**
+
+## Setup Instructions
+
+1. Clone the repository and navigate to the `frontend` folder:
+
+   ```bash
+   git clone <repository-url>
+   cd cis390/CardProject/Mavericks_Cat_CGs/frontend
+   ```
+
+2. Install the dependencies:
+
+   ```bash
+   npm install
+   ```
+
+   or, if you prefer yarn:
+
+   ```bash
+   yarn install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+   or, with yarn:
+
+   ```bash
+   yarn dev
+   ```
+
+4. Open your browser and navigate to the URL provided in the terminal (usually `http://localhost:5173`).
+
+
+
+
+
+
+## EXTRA
+## Building for Production
+
+To create a production build of the frontend:
+
+1. Run the build command:
+
+   ```bash
+   npm run build
+   ```
+
+   or, with yarn:
+
+   ```bash
+   yarn build
+   ```
+
+2. The production-ready files will be available in the `dist` folder.
+
+## Linting and Code Quality
+
+This project uses ESLint for linting. To run the linter:
+
+```bash
+npm run lint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+or, with yarn:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+```bash
+yarn lint
 ```
+
+### Expanding ESLint Configuration
+
+For stricter linting rules, you can update the ESLint configuration as described in the [Expanding the ESLint Configuration](#expanding-the-eslint-configuration) section of this README.
+
+## Additional Notes
+
+- The project uses the following ESLint plugins for React-specific linting:
+  - [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x)
+  - [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom)
+
+- TypeScript configuration files (`tsconfig.node.json` and `tsconfig.app.json`) are used to define the project's type-checking behavior.
+
+## Troubleshooting
+
+If you encounter issues during setup or development:
+
+1. Ensure all dependencies are installed correctly by running:
+
+   ```bash
+   npm install
+   ```
+
+2. Check for any errors in the terminal output when running the development server.
+
+3. Verify that your Node.js version is compatible with the project requirements.
+
+For further assistance, consult the project maintainers or open an issue in the repository.
