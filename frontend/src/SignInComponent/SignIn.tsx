@@ -24,7 +24,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
   alignSelf: "center",
-  width: "150%",
+  width: "100%",
+  minHeight: "75%",
   padding: theme.spacing(4),
   gap: theme.spacing(2),
   margin: "auto",
@@ -95,7 +96,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const response = await axios.post<LoginResponse>(
         "http://localhost:5000/api/auth/login",
         {
@@ -116,7 +116,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       // Show error to user
       if (error instanceof AxiosError && error.response) {
         if (error.response.status === 401) {
-          setUsernameError(true);
           setPasswordError(true);
           setPasswordErrorMessage("Invalid username or password");
         } else {
@@ -132,31 +131,32 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     });
   };
 
-  const validateInputs = (): boolean => {
+  const validateUsername = (): boolean => {
     const username = document.getElementById("username") as HTMLInputElement;
-    const password = document.getElementById("password") as HTMLInputElement;
-
-    let isValid = true;
 
     if (!username.value || username.value.length < 3) {
       setUsernameError(true);
       setUsernameErrorMessage("Username must be at least 3 characters long.");
-      isValid = false;
-    } else {
-      setUsernameError(false);
-      setUsernameErrorMessage("");
+      return false;
     }
+    setUsernameError(false);
+    setUsernameErrorMessage("");
+
+    return true;
+  };
+
+  const validatePassword = (): boolean => {
+    const password = document.getElementById("password") as HTMLInputElement;
 
     if (!password.value || password.value.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
+      return false;
     }
+    setPasswordError(false);
+    setPasswordErrorMessage("");
 
-    return isValid;
+    return true;
   };
 
   return (
@@ -179,9 +179,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             onSubmit={(e) => {
               void handleSubmit(e);
             }}
-            onChange={() => {
-              validateInputs();
-            }}
             noValidate
             sx={{
               display: "flex",
@@ -190,7 +187,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               gap: 2,
             }}
           >
-            <FormControl>
+            <FormControl sx={{ height: '90px', mb: 1 }}>
               <FormLabel htmlFor="username">Username</FormLabel>
               <TextField
                 error={usernameError}
@@ -204,10 +201,17 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
+                onChange={validateUsername}
                 color={usernameError ? "error" : "primary"}
+                sx={{ 
+                  '& .MuiFormHelperText-root': {
+                    minHeight: '20px',
+                    margin: '3px 14px 0'
+                  }
+                }}
               />
             </FormControl>
-            <FormControl>
+            <FormControl sx={{ height: '90px', mb: 1 }}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
                 error={passwordError}
@@ -221,7 +225,14 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
+                onChange={validatePassword}
                 color={passwordError ? "error" : "primary"}
+                sx={{ 
+                  '& .MuiFormHelperText-root': {
+                    minHeight: '20px',
+                    margin: '3px 14px 0'
+                  }
+                }}
               />
             </FormControl>
             <FormControlLabel
@@ -243,7 +254,12 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </Link>
           </Box>
           <Divider>or</Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box sx={{ 
+              display: "flex", 
+              flexDirection: "column", 
+              gap: 2,
+              marginTop: "auto" // Added marginTop
+            }}>
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
               <Link
