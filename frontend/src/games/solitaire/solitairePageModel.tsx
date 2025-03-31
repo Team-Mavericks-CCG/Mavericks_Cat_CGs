@@ -2,7 +2,7 @@
 import { Card, Rank } from "../utils/card";
 import { Deck } from "../utils/deck";
 
-class Column {
+export class Column {
   cards: Card[];
   faceUp: boolean;
 
@@ -21,7 +21,7 @@ class Column {
   }
 }
 
-class Foundation {
+export class Foundation {
   cards: Card[];
 
   constructor() {
@@ -37,7 +37,7 @@ class Foundation {
   }
 }
 
-class Stock {
+export class Stock {
   cards: Card[];
 
   constructor() {
@@ -80,6 +80,7 @@ export class SolitaireGame {
       }
     }
   }
+
   // move card from tableau to foundation
   moveCard(source: Column | Stock, target: Foundation | Column): boolean {
     if (
@@ -172,6 +173,7 @@ export class SolitaireGame {
       }
       return true; // No valid moves left
     }
+
     return false; // Stock is not empty, so not a loss yet
   }
 }

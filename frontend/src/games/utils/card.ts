@@ -35,6 +35,7 @@ export class Card {
   suit: Suit;
   rank: Rank;
   color: Color;
+  faceUp: boolean;
   options: CardRankOptions;
 
   /**
@@ -42,10 +43,16 @@ export class Card {
    * @param suit - The card suit from Suit enum
    * @param rank - The card rank from Rank enum
    */
-  constructor(suit: Suit, rank: Rank, options: CardRankOptions = {}) {
+  constructor(
+    suit: Suit,
+    rank: Rank,
+    options: CardRankOptions = {},
+    faceUp = true
+  ) {
     this.options = options;
     this.suit = suit;
     this.rank = rank;
+    this.faceUp = faceUp; // Default to face down if not specified
     //specify color based on suit
     this.color =
       suit === Suit.CLUBS || suit === Suit.SPADES ? Color.BLACK : Color.RED;
@@ -85,6 +92,10 @@ export class Card {
 
   getSuit(): Suit {
     return this.suit;
+  }
+
+  flip(): void {
+    this.faceUp = !this.faceUp;
   }
 
   /**
