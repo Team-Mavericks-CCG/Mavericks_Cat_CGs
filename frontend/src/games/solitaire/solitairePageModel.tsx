@@ -2,7 +2,7 @@
 import { Card, Rank } from "../utils/card";
 import { Deck } from "../utils/deck";
 
-class Tableau {
+class Column {
   cards: Card[];
   faceUp: boolean;
 
@@ -54,13 +54,13 @@ class Stock {
 }
 
 export class SolitaireGame {
-  tableau: Tableau[];
+  tableau: Column[];
   foundation: Foundation[];
   stock: Stock;
 
   constructor() {
     const deck = new Deck({ cardOptions: { faceCardUniqueValues: true } });
-    this.tableau = Array.from({ length: 7 }, () => new Tableau()); // Initialize tableau with 7 empty piles
+    this.tableau = Array.from({ length: 7 }, () => new Column()); // Initialize tableau with 7 empty piles
     this.foundation = Array.from({ length: 4 }, () => new Foundation()); // Initialize foundation with 4 empty piles
     this.stock = new Stock(); // Initialize stock pile
 
@@ -81,7 +81,7 @@ export class SolitaireGame {
     }
   }
   // move card from tableau to foundation
-  moveCard(source: Tableau | Stock, target: Foundation | Tableau): boolean {
+  moveCard(source: Column | Stock, target: Foundation | Column): boolean {
     if (
       !this.isValidMove(
         source.cards[source.cards.length - 1],
@@ -103,12 +103,12 @@ export class SolitaireGame {
   isValidMove(
     sourceCard: Card,
     targetCard: Card | null,
-    target: Foundation | Tableau
+    target: Foundation | Column
   ): boolean {
     if (!sourceCard) return false;
 
     // target card must be different color and one value higher
-    if (targetCard && target instanceof Tableau) {
+    if (targetCard && target instanceof Column) {
       return (
         sourceCard.getColor() !== targetCard.getColor() &&
         sourceCard.getValue() === targetCard.getValue() - 1
@@ -125,7 +125,7 @@ export class SolitaireGame {
     if (target instanceof Foundation) {
       return sourceCard.getRank() === Rank.ACE; // Only Ace can be placed on an empty foundation pile
     }
-    if (target instanceof Tableau) {
+    if (target instanceof Column) {
       return true; // Any card can be placed on an empty tableau pile
     }
     return false;
