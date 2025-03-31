@@ -1,11 +1,71 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
 import { Card } from "../utils/card";
 import "../solitaire/solitairePage.css";
+import {
+  getCardImage,
+  getCardBackImage,
+  getAllCardImages,
+} from "../utils/CardImage";
+
+// Card component with fallback handling
+const CardComponent: React.FC<{
+  card: Card;
+  isClickable: boolean;
+  isSelected: boolean;
+  onClick: () => void;
+}> = ({ card, isClickable, isSelected, onClick }) => {
+  const [imageError, setImageError] = useState(false);
+
+  const imageSrc = card.faceUp ? getCardImage(card) : getCardBackImage();
+  const altText = card.faceUp ? card.toString() : "🂠";
+
+  return (
+    <div
+      className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}${isSelected ? " selected" : ""}`}
+      onClick={onClick}
+    >
+      {!imageError ? (
+        <img
+          src={imageSrc}
+          alt={altText}
+          className="card-image"
+          onError={() => setImageError(true)}
+        />
+      ) : (
+        <div className="card-text-fallback">{altText}</div>
+      )}
+    </div>
+  );
+};
 
 export const SolitairePage: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_gameState, setGameState] = useState(0);
+
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  useEffect(() => {
+    const preloadImages = async () => {
+      const images = getAllCardImages();
+
+      await Promise.all(
+        images.map(
+          (src) =>
+            new Promise((resolve) => {
+              const img = new Image();
+              img.src = src;
+              img.onload = resolve;
+              img.onerror = resolve; // Continue even if some fail to load
+            })
+        )
+      );
+
+      setImagesLoaded(true);
+    };
+
+    void preloadImages();
+  }, []);
 
   // Explicitly define the type for selectedCard
   const [selectedCard, setSelectedCard] = useState<{
@@ -38,6 +98,13 @@ export const SolitairePage: React.FC = () => {
       // Only allow selecting the top card from any pile
       const isTopCard = source.cards[source.cards.length - 1] === card;
       if (isTopCard && !(source instanceof Foundation)) {
+        for (const foundation of game.foundation) {
+          const success = game.moveCard(source, foundation);
+          if (success) {
+            setGameState((prev) => prev + 1);
+            return;
+          }
+        }
         setSelectedCard({ card, source });
       }
     }
@@ -61,14 +128,13 @@ export const SolitairePage: React.FC = () => {
         </div>
       ) : (
         column.cards.map((card, index) => (
-          <div
-            className={`card ${card.faceUp ? "face-up" : ""} ${index === column.cards.length - 1 ? "clickable" : ""} ${selectedCard?.card === card ? "selected" : ""} `}
+          <CardComponent
+            card={card}
             key={index}
+            isClickable={index === column.cards.length - 1}
+            isSelected={selectedCard?.card === card}
             onClick={() => handleCardClick(card, column)}
-          >
-            {card.faceUp ? card.toString() : "🂠"}{" "}
-            {/* Render card string or face-down */}
-          </div>
+          />
         ))
       )}
     </div>
@@ -81,15 +147,15 @@ export const SolitairePage: React.FC = () => {
           className="card-blank-clickable"
           onClick={() => handleStockClick(stock)}
         >
-          {" "}
-          blank card clickable{" "}
+          +
         </div>
       ) : (
-        <div className="card clickable" onClick={() => handleStockClick(stock)}>
-          {"🂠"}
-          {""}
-          {/* Render card string or face-down */}
-        </div>
+        <CardComponent
+          card={stock.stock[stock.stock.length - 1]}
+          isClickable={true}
+          isSelected={false}
+          onClick={() => handleStockClick(stock)}
+        />
       )}
     </div>
   );
@@ -111,21 +177,14 @@ export const SolitairePage: React.FC = () => {
     return (
       <div className="stackable-pile">
         {visibleCards.map((card, index) => {
-          const isTopCard = index === visibleCards.length - 1;
-
           return (
-            <div
-              className={`card face-up ${isTopCard ? "clickable" : ""} ${selectedCard?.card === card ? "selected" : ""}`}
+            <CardComponent
+              card={card}
               key={index}
-              // Only make the top card clickable
-              onClick={
-                isTopCard ? () => handleCardClick(card, stock) : undefined
-              }
-            >
-              {card.toString()}
-              {""}
-              {/* Render card string */}
-            </div>
+              isClickable={index === visibleCards.length - 1}
+              isSelected={selectedCard?.card === card}
+              onClick={() => handleCardClick(card, stock)}
+            />
           );
         })}
       </div>
@@ -143,42 +202,50 @@ export const SolitairePage: React.FC = () => {
           +{" "}
         </div>
       ) : (
-        <div
-          className="card"
+        <CardComponent
+          card={foundation.cards[foundation.cards.length - 1]}
+          isClickable={false}
+          isSelected={false}
           onClick={() =>
             handleCardClick(
               foundation.cards[foundation.cards.length - 1],
               foundation
             )
           }
-        >
-          {foundation.cards[foundation.cards.length - 1].toString()}
-          {""}
-          {/* Render card string or face-down */}
-        </div>
+        />
       )}
     </div>
   );
 
   return (
     <div className="solitaire-page">
-      <h1>Solitaire</h1>
-      <div className="foundation">
-        {game.foundation.map((pile, index) => (
-          <div key={index} className="foundation-pile">
-            {renderFoundation(pile)}
+      {!imagesLoaded ? (
+        <div className="loading-overlay">
+          <div className="loading-spinner">Loading cards...</div>
+        </div>
+      ) : (
+        <>
+          <h1>Solitaire</h1>
+          <div className="foundation">
+            {game.foundation.map((pile, index) => (
+              <div key={index} className="foundation-pile">
+                {renderFoundation(pile)}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="tableau">
-        {game.tableau.map((pile, index) => (
-          <div key={index} className="tableau-pile">
-            {renderColumn(pile)}
+          <div className="tableau">
+            {game.tableau.map((pile, index) => (
+              <div key={index} className="tableau-pile">
+                {renderColumn(pile)}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="stock">{renderStock(game.stock)}</div>
-      <div className="waste">{renderWaste(game.stock)}</div>
+          <div className="stock-area">
+            <div className="stock">{renderStock(game.stock)}</div>
+            <div className="waste">{renderWaste(game.stock)}</div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -53,16 +53,16 @@ export class Stock {
 
   draw(): void {
     if (this.stock.length > 0) {
-      this.cards.push(this.stock.pop()!);
+      this.cards.push(this.stock.pop()!.flip());
     } else {
       for (const card of this.cards) {
-        this.stock.push(card);
+        this.stock.push(card.flip());
       }
       this.cards = [];
 
       this.stock.reverse();
       // Draw the top card from the stock
-      this.cards.push(this.stock.pop()!);
+      this.cards.push(this.stock.pop()!.flip());
     }
   }
 
@@ -73,7 +73,7 @@ export class Stock {
 
 export class SolitaireGame {
   tableau: Column[];
-  foundation: Foundation[];
+  public foundation: Foundation[];
   stock: Stock;
 
   constructor() {
@@ -97,6 +97,7 @@ export class SolitaireGame {
     while (deck.cards.length > 0) {
       const card = deck.draw();
       if (card) {
+        card.flip(); // Flip the card face down
         this.stock.addCard(card);
       }
     }
@@ -104,7 +105,6 @@ export class SolitaireGame {
 
   // move card from tableau to foundation
   moveCard(source: Column | Stock, target: Foundation | Column): boolean {
-    console.log(source);
     //get target card, null if empty target
     const targetCard =
       target.cards.length === 0 ? null : target.cards[target.cards.length - 1];
@@ -142,7 +142,6 @@ export class SolitaireGame {
     targetCard: Card | null,
     target: Foundation | Column
   ): boolean {
-    console.log("isValidMove", sourceCard, targetCard, target);
     if (!sourceCard) return false;
 
     // target card must be different color and one value higher
