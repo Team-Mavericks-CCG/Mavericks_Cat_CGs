@@ -91,7 +91,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const response = await axios.post<LoginResponse>(
         "http://localhost:5000/api/auth/login",
         {
@@ -113,7 +112,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
       if (error instanceof AxiosError && error.response) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.response.status === 401) {
-          setUsernameError(true);
           setPasswordError(true);
           setPasswordErrorMessage("Invalid username or password");
         } else {
@@ -129,31 +127,32 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     });
   };
 
-  const validateInputs = (): boolean => {
+  const validateUsername = (): boolean => {
     const username = document.getElementById("username") as HTMLInputElement;
-    const password = document.getElementById("password") as HTMLInputElement;
-
-    let isValid = true;
 
     if (!username.value || username.value.length < 3) {
       setUsernameError(true);
       setUsernameErrorMessage("Username must be at least 3 characters long.");
-      isValid = false;
-    } else {
-      setUsernameError(false);
-      setUsernameErrorMessage("");
+      return false;
     }
+    setUsernameError(false);
+    setUsernameErrorMessage("");
+
+    return true;
+  };
+
+  const validatePassword = (): boolean => {
+    const password = document.getElementById("password") as HTMLInputElement;
 
     if (!password.value || password.value.length < 6) {
       setPasswordError(true);
       setPasswordErrorMessage("Password must be at least 6 characters long.");
-      isValid = false;
-    } else {
-      setPasswordError(false);
-      setPasswordErrorMessage("");
+      return false;
     }
+    setPasswordError(false);
+    setPasswordErrorMessage("");
 
-    return isValid;
+    return true;
   };
 
   return (
@@ -175,9 +174,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             component="form"
             onSubmit={(e) => {
               void handleSubmit(e);
-            }}
-            onChange={() => {
-              validateInputs();
             }}
             noValidate
             sx={{
@@ -201,6 +197,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
+                onChange={validateUsername}
                 color={usernameError ? "error" : "primary"}
               />
             </FormControl>
@@ -218,6 +215,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 required
                 fullWidth
                 variant="outlined"
+                onChange={validatePassword}
                 color={passwordError ? "error" : "primary"}
               />
             </FormControl>
