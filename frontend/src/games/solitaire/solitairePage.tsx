@@ -1,18 +1,19 @@
 import React, { useState } from "react";
-import { SolitaireGame, Foundation, Tableau } from "./solitairePageModel";
+import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
+import { Card } from "../utils/card";
 import "../solitaire/solitairePage.css";
 
-const SolitairePage: React.FC = () => {
+export const SolitairePage: React.FC = () => {
   // Explicitly define the type for selectedCard
   const [selectedCard, setSelectedCard] = useState<{
-    card: any;
-    source: any;
+    card: Card;
+    source: Stock | Column;
   } | null>(null);
 
   const [game] = useState(new SolitaireGame());
 
   // Handle card click functionality with updated typing
-  const handleCardClick = (card: any, source: any) => {
+  const handleCardClick = (card: Card, source: Stock | Column) => {
     if (selectedCard) {
       // If a card is already selected, try to move it to the target
       if (source !== selectedCard.source) {
@@ -34,15 +35,15 @@ const SolitairePage: React.FC = () => {
   };
 
   // Render each pile (foundation, tableau, or stock)
-  const renderPile = (pile: any[], source: any) => (
+  const renderPile = (pile: Foundation | Stock | Column) => (
     <div className="pile">
-      {pile.map((card: any, index: number) => (
+      {pile.cards.map((card: Card, index: number) => (
         <div
-          className={`card ${index === pile.length - 1 ? "clickable" : ""} ${selectedCard?.card === card ? "selected" : ""}`}
+          className={`card ${index === pile.cards.length - 1 ? "clickable" : ""} ${selectedCard?.card === card ? "selected" : ""}`}
           key={index}
-          onClick={() => handleCardClick(card, source)}
+          onClick={() => handleCardClick(card, pile)}
         >
-          {index === pile.length - 1 ? card.toString() : "🂠"} {/* Render card string or face-down */}
+          {index === pile.cards.length - 1 ? card.toString() : "🂠"} {/* Render card string or face-down */}
         </div>
       ))}
     </div>
@@ -54,19 +55,19 @@ const SolitairePage: React.FC = () => {
       <div className="foundation">
         {game.foundation.map((pile, index) => (
           <div key={index} className="foundation-pile">
-            {renderPile(pile.cards, pile)}
+            {renderPile(pile)}
           </div>
         ))}
       </div>
       <div className="tableau">
         {game.tableau.map((pile, index) => (
           <div key={index} className="tableau-pile">
-            {renderPile(pile.cards, pile)}
+            {renderPile(pile)}
           </div>
         ))}
       </div>
       <div className="stock">
-        {renderPile(game.stock.cards, game.stock)}
+        {renderPile(game.stock)}
       </div>
     </div>
   );
