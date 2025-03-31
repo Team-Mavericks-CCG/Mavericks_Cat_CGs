@@ -1,117 +1,149 @@
-
 .solitaire-page {
-    background-color: #2c7a2c;
-    min-height: 100vh;
-    padding: 20px;
-    color: white;
-  }
-  
-  h1 {
-    text-align: center;
-    margin-bottom: 30px;
-  }
-  
-  .foundation {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin-bottom: 40px;
-  }
-  
-  .foundation-pile {
-    width: 90px;
-    height: 130px;
-  
-    border-radius: 8px;
-    
-  }
-  
-  .tableau {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .tableau-pile {
-    min-height: 130px;
-  }
-  
-  .stock {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    width: 90px;
-    height: 130px;
-  }
-  
-  .pile {
-    position: relative;
-    min-height: 130px;
-  }
-  
-  .stock .card {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform-origin: center center;
-  }
-  
-  .stock .card:not(:last-child) {
-    pointer-events: none;
-  }
-  
-  .card {
-    width: 90px;
-    height: 130px;
-    background-color: white;
-    border: 1px solid #333;
-    border-radius: 8px;
-    color: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2em;
-    position: relative;
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-    margin-top: -110px;
-  }
-  
-  .pile:first-child .card {
-    margin-top: 0;
-  }
-  
-  .tableau-pile .card {
-    margin-top: -90px;
-  }
-  
-  .card.clickable {
-    cursor: pointer;
-    transition: transform 0.2s;
-  }
-  
-  .card.clickable:hover {
-    transform: translateY(-5px);
-  }
-  
-  .card.selected {
-    border-color: #ffcc00;
-  }
+  background-color: #2c7a2c;
+  min-height: 100vh;
+  padding: 20px;
+  color: white;
+}
 
-  .card-blank-clickable {
-    border: 2px dashed rgba(255, 255, 255, 0.4);
-    background-color: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 2em;
-    text-align: center;
-    width: 90px;
-    height: 130px;
-    border-radius: 8px;
-    line-height: 96px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
 
-  .card-blank-clickable:hover {
-    border-color: rgba(255, 255, 255, 0.8);
-    background-color: rgba(255, 255, 255, 0.2);
-  }
+.foundation {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.foundation-pile {
+  width: 90px;
+  height: 130px;
+
+  border-radius: 8px;
+}
+
+.tableau {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.tableau-pile {
+  min-height: 130px;
+}
+
+.stock {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 90px;
+  height: 130px;
+}
+
+.pile {
+  position: relative;
+  min-height: 130px;
+}
+
+.stackable-pile {
+  position: relative;
+  min-height: 130px;
+}
+
+.stackable-pile .card {
+  position: relative;
+  z-index: 1; /* Establish stacking context */
+}
+
+.stackable-pile .card:not(.face-up) {
+  margin-top: -110px; /* Adjust overlap for face-down cards */
+}
+
+.stackable-pile .card.face-up {
+  margin-top: -80px;
+}
+
+.stackable-pile .card:first-child {
+  margin-top: 0; /* No overlap for the first card */
+}
+
+/* Make clickable cards more interactive */
+.stackable-pile .card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.stackable-pile .card.clickable:hover {
+  transform: translateY(-5px);
+  z-index: 100; /* Ensure hovered card is on top */
+}
+
+.stock .card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: center center;
+}
+
+.stock .card:not(:last-child) {
+  pointer-events: none;
+}
+
+.card {
+  width: 90px;
+  height: 130px;
+  background-color: white;
+  border: 1px solid #333;
+  border-radius: 8px;
+  color: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2em;
+  position: relative;
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-top: -110px;
+}
+
+.pile:first-child .card {
+  margin-top: 0;
+}
+
+.tableau-pile .card {
+  margin-top: -90px;
+}
+
+.card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.card.clickable:hover {
+  transform: translateY(-5px);
+}
+
+.card.selected {
+  border: 3px solid #ffcc00;
+  box-shadow: 0 0 30px #ffcc00;
+}
+
+.card-blank-clickable {
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 2em;
+  text-align: center;
+  width: 90px;
+  height: 130px;
+  border-radius: 8px;
+  line-height: 96px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card-blank-clickable:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  background-color: rgba(255, 255, 255, 0.2);
+}

@@ -67,7 +67,7 @@ export class Stock {
   }
 
   removeCard(): Card | null {
-    return this.stock.pop() ?? null;
+    return this.cards.pop() ?? null;
   }
 }
 
@@ -104,6 +104,7 @@ export class SolitaireGame {
 
   // move card from tableau to foundation
   moveCard(source: Column | Stock, target: Foundation | Column): boolean {
+    console.log(source);
     //get target card, null if empty target
     const targetCard =
       target.cards.length === 0 ? null : target.cards[target.cards.length - 1];
