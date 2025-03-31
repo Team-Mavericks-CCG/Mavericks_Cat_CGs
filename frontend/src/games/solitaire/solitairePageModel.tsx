@@ -137,4 +137,41 @@ export class SolitaireGame {
   }
 
   //TODO Softlock
+  checkLose(): boolean {
+    // Check if stock is empty and no valid moves left
+    if (this.stock.cards.length === 0) {
+      for (const tableau of this.tableau) {
+        if (tableau.cards.length > 0) {
+          const topCard = tableau.cards[tableau.cards.length - 1];
+          for (const target of this.tableau) {
+            // Check if any tableau other than current can accept the top card
+            if (
+              target !== tableau &&
+              this.isValidMove(
+                topCard,
+                target.cards[target.cards.length - 1],
+                target
+              )
+            ) {
+              return false; // Valid move exists
+            }
+          }
+          for (const foundation of this.foundation) {
+            // Check if any foundation can accept the top card
+            if (
+              this.isValidMove(
+                topCard,
+                foundation.cards[foundation.cards.length - 1],
+                foundation
+              )
+            ) {
+              return false; // Valid move exists
+            }
+          }
+        }
+      }
+      return true; // No valid moves left
+    }
+    return false; // Stock is not empty, so not a loss yet
+  }
 }
