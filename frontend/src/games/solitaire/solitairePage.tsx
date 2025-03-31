@@ -13,7 +13,7 @@ export const SolitairePage: React.FC = () => {
   const [game] = useState(new SolitaireGame());
 
   // Handle card click functionality with updated typing
-  const handleCardClick = (card: Card, source: Stock | Column) => {
+  const handleCardClick = (card: Card | null, source: Stock | Column) => {
     if (selectedCard) {
       // If a card is already selected, try to move it to the target
       if (source !== selectedCard.source) {
@@ -37,6 +37,7 @@ export const SolitairePage: React.FC = () => {
   // Render each pile (foundation, tableau, or stock)
   const renderPile = (pile: Foundation | Stock | Column) => (
     <div className="pile">
+      <div className="card-blank-clickable" onClick={() => handleCardClick(null, pile)}> + </div>
       {pile.cards.map((card: Card, index: number) => (
         <div
           className={`card ${index === pile.cards.length - 1 ? "clickable" : ""} ${selectedCard?.card === card ? "selected" : ""}`}

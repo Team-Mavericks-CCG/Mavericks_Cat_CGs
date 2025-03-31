@@ -21,8 +21,9 @@
   .foundation-pile {
     width: 90px;
     height: 130px;
-    border: 2px dashed rgba(255, 255, 255, 0.3);
+  
     border-radius: 8px;
+    
   }
   
   .tableau {
@@ -94,5 +95,23 @@
   
   .card.selected {
     border-color: #ffcc00;
-    border-size: 2 px;
+  }
+
+  .card-blank-clickable {
+    border: 2px dashed rgba(255, 255, 255, 0.4);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 2em;
+    text-align: center;
+    width: 90px;
+    height: 130px;
+    border-radius: 8px;
+    line-height: 96px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .card-blank-clickable:hover {
+    border-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.2);
   }
