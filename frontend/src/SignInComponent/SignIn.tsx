@@ -101,7 +101,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       console.log("Login successful:");
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       localStorage.setItem("authToken", response.data.token);
 
       window.location.href = "/solitaire";
@@ -110,7 +109,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       // Show error to user
       if (error instanceof AxiosError && error.response) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         if (error.response.status === 401) {
           setPasswordError(true);
           setPasswordErrorMessage("Invalid username or password");
