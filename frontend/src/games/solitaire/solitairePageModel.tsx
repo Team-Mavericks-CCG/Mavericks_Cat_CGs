@@ -104,11 +104,6 @@ export class SolitaireGame {
 
   // move card from tableau to foundation
   moveCard(source: Column | Stock, target: Foundation | Column): boolean {
-    // check if the source is empty
-    if (source.cards.length === 0) {
-      return false;
-    }
-
     //get target card, null if empty target
     const targetCard =
       target.cards.length === 0 ? null : target.cards[target.cards.length - 1];
@@ -124,6 +119,12 @@ export class SolitaireGame {
       return false;
     }
 
+    // remove from source
+    const card = source.removeCard()!;
+
+    // add the card to target, if should never fail
+    target.addCard(card);
+
     if (
       source instanceof Column &&
       source.cards.length > 0 &&
@@ -132,11 +133,6 @@ export class SolitaireGame {
       source.cards[source.cards.length - 1].flip(); // Flip the last card face up if it's a column
     }
 
-    // remove from source
-    const card = source.removeCard()!;
-
-    // add the card to target, if should never fail
-    target.addCard(card);
     return true;
   }
 
