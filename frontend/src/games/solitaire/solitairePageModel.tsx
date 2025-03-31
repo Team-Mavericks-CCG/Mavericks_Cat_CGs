@@ -2,7 +2,7 @@
 import { Card, Rank } from "../utils/card";
 import { Deck } from "../utils/deck";
 
-class Tableau {
+class Column {
   cards: Card[];
   faceUp: boolean;
 
@@ -54,13 +54,13 @@ class Stock {
 }
 
 export class SolitaireGame {
-  tableau: Tableau[];
+  tableau: Column[];
   foundation: Foundation[];
   stock: Stock;
 
   constructor() {
     const deck = new Deck({ cardOptions: { faceCardUniqueValues: true } });
-    this.tableau = Array.from({ length: 7 }, () => new Tableau()); // Initialize tableau with 7 empty piles
+    this.tableau = Array.from({ length: 7 }, () => new Column()); // Initialize tableau with 7 empty piles
     this.foundation = Array.from({ length: 4 }, () => new Foundation()); // Initialize foundation with 4 empty piles
     this.stock = new Stock(); // Initialize stock pile
 
@@ -81,10 +81,7 @@ export class SolitaireGame {
     }
   }
   // move card from tableau to foundation
-  moveCard(source: Stock, target: Foundation): boolean;
-  moveCard(source: Stock, target: Tableau): boolean;
-  moveCard(source: Tableau, target: Tableau): boolean;
-  moveCard(source: Tableau, target: Foundation): boolean {
+  moveCard(source: Column | Stock, target: Foundation | Column): boolean {
     if (
       !this.isValidMove(
         source.cards[source.cards.length - 1],
@@ -106,21 +103,32 @@ export class SolitaireGame {
   isValidMove(
     sourceCard: Card,
     targetCard: Card | null,
-    target: Foundation | Tableau
+    target: Foundation | Column
   ): boolean {
     if (!sourceCard) return false;
-    if (!targetCard && target instanceof Foundation) {
+
+    // target card must be different color and one value higher
+    if (targetCard && target instanceof Column) {
+      return (
+        sourceCard.getColor() !== targetCard.getColor() &&
+        sourceCard.getValue() === targetCard.getValue() - 1
+      );
+    }
+
+    if (targetCard && target instanceof Foundation) {
+      return (
+        sourceCard.getValue() === targetCard.getValue() + 1 &&
+        sourceCard.getSuit() === targetCard.getSuit()
+      );
+    }
+
+    if (target instanceof Foundation) {
       return sourceCard.getRank() === Rank.ACE; // Only Ace can be placed on an empty foundation pile
     }
-    if (!targetCard && target instanceof Tableau) {
+    if (target instanceof Column) {
       return true; // Any card can be placed on an empty tableau pile
     }
-    if (!targetCard) return false;
-    // Check if the source card can be placed on the target card
-    return (
-      sourceCard.getColor() !== targetCard.getColor() &&
-      sourceCard.getValue() === targetCard.getValue() - 1
-    );
+    return false;
   }
 
   checkWin(): boolean {
@@ -129,4 +137,41 @@ export class SolitaireGame {
   }
 
   //TODO Softlock
+  checkLose(): boolean {
+    // Check if stock is empty and no valid moves left
+    if (this.stock.cards.length === 0) {
+      for (const tableau of this.tableau) {
+        if (tableau.cards.length > 0) {
+          const topCard = tableau.cards[tableau.cards.length - 1];
+          for (const target of this.tableau) {
+            // Check if any tableau other than current can accept the top card
+            if (
+              target !== tableau &&
+              this.isValidMove(
+                topCard,
+                target.cards[target.cards.length - 1],
+                target
+              )
+            ) {
+              return false; // Valid move exists
+            }
+          }
+          for (const foundation of this.foundation) {
+            // Check if any foundation can accept the top card
+            if (
+              this.isValidMove(
+                topCard,
+                foundation.cards[foundation.cards.length - 1],
+                foundation
+              )
+            ) {
+              return false; // Valid move exists
+            }
+          }
+        }
+      }
+      return true; // No valid moves left
+    }
+    return false; // Stock is not empty, so not a loss yet
+  }
 }

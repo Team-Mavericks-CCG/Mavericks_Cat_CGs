@@ -83,6 +83,10 @@ export class Card {
     return this.color;
   }
 
+  getSuit(): Suit {
+    return this.suit;
+  }
+
   /**
    * Returns a string representation of the card
    * @returns A string in the format "RANK of SUIT"
