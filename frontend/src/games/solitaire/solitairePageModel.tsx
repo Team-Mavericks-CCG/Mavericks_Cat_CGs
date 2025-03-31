@@ -68,6 +68,9 @@ export class SolitaireGame {
       for (let j = 0; j <= i; j++) {
         const card = deck.draw();
         if (card) {
+          if (j != i) {
+            card.flip(); // Flip the card face down if it's not the last card in the pile
+          }
           this.tableau[i].addCard(card);
         }
       }
@@ -94,10 +97,20 @@ export class SolitaireGame {
     }
 
     const card = source.removeCard();
+
+    if (
+      source instanceof Column &&
+      source.cards.length > 0 &&
+      !source.cards[source.cards.length - 1].faceUp
+    ) {
+      source.cards[source.cards.length - 1].flip(); // Flip the last card face up if it's a column
+    }
+
     if (card) {
       target.addCard(card);
       return true;
     }
+
     return false;
   }
 
