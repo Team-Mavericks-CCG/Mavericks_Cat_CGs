@@ -43,7 +43,8 @@ export const SolitairePage: React.FC = () => {
           key={index}
           onClick={() => handleCardClick(card, pile)}
         >
-          {index === pile.cards.length - 1 ? card.toString() : "🂠"} {/* Render card string or face-down */}
+          {card.faceUp ? card.toString() : "🂠"}{" "}
+          {/* Render card string or face-down */}
         </div>
       ))}
     </div>
@@ -66,9 +67,7 @@ export const SolitairePage: React.FC = () => {
           </div>
         ))}
       </div>
-      <div className="stock">
-        {renderPile(game.stock)}
-      </div>
+      <div className="stock">{renderPile(game.stock)}</div>
     </div>
   );
 };
