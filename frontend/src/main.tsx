@@ -4,16 +4,17 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import "./index.css";
 import SignIn from "./SignInComponent/SignIn";
 import { SolitairePage } from "./games/solitaire/solitairePage";
+import HomePage from "./homePage";
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode> 
-    <BrowserRouter>
-    <Routes>
-        <Route path="/" element={<SignIn />} />  {/* / url is homepage but for now its the signin*/} 
-        <Route path="/solitaire" element={<SolitairePage />} /> {/* /solitaire url is solitaire*/} 
+   <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<SignIn />} />             {/* Sign-in */}
+        <Route path="/home" element={<HomePage />} />           {/* homepage */}
+        <Route path="/solitaire" element={<SolitairePage />} />
       </Routes>
     </BrowserRouter>
-
-    {/*<SolitairePage />  going to rm this */}
   </StrictMode>
 );
