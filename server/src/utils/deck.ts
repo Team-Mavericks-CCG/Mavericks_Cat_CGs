@@ -1,6 +1,8 @@
-import { Card, Suit, Rank } from "./card.js";
+import { Card, Suit, Rank, CardRankOptions } from "./card.js";
 
+// TODO: add multiple deck support
 export interface DeckOptions {
+  cardOptions?: CardRankOptions;
   suits?: Suit[];
   ranks?: Rank[];
   jokers?: number;
@@ -18,10 +20,11 @@ export class Deck {
 
     this.cards = [];
 
+    const cardOptions = options.cardOptions ?? {};
     // Generate standard deck
     for (const suit of suits) {
       for (const rank of ranks) {
-        this.cards.push(new Card(suit, rank));
+        this.cards.push(new Card(suit, rank, cardOptions));
       }
     }
 
@@ -30,18 +33,26 @@ export class Deck {
       throw new Error("Jokers are not supported yet");
       // add 2 jokers to the deck, 1 red and 1 black
     }
+
+    this.shuffle();
   }
 
   /**
    * Shuffle the deck using Fisher-Yates algorithm
    */
-  shuffle(): this {
-    for (let i = this.cards.length - 1; i > 0; i--) {
-      // Generate a random index j such that 0 ≤ j ≤ i
-      const j = Math.floor(Math.random() * (i + 1));
+  shuffle(passes = 3): this {
+    const timestamp = new Date().getTime();
 
-      // eslint-disable-next-line security/detect-object-injection
-      [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+    for (let pass = 0; pass < passes; pass++) {
+      const offset = pass * 7;
+
+      for (let i = this.cards.length - 1; i > 0; i--) {
+        // Generate a random index j such that 0 ≤ j ≤ i
+        const factor = (timestamp % 17) + offset;
+        const j = Math.floor((Math.random() * (i + 1) + factor) % (i + 1));
+
+        [this.cards[i], this.cards[j]] = [this.cards[j], this.cards[i]];
+      }
     }
     return this;
   }

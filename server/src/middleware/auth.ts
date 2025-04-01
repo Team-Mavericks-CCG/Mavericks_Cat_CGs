@@ -50,7 +50,9 @@ export const auth = (req: Request, res: Response, next: NextFunction) => {
 const asyncHandler =
   (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
   (req: Request, res: Response, next: NextFunction) => {
-    Promise.resolve(fn(req, res, next)).catch(res.status(500).json);
+    Promise.resolve(fn(req, res, next)).catch(() =>
+      res.status(500).json({ message: "Server Error" })
+    );
   };
 
 export const verifyToken = asyncHandler(
