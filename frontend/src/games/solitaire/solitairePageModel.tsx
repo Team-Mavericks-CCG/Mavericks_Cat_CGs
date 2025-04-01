@@ -150,6 +150,15 @@ export class SolitaireGame {
     sourceIndex: number
   ): boolean {
     console.log("Move card", source, target, sourceIndex);
+
+    // if the source isn't a column only the top card can be moved
+    if (
+      sourceIndex !== source.cards.length - 1 &&
+      !(source instanceof Column)
+    ) {
+      return false;
+    }
+
     //get target card, null if empty target
     const targetCard =
       target.cards.length === 0 ? null : target.cards[target.cards.length - 1];
