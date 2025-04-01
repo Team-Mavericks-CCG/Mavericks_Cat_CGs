@@ -108,9 +108,8 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
 
       localStorage.setItem("authToken", response.data.token);
 
-      
-      navigate("/homePage"); /* routes to the homePage page*/
-
+      /*window.location.href = "/solitaire";  full page reload, rm */
+      void navigate("/homePage"); /* routes to the solitaire page*/
     } catch (error) {
       console.error("Error during login:", error);
 
