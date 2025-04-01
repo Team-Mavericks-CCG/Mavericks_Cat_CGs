@@ -7,7 +7,35 @@ import {
   getCardBackImage,
   getAllCardImages,
 } from "../utils/CardImage";
-import { Button } from "@mui/material";
+import { Button, styled } from "@mui/material";
+
+const UndoButton = styled(Button)(() => ({
+  position: "absolute",
+  top: "20px",
+  right: "20px",
+  backgroundColor: "rgba(20, 20, 20, 0.8)",
+  padding: "10px 20px",
+  borderRadius: "5px",
+  cursor: "pointer",
+  fontSize: "16px",
+  transition: "all 0.2s ease",
+  textAlign: "center",
+  fontWeight: "bold",
+  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)",
+  "&:hover": {
+    backgroundColor: "rgba(20, 20, 20, 0.6)",
+    transform: "translateY(-2px)",
+    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+  },
+  "&:active": {
+    transform: "translateY(0)",
+    boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.2)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor: "rgba(20, 20, 20, 0.4)",
+    color: "rgba(255, 255, 255, 0.5)",
+  },
+}));
 
 // Card component with fallback handling
 const CardComponent: React.FC<{
@@ -274,16 +302,14 @@ export const SolitairePage: React.FC = () => {
             <div className="stock">{renderStock(game.stock)}</div>
             <div className="waste">{renderWaste(game.stock)}</div>
           </div>
-          <div className="undo-area">
-            <Button
-              className="undo-button"
-              onClick={handleUndo}
-              disabled={!canUndo}
-              aria-label="Undo last move"
-            >
-              Undo
-            </Button>
-          </div>
+          <UndoButton
+            className="undo-button"
+            onClick={handleUndo}
+            disabled={!canUndo}
+            aria-label="Undo last move"
+          >
+            Undo
+          </UndoButton>
         </>
       )}
     </div>

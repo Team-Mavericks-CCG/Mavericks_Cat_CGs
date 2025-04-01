@@ -196,19 +196,3 @@ h1 {
   border-color: rgba(255, 255, 255, 0.8);
   background-color: rgba(255, 255, 255, 0.2);
 }
-
-.undo-area {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.undo-button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-}
