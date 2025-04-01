@@ -1,0 +1,45 @@
+/* General container */
+.leaderboard-container {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Title Styling */
+.leaderboard-title {
+    color: #333;
+    font-size: 2em;
+    margin-bottom: 20px;
+}
+
+/* Table Styling */
+.leaderboard-table {
+    width: 80%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: white;
+}
+
+/* Table Header */
+.leaderboard-table th {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+}
+
+/* Table Rows */
+.leaderboard-table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.leaderboard-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Hover Effect */
+.leaderboard-table tr:hover {
+    background-color: #ddd;
+}
