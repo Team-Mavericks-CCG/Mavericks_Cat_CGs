@@ -58,7 +58,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignUp(props: { disableCustomTheme?: boolean }) {
+export default function Register(props: { disableCustomTheme?: boolean }) {
   const [usernameError, setUsernameError] = React.useState(false);
   const [usernameErrorMessage, setUsernameErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
@@ -101,11 +101,13 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
     }
     const data = new FormData(event.currentTarget);
 
-    void navigate("/homePage");
+    
     console.log({
       username: data.get('name'),
       password: data.get('password'),
     });
+
+    void navigate("/home");
   };
 
   return (
@@ -119,7 +121,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             variant="h4"
             sx={{ width: '100%', fontSize: 'clamp(2rem, 10vw, 2.15rem)' }}
           >
-            Sign up
+            Register
           </Typography>
           <Box
             component="form"
@@ -191,7 +193,7 @@ export default function SignUp(props: { disableCustomTheme?: boolean }) {
             <Typography sx={{ textAlign: 'center' }}>
               Already have an account?{' '}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="./"
                 variant="body2"
                 sx={{ alignSelf: 'center' }}
               >

@@ -9,7 +9,7 @@ function HomePage() {
     <div className="home-page">
       <h1>Homepage!</h1>
       <div>
-        <button onClick={() => navigate("/solitaire")}>Solitaire</button>
+        <button onClick={() => void navigate("/solitaire")}>Solitaire</button>
       </div>
     </div>
   );
