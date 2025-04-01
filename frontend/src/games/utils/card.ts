@@ -121,4 +121,9 @@ export class Card {
       color: this.color,
     };
   }
+
+  clone(): Card {
+    const cloned = new Card(this.suit, this.rank, this.options, this.faceUp);
+    return cloned;
+  }
 }

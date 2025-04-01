@@ -7,6 +7,7 @@ import {
   getCardBackImage,
   getAllCardImages,
 } from "../utils/CardImage";
+import { Button } from "@mui/material";
 
 // Card component with fallback handling
 const CardComponent: React.FC<{
@@ -23,7 +24,7 @@ const CardComponent: React.FC<{
   return (
     <div
       className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}${isSelected ? " selected" : ""}`}
-      onClick={onClick}
+      onClick={() => onClick()}
     >
       {!imageError ? (
         <img
@@ -44,6 +45,8 @@ export const SolitairePage: React.FC = () => {
   const [_gameState, setGameState] = useState(0);
 
   const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  const [canUndo, setCanUndo] = useState(false);
 
   useEffect(() => {
     const preloadImages = async () => {
@@ -71,6 +74,7 @@ export const SolitairePage: React.FC = () => {
   const [selectedCard, setSelectedCard] = useState<{
     card: Card;
     source: Stock | Column;
+    sourceIndex: number;
   } | null>(null);
 
   const [game] = useState(new SolitaireGame());
@@ -78,13 +82,19 @@ export const SolitairePage: React.FC = () => {
   // Handle card click functionality with updated typing
   const handleCardClick = (
     card: Card | null,
-    source: Stock | Column | Foundation
+    source: Stock | Column | Foundation,
+    sourceIndex: number
   ) => {
     if (selectedCard) {
       // If a card is already selected, try to move it to the target
       if (source !== selectedCard.source) {
-        const success = game.moveCard(selectedCard.source, source);
+        const success = game.moveCard(
+          selectedCard.source,
+          source,
+          selectedCard.sourceIndex
+        );
         if (success) {
+          setCanUndo(true);
           setSelectedCard(null);
           setGameState((prev) => prev + 1);
         } else {
@@ -96,24 +106,41 @@ export const SolitairePage: React.FC = () => {
       }
     } else {
       // Only allow selecting the top card from any pile
+      console.log("Selected card:", card, source, sourceIndex);
       const isTopCard = source.cards[source.cards.length - 1] === card;
-      if (isTopCard && !(source instanceof Foundation)) {
+      if (
+        (isTopCard || (source instanceof Column && card?.faceUp)) &&
+        !(source instanceof Foundation)
+      ) {
+        // if the clicked card can be played on the foundation, play it
         for (const foundation of game.foundation) {
-          const success = game.moveCard(source, foundation);
+          const success = game.moveCard(source, foundation, sourceIndex);
           if (success) {
+            setCanUndo(true);
             setGameState((prev) => prev + 1);
             return;
           }
         }
-        setSelectedCard({ card, source });
+        setSelectedCard({ card, source, sourceIndex });
       }
     }
   };
 
-  const handleStockClick = (stock: Stock) => {
-    stock.draw();
+  const handleStockClick = () => {
+    game.draw();
+    setCanUndo(true);
     setSelectedCard(null);
     setGameState((prev) => prev + 1);
+  };
+
+  const handleUndo = () => {
+    const success = game.undo();
+    if (success) {
+      setSelectedCard(null);
+      setGameState((prev) => prev - 1);
+
+      setCanUndo(game.hasHistory());
+    }
   };
 
   const renderColumn = (column: Column) => (
@@ -121,7 +148,7 @@ export const SolitairePage: React.FC = () => {
       {column.cards.length === 0 ? (
         <div
           className="card-blank-clickable"
-          onClick={() => handleCardClick(null, column)}
+          onClick={() => handleCardClick(null, column, -1)}
         >
           {" "}
           +{" "}
@@ -133,7 +160,7 @@ export const SolitairePage: React.FC = () => {
             key={index}
             isClickable={index === column.cards.length - 1}
             isSelected={selectedCard?.card === card}
-            onClick={() => handleCardClick(card, column)}
+            onClick={() => handleCardClick(card, column, index)}
           />
         ))
       )}
@@ -145,7 +172,7 @@ export const SolitairePage: React.FC = () => {
       {stock.stock.length === 0 ? (
         <div
           className="card-blank-clickable"
-          onClick={() => handleStockClick(stock)}
+          onClick={() => handleStockClick()}
         >
           +
         </div>
@@ -154,7 +181,7 @@ export const SolitairePage: React.FC = () => {
           card={stock.stock[stock.stock.length - 1]}
           isClickable={true}
           isSelected={false}
-          onClick={() => handleStockClick(stock)}
+          onClick={() => handleStockClick()}
         />
       )}
     </div>
@@ -177,13 +204,15 @@ export const SolitairePage: React.FC = () => {
     return (
       <div className="stackable-pile">
         {visibleCards.map((card, index) => {
+          const actualIndex = stock.cards.length - visibleCards.length + index; // Calculate the actual index in the stock
+
           return (
             <CardComponent
               card={card}
               key={index}
               isClickable={index === visibleCards.length - 1}
               isSelected={selectedCard?.card === card}
-              onClick={() => handleCardClick(card, stock)}
+              onClick={() => handleCardClick(card, stock, actualIndex)}
             />
           );
         })}
@@ -196,7 +225,7 @@ export const SolitairePage: React.FC = () => {
       {foundation.cards.length === 0 ? (
         <div
           className="card-blank-clickable"
-          onClick={() => handleCardClick(null, foundation)}
+          onClick={() => handleCardClick(null, foundation, -1)}
         >
           {" "}
           +{" "}
@@ -209,7 +238,8 @@ export const SolitairePage: React.FC = () => {
           onClick={() =>
             handleCardClick(
               foundation.cards[foundation.cards.length - 1],
-              foundation
+              foundation,
+              foundation.cards.length - 1
             )
           }
         />
@@ -243,6 +273,16 @@ export const SolitairePage: React.FC = () => {
           <div className="stock-area">
             <div className="stock">{renderStock(game.stock)}</div>
             <div className="waste">{renderWaste(game.stock)}</div>
+          </div>
+          <div className="undo-area">
+            <Button
+              className="undo-button"
+              onClick={handleUndo}
+              disabled={!canUndo}
+              aria-label="Undo last move"
+            >
+              Undo
+            </Button>
           </div>
         </>
       )}

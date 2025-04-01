@@ -42,28 +42,18 @@ export class Stock {
   // waste pile
   cards: Card[];
 
-  constructor() {
-    this.stock = [];
-    this.cards = [];
+  constructor(initialState?: { stock: Card[]; waste: Card[] }) {
+    if (initialState) {
+      this.stock = cloneCards(initialState.stock);
+      this.cards = cloneCards(initialState.waste);
+    } else {
+      this.stock = [];
+      this.cards = [];
+    }
   }
 
   addCard(card: Card) {
     this.stock.push(card);
-  }
-
-  draw(): void {
-    if (this.stock.length > 0) {
-      this.cards.push(this.stock.pop()!.flip());
-    } else {
-      for (const card of this.cards) {
-        this.stock.push(card.flip());
-      }
-      this.cards = [];
-
-      this.stock.reverse();
-      // Draw the top card from the stock
-      this.cards.push(this.stock.pop()!.flip());
-    }
   }
 
   removeCard(): Card | null {
@@ -71,10 +61,25 @@ export class Stock {
   }
 }
 
+interface GameState {
+  tableau: Card[][];
+  foundation: Card[][];
+  stock: {
+    stock: Card[];
+    waste: Card[];
+  };
+}
+
+function cloneCards(cards: Card[]): Card[] {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call
+  return cards.map((card) => card.clone());
+}
+
 export class SolitaireGame {
   tableau: Column[];
   public foundation: Foundation[];
   stock: Stock;
+  history: GameState[] = [];
 
   constructor() {
     const deck = new Deck({ cardOptions: { faceCardUniqueValues: true } });
@@ -103,35 +108,88 @@ export class SolitaireGame {
     }
   }
 
+  saveState(): void {
+    const state: GameState = {
+      tableau: this.tableau.map((column) => cloneCards(column.cards)),
+      foundation: this.foundation.map((f) => cloneCards(f.cards)),
+      stock: {
+        stock: cloneCards(this.stock.stock),
+        waste: cloneCards(this.stock.cards),
+      },
+    };
+
+    this.history.push(state);
+  }
+
+  draw(): void {
+    this.saveState();
+    if (this.stock.stock.length > 0) {
+      this.stock.cards.push(this.stock.stock.pop()!.flip());
+    } else {
+      for (const card of this.stock.cards) {
+        this.stock.stock.push(card.flip());
+      }
+
+      this.stock.cards = [];
+
+      this.stock.stock.reverse();
+
+      // Draw the top card from the stock
+      this.stock.cards.push(this.stock.stock.pop()!.flip());
+    }
+  }
+
+  hasHistory(): boolean {
+    return this.history.length > 0;
+  }
+
   // move card from tableau to foundation
-  moveCard(source: Column | Stock, target: Foundation | Column): boolean {
+  moveCard(
+    source: Column | Stock,
+    target: Foundation | Column,
+    sourceIndex: number
+  ): boolean {
+    console.log("Move card", source, target, sourceIndex);
     //get target card, null if empty target
     const targetCard =
       target.cards.length === 0 ? null : target.cards[target.cards.length - 1];
 
+    const sourceCard = source.cards[sourceIndex];
+
     // check if the move is valid
-    if (
-      !this.isValidMove(
-        source.cards[source.cards.length - 1],
-        targetCard,
-        target
-      )
-    ) {
+    if (!this.isValidMove(sourceCard, targetCard, target)) {
       return false;
     }
 
-    // remove from source
-    const card = source.removeCard()!;
+    // save previous state for undo
+    this.saveState();
 
-    // add the card to target, if should never fail
-    target.addCard(card);
+    // not top card
+    if (sourceIndex !== source.cards.length - 1) {
+      // move all cards from sourceIndex to the end of the source column to target
+      //remove the cards from source and add them to target
+      const cardsToMove = source.cards.splice(
+        sourceIndex,
+        source.cards.length - sourceIndex
+      );
+      target.cards.push(...cardsToMove);
+    }
+    // top card
+    else {
+      // remove from source
+      const card = source.removeCard()!;
 
+      // add the card to target, if should never fail
+      target.addCard(card);
+    }
+
+    // flip the last card face up if it's a column and the last card is face down
     if (
       source instanceof Column &&
       source.cards.length > 0 &&
       !source.cards[source.cards.length - 1].faceUp
     ) {
-      source.cards[source.cards.length - 1].flip(); // Flip the last card face up if it's a column
+      source.cards[source.cards.length - 1].flip();
     }
 
     return true;
@@ -166,6 +224,28 @@ export class SolitaireGame {
       return true; // Any card can be placed on an empty tableau pile
     }
     return false;
+  }
+
+  undo(): boolean {
+    const previousState = this.history.pop();
+
+    if (!previousState) return false; // No previous state to undo to
+
+    this.tableau.forEach((column, index) => {
+      column.cards = cloneCards(previousState.tableau[index]);
+    });
+
+    // Restore foundation piles with the cloned cards
+    this.foundation.forEach((foundation, index) => {
+      foundation.cards = cloneCards(previousState.foundation[index]);
+    });
+
+    this.stock = new Stock({
+      stock: cloneCards(previousState.stock.stock),
+      waste: cloneCards(previousState.stock.waste),
+    });
+
+    return true; // Undo successful
   }
 
   checkWin(): boolean {
