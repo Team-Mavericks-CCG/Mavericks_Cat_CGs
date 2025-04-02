@@ -11,7 +11,7 @@ export enum Suit {
 }
 
 export enum Rank {
-  ACE = "A",
+  ACE = "Ace",
   TWO = "2",
   THREE = "3",
   FOUR = "4",
@@ -21,9 +21,9 @@ export enum Rank {
   EIGHT = "8",
   NINE = "9",
   TEN = "10",
-  JACK = "J",
-  QUEEN = "Q",
-  KING = "K",
+  JACK = "Jack",
+  QUEEN = "Queen",
+  KING = "King",
 }
 
 export enum Color {
@@ -44,8 +44,8 @@ export class Card {
    * @param rank - The card rank from Rank enum
    */
   constructor(
-    suit: Suit,
     rank: Rank,
+    suit: Suit,
     options: CardRankOptions = {},
     faceUp = true
   ) {
@@ -69,9 +69,12 @@ export class Card {
     // TODO: Should Ace be 14 when high to match faceCardUniqueValues?
     if (this.rank === Rank.ACE) {
       return aceHigh ? 11 : 1;
-    } else if (faceCardUniqueValues && ["J", "Q", "K"].includes(this.rank)) {
-      return 11 + ["J", "Q", "K"].indexOf(this.rank);
-    } else if (["J", "Q", "K"].includes(this.rank)) {
+    } else if (
+      faceCardUniqueValues &&
+      ["Jack", "Queen", "King"].includes(this.rank)
+    ) {
+      return 11 + ["Jack", "Queen", "King"].indexOf(this.rank);
+    } else if (["Jack", "Queen", "King"].includes(this.rank)) {
       return 10;
     } else {
       return parseInt(this.rank, 10);
@@ -94,8 +97,9 @@ export class Card {
     return this.suit;
   }
 
-  flip(): void {
+  flip(): this {
     this.faceUp = !this.faceUp;
+    return this;
   }
 
   /**
@@ -116,5 +120,10 @@ export class Card {
       rank: this.rank,
       color: this.color,
     };
+  }
+
+  clone(): Card {
+    const cloned = new Card(this.rank, this.suit, this.options, this.faceUp);
+    return cloned;
   }
 }

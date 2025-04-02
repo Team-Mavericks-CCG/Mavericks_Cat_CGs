@@ -24,7 +24,7 @@ export class Deck {
     // Generate standard deck
     for (const suit of suits) {
       for (const rank of ranks) {
-        this.cards.push(new Card(suit, rank, cardOptions));
+        this.cards.push(new Card(rank, suit, cardOptions));
       }
     }
 

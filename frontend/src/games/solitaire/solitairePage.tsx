@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
-import { Card } from "../utils/card";
+import {
+  SolitaireGame,
+  Foundation,
+  Column,
+  Stock,
+  almostWon,
+} from "./solitairePageModel";
+import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import {
   getCardImage,
@@ -76,6 +82,23 @@ export const SolitairePage: React.FC = () => {
 
   const [canUndo, setCanUndo] = useState(false);
 
+  // disable right click context menu
+  useEffect(() => {
+    // Function to prevent context menu
+    const preventContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      return false;
+    };
+
+    // Add the event listener when component mounts
+    document.addEventListener("contextmenu", preventContextMenu);
+
+    // Clean up the event listener when component unmounts
+    return () => {
+      document.removeEventListener("contextmenu", preventContextMenu);
+    };
+  }, []);
+
   useEffect(() => {
     const preloadImages = async () => {
       const images = getAllCardImages();
@@ -105,50 +128,113 @@ export const SolitairePage: React.FC = () => {
     sourceIndex: number;
   } | null>(null);
 
-  const [game] = useState(new SolitaireGame());
+  const [game] = useState(new SolitaireGame(almostWon));
 
+  const moveCard = (
+    source: Column | Stock,
+    target: Column | Foundation,
+    index: number
+  ): boolean => {
+    console.log("Moving card from", source, "to", target, "at index", index);
+    const success = game.moveCard(source, target, index);
+    if (success) {
+      setCanUndo(true);
+      setSelectedCard(null);
+      setGameState((prev) => prev + 1);
+      if (game.checkWin()) {
+        win();
+      }
+      console.log("Move successful!");
+      return true;
+    }
+    console.log("Move failed!");
+    return false;
+  };
   // Handle card click functionality with updated typing
   const handleCardClick = (
     card: Card | null,
     source: Stock | Column | Foundation,
     sourceIndex: number
   ) => {
+    // can't select a face down card
+    if (!card?.faceUp) {
+      return;
+    }
+
     if (selectedCard) {
+      // can't move to stock, foundation is handled automatically
+      if (!(source instanceof Column)) {
+        setSelectedCard(null);
+        return;
+      }
+
       // If a card is already selected, try to move it to the target
       if (source !== selectedCard.source) {
-        const success = game.moveCard(
+        const success = moveCard(
           selectedCard.source,
           source,
           selectedCard.sourceIndex
         );
-        if (success) {
-          setCanUndo(true);
-          setSelectedCard(null);
-          setGameState((prev) => prev + 1);
-        } else {
+        if (!success) {
           setSelectedCard(null);
         }
       } else {
         // Deselect if clicking the same card
         setSelectedCard(null);
       }
-    } else {
-      // Only allow selecting the top card from any pile
-      console.log("Selected card:", card, source, sourceIndex);
+    }
+    // no selected card
+    else {
+      // Only allow selecting the top card from Stock
+      // Any face up card from Column
+      // No selection from Foundation
+      if (source instanceof Foundation) {
+        return;
+      }
+
       const isTopCard = source.cards[source.cards.length - 1] === card;
-      if (
-        (isTopCard || (source instanceof Column && card?.faceUp)) &&
-        !(source instanceof Foundation)
-      ) {
-        // if the clicked card can be played on the foundation, play it
-        for (const foundation of game.foundation) {
-          const success = game.moveCard(source, foundation, sourceIndex);
-          if (success) {
-            setCanUndo(true);
-            setGameState((prev) => prev + 1);
-            return;
+
+      // if the card isn't the top card, try to move it to somewhere else in the tableau
+      // select if you can't move it to somewhere else in the tableau
+      if (source instanceof Column && !isTopCard) {
+        // try to move to another column in the tableau
+        for (const column of game.tableau) {
+          if (column !== source) {
+            const success = moveCard(source, column, sourceIndex);
+            if (success) {
+              return;
+            }
           }
         }
+        // if you can't move it to another column, select it
+        setSelectedCard({ card, source, sourceIndex });
+        return;
+      }
+      // if the card is the top card, try to play it on foundation
+      // then try to play to tableau
+      // select if you can't play it anywhere
+      else if (isTopCard) {
+        // if the clicked card can be played on the foundation, play it
+        const foundation = game.foundation.find(
+          (foundation) => foundation.suit === card?.suit
+        );
+
+        const success = moveCard(source, foundation!, sourceIndex);
+        if (success) {
+          return;
+        }
+
+        // try to play it on another column in the tableau
+        for (const column of game.tableau) {
+          if (column !== source) {
+            const success = moveCard(source, column, sourceIndex);
+            if (success) {
+              return;
+            }
+          }
+        }
+
+        // if you can't play it anywhere, select it
         setSelectedCard({ card, source, sourceIndex });
       }
     }
@@ -168,6 +254,28 @@ export const SolitairePage: React.FC = () => {
       setGameState((prev) => prev - 1);
 
       setCanUndo(game.hasHistory());
+    }
+  };
+
+  const win = () => {
+    console.log("You win!");
+
+    // iterate through the tableau and move cards to the foundation
+    // we dont actually know how many iterations it will take
+    // so just loop until the foundations are full
+    while (game.foundation.some((foundation) => foundation.cards.length < 13)) {
+      for (const column of game.tableau) {
+        if (column.cards.length > 0) {
+          for (const foundation of game.foundation) {
+            if (
+              game.moveCard(column, foundation, column.cards.length - 1, false)
+            ) {
+              setGameState((prev) => prev + 1);
+              break;
+            }
+          }
+        }
+      }
     }
   };
 
@@ -248,32 +356,48 @@ export const SolitairePage: React.FC = () => {
     );
   };
 
-  const renderFoundation = (foundation: Foundation) => (
-    <div className="pile">
-      {foundation.cards.length === 0 ? (
-        <div
-          className="card-blank-clickable"
-          onClick={() => handleCardClick(null, foundation, -1)}
-        >
-          {" "}
-          +{" "}
-        </div>
-      ) : (
-        <CardComponent
-          card={foundation.cards[foundation.cards.length - 1]}
-          isClickable={false}
-          isSelected={false}
-          onClick={() =>
-            handleCardClick(
-              foundation.cards[foundation.cards.length - 1],
-              foundation,
-              foundation.cards.length - 1
-            )
-          }
-        />
-      )}
-    </div>
-  );
+  const renderFoundation = (foundation: Foundation) => {
+    const getSuitSymbol = (suit: Suit) => {
+      switch (suit) {
+        case Suit.CLUBS:
+          return "♣";
+        case Suit.DIAMONDS:
+          return "♦";
+        case Suit.HEARTS:
+          return "♥";
+        case Suit.SPADES:
+          return "♠";
+        default:
+          return "+";
+      }
+    };
+
+    return (
+      <div className="pile">
+        {foundation.cards.length === 0 ? (
+          <div
+            className="card-blank-clickable"
+            onClick={() => handleCardClick(null, foundation, -1)}
+          >
+            {getSuitSymbol(foundation.suit)}
+          </div>
+        ) : (
+          <CardComponent
+            card={foundation.cards[foundation.cards.length - 1]}
+            isClickable={false}
+            isSelected={false}
+            onClick={() =>
+              handleCardClick(
+                foundation.cards[foundation.cards.length - 1],
+                foundation,
+                foundation.cards.length - 1
+              )
+            }
+          />
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="solitaire-page">

@@ -13,6 +13,10 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+
+  /* Disable scrolling overscroll effects/bounce */
+  overscroll-behavior: none;
+  -webkit-overscroll-behavior: none;
 }
 
 h1 {
