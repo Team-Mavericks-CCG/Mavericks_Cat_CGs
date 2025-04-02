@@ -14,6 +14,8 @@ import { styled } from '@mui/material/styles';
 import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import { useNavigate } from 'react-router-dom';
+import axios, { AxiosError } from "axios";
+
 //import axios, { AxiosError } from "axios";
 
 const Card = styled(MuiCard)(({ theme }) => ({
@@ -94,20 +96,50 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    if (usernameErrorMessage || passwordError) {
-      event.preventDefault();
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (usernameError || passwordError) {
       return;
     }
+
     const data = new FormData(event.currentTarget);
+    const username = data.get("username") as string;
+    const password = data.get("password") as string;
 
+    interface LoginResponse {
+      token: string;
+    }
+
+    try {
+      const response = await axios.post<LoginResponse>(
+        "http://localhost:5000/api/auth/login",
+        {
+          username,
+          password,
+        }
+      );
+
+      localStorage.setItem("authToken", response.data.token);
+
+      /*window.location.href = "/solitaire";  full page reload, rm */
+      void navigate("/homePage"); /* routes to the solitaire page*/
+    } catch (error) {
+      console.error("Error during login:", error);
+
+      // Show error to user
+      if (error instanceof AxiosError && error.response) {
+        if (error.response.status === 401) {
+          setPasswordError(true);
+          setPasswordErrorMessage("Invalid username or password");
+        } else {
+          alert("Login failed. Please try again later.");
+        }
+      } else {
+        alert("Network error. Please check your connection.");
+      }
+    }
     
-    console.log({
-      username: data.get('name'),
-      password: data.get('password'),
-    });
-
-    void navigate("/home");
   };
 
   return (
@@ -125,7 +157,9 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
           </Typography>
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={(e) => {
+              void handleSubmit(e);
+            }}
             sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
           >
             <FormControl sx={{ height: '90px', mb: 1 }}>
