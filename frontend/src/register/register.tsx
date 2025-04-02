@@ -113,7 +113,7 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
 
     try {
       const response = await axios.post<LoginResponse>(
-        "http://localhost:5000/api/auth/login",
+        "http://localhost:5000/api/auth/register",
         {
           username,
           password,
@@ -125,7 +125,7 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
       /*window.location.href = "/solitaire";  full page reload, rm */
       void navigate("/homePage"); /* routes to the solitaire page*/
     } catch (error) {
-      console.error("Error during login:", error);
+      console.error("Error during register:", error);
 
       // Show error to user
       if (error instanceof AxiosError && error.response) {
@@ -133,7 +133,7 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
           setPasswordError(true);
           setPasswordErrorMessage("Invalid username or password");
         } else {
-          alert("Login failed. Please try again later.");
+          alert("Register failed. Please try again later.");
         }
       } else {
         alert("Network error. Please check your connection.");
