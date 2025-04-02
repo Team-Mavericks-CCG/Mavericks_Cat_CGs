@@ -19,7 +19,6 @@ import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import axios, { AxiosError } from "axios";
 
-
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -104,8 +103,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
         }
       );
 
-      console.log("Login successful:");
-
       localStorage.setItem("authToken", response.data.token);
 
       /*window.location.href = "/solitaire";  full page reload, rm */
@@ -125,10 +122,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
         alert("Network error. Please check your connection.");
       }
     }
-    console.log({
-      username: data.get("username"),
-      password: data.get("password"),
-    });
   };
 
   const validateUsername = (): boolean => {
@@ -187,7 +180,7 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
               gap: 2,
             }}
           >
-            <FormControl sx={{ height: '90px', mb: 1 }}>
+            <FormControl sx={{ height: "90px", mb: 1 }}>
               <FormLabel htmlFor="username">Username</FormLabel>
               <TextField
                 error={usernameError}
@@ -203,15 +196,15 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 variant="outlined"
                 onChange={validateUsername}
                 color={usernameError ? "error" : "primary"}
-                sx={{ 
-                  '& .MuiFormHelperText-root': {
-                    minHeight: '20px',
-                    margin: '3px 14px 0'
-                  }
+                sx={{
+                  "& .MuiFormHelperText-root": {
+                    minHeight: "20px",
+                    margin: "3px 14px 0",
+                  },
                 }}
               />
             </FormControl>
-            <FormControl sx={{ height: '90px', mb: 1 }}>
+            <FormControl sx={{ height: "90px", mb: 1 }}>
               <FormLabel htmlFor="password">Password</FormLabel>
               <TextField
                 error={passwordError}
@@ -227,11 +220,11 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
                 variant="outlined"
                 onChange={validatePassword}
                 color={passwordError ? "error" : "primary"}
-                sx={{ 
-                  '& .MuiFormHelperText-root': {
-                    minHeight: '20px',
-                    margin: '3px 14px 0'
-                  }
+                sx={{
+                  "& .MuiFormHelperText-root": {
+                    minHeight: "20px",
+                    margin: "3px 14px 0",
+                  },
                 }}
               />
             </FormControl>
@@ -254,16 +247,18 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
             </Link>
           </Box>
           <Divider>or</Divider>
-          <Box sx={{ 
-              display: "flex", 
-              flexDirection: "column", 
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
               gap: 2,
-              marginTop: "auto" // Added marginTop
-            }}>
+              marginTop: "auto", // Added marginTop
+            }}
+          >
             <Typography sx={{ textAlign: "center" }}>
               Don&apos;t have an account?{" "}
               <Link
-                href="/material-ui/getting-started/templates/sign-in/"
+                href="/register"
                 variant="body2"
                 sx={{ alignSelf: "center" }}
               >
