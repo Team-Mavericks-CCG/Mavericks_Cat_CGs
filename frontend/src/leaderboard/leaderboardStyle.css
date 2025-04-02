@@ -19,7 +19,7 @@
     width: 80%;
     margin: 0 auto;
     border-collapse: collapse;
-    background-color: white;
+    background-color: rgb(248, 244, 244);
 }
 
 /* Table Header */
@@ -33,6 +33,7 @@
 .leaderboard-table td {
     padding: 10px;
     border: 1px solid #ddd;
+    color: #333;
 }
 
 .leaderboard-table tr:nth-child(even) {
