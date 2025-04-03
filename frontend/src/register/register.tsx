@@ -19,21 +19,22 @@ import axios, { AxiosError } from "axios";
 //import axios, { AxiosError } from "axios";
 
 const Card = styled(MuiCard)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  alignSelf: 'center',
-  width: '100%',
+  display: "flex",
+  flexDirection: "column",
+  alignSelf: "center",
+  width: "100%",
+  minHeight: "75%",
   padding: theme.spacing(4),
   gap: theme.spacing(2),
-  margin: 'auto',
-  boxShadow:
-    'hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px',
-  [theme.breakpoints.up('sm')]: {
-    width: '450px',
+  margin: "auto",
+  [theme.breakpoints.up("sm")]: {
+    maxWidth: "650px",
   },
-  ...theme.applyStyles('dark', {
+  boxShadow:
+    "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
+  ...theme.applyStyles("dark", {
     boxShadow:
-      'hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px',
+      "hsla(220, 30%, 5%, 0.5) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.08) 0px 15px 35px -5px",
   }),
 }));
 
@@ -65,6 +66,8 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
   const [usernameErrorMessage, setUsernameErrorMessage] = React.useState('');
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
+  const [confirmPasswordErrorMessage, setConfrimPasswordErrorMessage] = React.useState('');
 
   const validateUsername = (): boolean => {
     const username = document.getElementById('username') as HTMLInputElement;
@@ -94,12 +97,27 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
     return true;
   };
 
+  const samePassword = (): boolean => {
+    const password = document.getElementById('password') as HTMLInputElement;
+    const confirmPassword = document.getElementById('confirmPassword') as HTMLInputElement;
+
+    if (confirmPassword.value != password.value) {
+      setConfirmPasswordError(true);
+      setConfrimPasswordErrorMessage('Passwords must be the same');
+      return false;
+    }
+    setConfirmPasswordError(false);
+    setConfrimPasswordErrorMessage('');
+
+    return true;
+  };
+
   const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (usernameError || passwordError) {
+    if (usernameError || passwordError || confirmPasswordError) {
       return;
     }
 
@@ -123,15 +141,15 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
       localStorage.setItem("authToken", response.data.token);
 
       /*window.location.href = "/solitaire";  full page reload, rm */
-      void navigate("/home"); /* routes to the solitaire page*/
+      void navigate("/home"); /* routes to the home page*/
     } catch (error) {
       console.error("Error during register:", error);
 
       // Show error to user
       if (error instanceof AxiosError && error.response) {
-        if (error.response.status === 401) {
-          setPasswordError(true);
-          setPasswordErrorMessage("Invalid username or password");
+        if (error.response.status === 409) {
+          setUsernameError(true);
+          setUsernameErrorMessage("Username taken. Please choose another one.");
         } else {
           alert("Register failed. Please try again later.");
         }
@@ -201,6 +219,30 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
                 fullWidth
                 variant="outlined"
                 onChange={validatePassword}
+                color={passwordError ? 'error' : 'primary'}
+                sx={{
+                  '& .MuiFormHelperText-root': {
+                    minHeight: '20px',
+                    margin: '3px 14px 0',
+                  },
+                }}
+              />
+            </FormControl>
+            <FormControl sx={{ height: '90px', mb: 1 }}>
+              <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+              <TextField
+                error={confirmPasswordError}
+                helperText={confirmPasswordErrorMessage}
+                name="confirmPassword"
+                placeholder="••••••"
+                type="password"
+                id="confirmPassword"
+                autoComplete="current-password"
+                autoFocus
+                required
+                fullWidth
+                variant="outlined"
+                onChange={samePassword}
                 color={passwordError ? 'error' : 'primary'}
                 sx={{
                   '& .MuiFormHelperText-root': {
