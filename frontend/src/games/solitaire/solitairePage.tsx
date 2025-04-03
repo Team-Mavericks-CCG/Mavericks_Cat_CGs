@@ -135,7 +135,6 @@ export const SolitairePage: React.FC = () => {
     target: Column | Foundation,
     index: number
   ): boolean => {
-    console.log("Moving card from", source, "to", target, "at index", index);
     const success = game.moveCard(source, target, index);
     if (success) {
       setCanUndo(true);
@@ -144,10 +143,8 @@ export const SolitairePage: React.FC = () => {
       if (game.checkWin()) {
         win();
       }
-      console.log("Move successful!");
       return true;
     }
-    console.log("Move failed!");
     return false;
   };
   // Handle card click functionality with updated typing
