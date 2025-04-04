@@ -56,7 +56,7 @@ const CardComponent: React.FC<{
 
   return (
     <div
-      className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}}`}
+      className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}`}
       onClick={() => onClick()}
     >
       {!imageError ? (
