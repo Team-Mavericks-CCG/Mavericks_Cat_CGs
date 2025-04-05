@@ -187,7 +187,9 @@ export class SolitaireGame {
   }
 
   initializeGame() {
-    const deck = new Deck({ cardOptions: { faceCardUniqueValues: true } });
+    const deck = Deck.createShuffled({
+      cardOptions: { faceCardUniqueValues: true },
+    });
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j <= i; j++) {
         const card = deck.draw();

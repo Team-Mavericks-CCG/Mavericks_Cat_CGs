@@ -22,7 +22,6 @@ CREATE TABLE games(
 );
 
 CREATE TABLE gameStats(
-    gamestatsid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     playerid INT NOT NULL,
     gameid INT NOT NULL,
     totalGamesCount INT,

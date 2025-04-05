@@ -11,7 +11,7 @@ export interface DeckOptions {
 export class Deck {
   cards: Card[];
 
-  constructor(options: DeckOptions = {}) {
+  constructor(options: DeckOptions = {}, numDecks = 1) {
     const {
       suits = Object.values(Suit),
       ranks = Object.values(Rank),
@@ -21,10 +21,13 @@ export class Deck {
     this.cards = [];
 
     const cardOptions = options.cardOptions ?? {};
+
     // Generate standard deck
-    for (const suit of suits) {
-      for (const rank of ranks) {
-        this.cards.push(new Card(rank, suit, cardOptions));
+    for (let i = 0; i < numDecks; i++) {
+      for (const suit of suits) {
+        for (const rank of ranks) {
+          this.cards.push(new Card(rank, suit, cardOptions));
+        }
       }
     }
 
@@ -33,8 +36,6 @@ export class Deck {
       throw new Error("Jokers are not supported yet");
       // add 2 jokers to the deck, 1 red and 1 black
     }
-
-    this.shuffle();
   }
 
   /**
@@ -117,7 +118,7 @@ export class Deck {
   /**
    * Create a new shuffled deck
    */
-  static createShuffled(options: DeckOptions = {}): Deck {
-    return new Deck(options).shuffle();
+  static createShuffled(options: DeckOptions = {}, numDecks = 1): Deck {
+    return new Deck(options, numDecks).shuffle();
   }
 }
