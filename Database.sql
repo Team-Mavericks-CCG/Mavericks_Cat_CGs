@@ -17,34 +17,14 @@ CREATE TABLE games(
     gameDescription TEXT
 );
 
-CREATE TABLE scoreInformation(
-    scoreid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    playerid INT NOT NULL,
-    gameid INT NOT NULL,
-    scores INT,
-    ranks INT,
-    rewards INT,
-    CONSTRAINT fk_score_player FOREIGN KEY (playerid) REFERENCES players(playerid),
-    CONSTRAINT fk_score_game FOREIGN KEY (gameid) REFERENCES games(gameid)
-);
-
 CREATE TABLE gameStats(
     gamestatsid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     playerid INT NOT NULL,
     gameid INT NOT NULL,
     totalGamesCount INT,
-    cardGameCount INT,
-    mostPlayedCount INT,
     winCount INT,
     loseCount INT,
+    score INT,
     CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid),
     CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid)
-);
-
-CREATE TABLE playerStats(
-    playerStatsid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    playerid INT NOT NULL,
-    mostplayedWithCount INT,
-    mostPlayedWith INT,
-    CONSTRAINT fk_playerstats FOREIGN KEY (mostPlayedWith) REFERENCES players(playerid)
 );
