@@ -67,6 +67,7 @@ export class Stock {
 }
 
 interface GameState {
+  score: number;
   tableau: Card[][];
   foundation: Card[][];
   stock: {
@@ -76,6 +77,7 @@ interface GameState {
 }
 
 export const almostWon: GameState = {
+  score: 0,
   tableau: [
     [
       new Card(Rank.KING, Suit.SPADES, { faceCardUniqueValues: true }),
@@ -160,12 +162,14 @@ function cloneCards(cards: Card[]): Card[] {
 }
 
 export class SolitaireGame {
+  score: number;
   tableau: Column[];
   public foundation: Foundation[];
   stock: Stock;
   history: GameState[] = [];
 
   constructor(gameState?: GameState) {
+    this.score = 0;
     this.tableau = Array.from({ length: 7 }, () => new Column()); // Initialize tableau with 7 empty piles
     this.foundation = [
       new Foundation(Suit.SPADES),
@@ -231,6 +235,7 @@ export class SolitaireGame {
   }
 
   setGame(gameState: GameState): void {
+    this.score = gameState.score;
     // restore each pile with cloned cards (deep copy)
     this.tableau.forEach((column, index) => {
       column.cards = cloneCards(gameState.tableau[index]);
@@ -250,6 +255,7 @@ export class SolitaireGame {
 
   getState(): GameState {
     return {
+      score: this.score,
       tableau: this.tableau.map((column) => cloneCards(column.cards)),
       foundation: this.foundation.map((f) => cloneCards(f.cards)),
       stock: {
@@ -273,6 +279,7 @@ export class SolitaireGame {
     // if the stock pile is empty, move cards from waste pile to stock pile
     // and draw the top card from the waste pile
     else {
+      this.updateScore(-50);
       for (const card of this.stock.cards) {
         this.stock.stock.push(card.flip());
       }
@@ -290,6 +297,14 @@ export class SolitaireGame {
 
   hasHistory(): boolean {
     return this.history.length > 0;
+  }
+
+  updateScore(points: number): void {
+    if (this.score + points < 0) {
+      this.score = 0;
+      return;
+    }
+    this.score += points;
   }
 
   // move card from tableau to foundation
@@ -323,6 +338,11 @@ export class SolitaireGame {
       this.saveState();
     }
 
+    if (target instanceof Foundation) {
+      // moving to foundation earns points
+      this.updateScore(5);
+    }
+
     // not top card
     if (sourceIndex !== source.cards.length - 1) {
       // move all cards from sourceIndex to the end of the source column to target
@@ -349,6 +369,7 @@ export class SolitaireGame {
       !source.cards[source.cards.length - 1].faceUp
     ) {
       source.cards[source.cards.length - 1].flip();
+      this.updateScore(15);
     }
 
     return true;
@@ -402,6 +423,9 @@ export class SolitaireGame {
     }
 
     this.setGame(previousState);
+
+    // Undo costs 50 points
+    this.updateScore(-50);
     return true;
   }
 

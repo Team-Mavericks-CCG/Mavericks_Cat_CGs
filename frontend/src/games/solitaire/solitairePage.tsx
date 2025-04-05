@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  SolitaireGame,
-  Foundation,
-  Column,
-  Stock,
-  almostWon,
-} from "./solitairePageModel";
+import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import {
@@ -120,7 +114,7 @@ export const SolitairePage: React.FC = () => {
     void preloadImages();
   }, []);
 
-  const [game] = useState(new SolitaireGame(almostWon));
+  const [game] = useState(new SolitaireGame());
 
   const moveCard = (
     source: Column | Stock,
