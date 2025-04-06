@@ -121,23 +121,23 @@ function HomePage() {
     <AppTheme>
       <ColorModeSelect sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
       <HomePageContainer direction="column" justifyContent="space-between">
-        <Card>
-          <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
-            Welcome to Mavericks Cat Card Games!
-          </Typography>
-          <p>Choose a game to play:</p>
-          <div className="button-container">
-            <div className="button-row">
-              <button onClick={() => setOpenSolitaire(true)}>Solitaire</button>
-              <button onClick={() => setOpenWar(true)}>War</button>
-            </div>
-            <div className="button-row">
-              <button onClick={() => setOpenPoker(true)}>Poker</button>
-              <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
-            </div>
-          </div>
-        </Card>
-      </HomePageContainer>
+  <Card sx={{ flex: 1 }}>
+    <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
+      Welcome to Mavericks Cat Card Games!
+    </Typography>
+    <p>Choose a game to play:</p>
+    <div className="button-container">
+      <div className="button-row">
+        <button onClick={() => setOpenSolitaire(true)}>Solitaire</button>
+        <button onClick={() => setOpenWar(true)}>War</button>
+      </div>
+      <div className="button-row">
+        <button onClick={() => setOpenPoker(true)}>Poker</button>
+        <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
+      </div>
+    </div>
+  </Card>
+</HomePageContainer>
 
       <GameDialog
         open={openSolitaire}
