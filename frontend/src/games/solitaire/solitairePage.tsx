@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  SolitaireGame,
-  Foundation,
-  Column,
-  Stock,
-  almostWon,
-} from "./solitairePageModel";
+import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import {
@@ -47,9 +41,8 @@ const UndoButton = styled(Button)(() => ({
 const CardComponent: React.FC<{
   card: Card;
   isClickable: boolean;
-  isSelected: boolean;
   onClick: () => void;
-}> = ({ card, isClickable, isSelected, onClick }) => {
+}> = ({ card, isClickable, onClick }) => {
   const [imageError, setImageError] = useState(false);
 
   const imageSrc = card.faceUp ? getCardImage(card) : getCardBackImage();
@@ -57,7 +50,7 @@ const CardComponent: React.FC<{
 
   return (
     <div
-      className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}${isSelected ? " selected" : ""}`}
+      className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}`}
       onClick={() => onClick()}
     >
       {!imageError ? (
@@ -121,14 +114,7 @@ export const SolitairePage: React.FC = () => {
     void preloadImages();
   }, []);
 
-  // Explicitly define the type for selectedCard
-  const [selectedCard, setSelectedCard] = useState<{
-    card: Card;
-    source: Stock | Column;
-    sourceIndex: number;
-  } | null>(null);
-
-  const [game] = useState(new SolitaireGame(almostWon));
+  const [game] = useState(new SolitaireGame());
 
   const moveCard = (
     source: Column | Stock,
@@ -138,7 +124,6 @@ export const SolitairePage: React.FC = () => {
     const success = game.moveCard(source, target, index);
     if (success) {
       setCanUndo(true);
-      setSelectedCard(null);
       setGameState((prev) => prev + 1);
       if (game.checkWin()) {
         win();
@@ -158,81 +143,51 @@ export const SolitairePage: React.FC = () => {
       return;
     }
 
-    if (selectedCard) {
-      // can't move to stock, foundation is handled automatically
-      if (!(source instanceof Column)) {
-        setSelectedCard(null);
-        return;
-      }
-
-      // If a card is already selected, try to move it to the target
-      if (source !== selectedCard.source) {
-        const success = moveCard(
-          selectedCard.source,
-          source,
-          selectedCard.sourceIndex
-        );
-        if (!success) {
-          setSelectedCard(null);
-        }
-      } else {
-        // Deselect if clicking the same card
-        setSelectedCard(null);
-      }
+    // Only allow selecting the top card from Stock,
+    // Any face up card from Column,
+    // No selection from Foundation
+    if (source instanceof Foundation) {
+      return;
     }
-    // no selected card
-    else {
-      // Only allow selecting the top card from Stock
-      // Any face up card from Column
-      // No selection from Foundation
-      if (source instanceof Foundation) {
+
+    const isTopCard = source.cards[source.cards.length - 1] === card;
+
+    // if the card isn't the top card, try to move it to somewhere else in the tableau
+    // select if you can't move it to somewhere else in the tableau
+    if (source instanceof Column && !isTopCard) {
+      // try to move to another column in the tableau
+      for (const column of game.tableau) {
+        if (column !== source) {
+          const success = moveCard(source, column, sourceIndex);
+          if (success) {
+            return;
+          }
+        }
+      }
+      return;
+    }
+    // if the card is the top card, try to play it on foundation
+    // then try to play to tableau
+    // select if you can't play it anywhere
+    else if (isTopCard) {
+      // if the clicked card can be played on the foundation, play it
+      const foundation = game.foundation.find(
+        (foundation) => foundation.suit === card?.suit
+      );
+
+      const success = moveCard(source, foundation!, sourceIndex);
+      if (success) {
         return;
       }
 
-      const isTopCard = source.cards[source.cards.length - 1] === card;
-
-      // if the card isn't the top card, try to move it to somewhere else in the tableau
-      // select if you can't move it to somewhere else in the tableau
-      if (source instanceof Column && !isTopCard) {
-        // try to move to another column in the tableau
-        for (const column of game.tableau) {
-          if (column !== source) {
-            const success = moveCard(source, column, sourceIndex);
-            if (success) {
-              return;
-            }
+      // try to play it on another column in the tableau
+      for (const column of game.tableau) {
+        if (column !== source) {
+          const success = moveCard(source, column, sourceIndex);
+          if (success) {
+            return;
           }
         }
-        // if you can't move it to another column, select it
-        setSelectedCard({ card, source, sourceIndex });
-        return;
-      }
-      // if the card is the top card, try to play it on foundation
-      // then try to play to tableau
-      // select if you can't play it anywhere
-      else if (isTopCard) {
-        // if the clicked card can be played on the foundation, play it
-        const foundation = game.foundation.find(
-          (foundation) => foundation.suit === card?.suit
-        );
-
-        const success = moveCard(source, foundation!, sourceIndex);
-        if (success) {
-          return;
-        }
-
-        // try to play it on another column in the tableau
-        for (const column of game.tableau) {
-          if (column !== source) {
-            const success = moveCard(source, column, sourceIndex);
-            if (success) {
-              return;
-            }
-          }
-        }
-
-        // if you can't play it anywhere, select it
-        setSelectedCard({ card, source, sourceIndex });
       }
     }
   };
@@ -240,14 +195,12 @@ export const SolitairePage: React.FC = () => {
   const handleStockClick = () => {
     game.draw();
     setCanUndo(true);
-    setSelectedCard(null);
     setGameState((prev) => prev + 1);
   };
 
   const handleUndo = () => {
     const success = game.undo();
     if (success) {
-      setSelectedCard(null);
       setGameState((prev) => prev - 1);
 
       setCanUndo(game.hasHistory());
@@ -292,7 +245,6 @@ export const SolitairePage: React.FC = () => {
             card={card}
             key={index}
             isClickable={index === column.cards.length - 1}
-            isSelected={selectedCard?.card === card}
             onClick={() => handleCardClick(card, column, index)}
           />
         ))
@@ -313,7 +265,6 @@ export const SolitairePage: React.FC = () => {
         <CardComponent
           card={stock.stock[stock.stock.length - 1]}
           isClickable={true}
-          isSelected={false}
           onClick={() => handleStockClick()}
         />
       )}
@@ -344,7 +295,6 @@ export const SolitairePage: React.FC = () => {
               card={card}
               key={index}
               isClickable={index === visibleCards.length - 1}
-              isSelected={selectedCard?.card === card}
               onClick={() => handleCardClick(card, stock, actualIndex)}
             />
           );
@@ -382,7 +332,6 @@ export const SolitairePage: React.FC = () => {
           <CardComponent
             card={foundation.cards[foundation.cards.length - 1]}
             isClickable={false}
-            isSelected={false}
             onClick={() =>
               handleCardClick(
                 foundation.cards[foundation.cards.length - 1],
