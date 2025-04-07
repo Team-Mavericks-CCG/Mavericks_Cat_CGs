@@ -25,6 +25,6 @@ CREATE TABLE gameStats(
     loseCount INT,
     score INT,
     CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid),
-    CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid)
+    CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid),
     CONSTRAINT gameStats_pk PRIMARY KEY (playerid, gameid)
 );
