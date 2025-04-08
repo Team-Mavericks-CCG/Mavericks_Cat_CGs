@@ -380,6 +380,7 @@ export const SolitairePage: React.FC = () => {
           >
             Undo
           </UndoButton>
+          <div>{game.score}</div>
         </>
       )}
     </div>
