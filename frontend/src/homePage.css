@@ -1,12 +1,52 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .home-page {
-    background-color: #9798eaea;
-    height: 100vh;
-    width: 100vw;
-    color: white;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-  }
- 
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  padding-bottom: 3rem; /* Space for footer */
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+button {
+  background-color: #3f51b5;
+  color: white;
+  padding: 16px 32px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 220px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #303f9f;
+}
