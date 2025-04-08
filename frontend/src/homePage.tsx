@@ -17,7 +17,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import AppTheme from "./shared-theme/AppTheme";
-import ColorModeSelect from "./shared-theme/ColorModeSelect";
+import ColorModeToggle from "./shared-theme/ColorModeToggle";
 
 const Card = styled("div")(({ theme }) => ({
   display: "flex",
@@ -238,7 +238,7 @@ function HomePage() {
 
   return (
     <AppTheme>
-      <ColorModeSelect sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
+      <ColorModeToggle sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
       <HomePageContainer direction="column" justifyContent="space-between">
         <Card sx={{ flex: 1 }}>
           <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
