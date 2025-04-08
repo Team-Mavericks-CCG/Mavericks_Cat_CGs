@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./leaderboardStyle.css"; // Import external CSS
 
 // Interfaces
-interface Player {
+export interface Player {   //exported to end of game page 
     playerId: number;
     username: string;
     firstName: string;
@@ -14,7 +14,7 @@ interface Player {
     lastLogin: Date;
 }
 
-interface Score {
+export interface Score {   //exported to end of game page 
     scoreId: number;
     playerId: number;
     gameStatsId: number;
@@ -24,7 +24,7 @@ interface Score {
 }
 
 // Mock API calls (replace with real API calls)
-const getPlayers = (): Promise<Player[]> => Promise.resolve([
+export const getPlayers = (): Promise<Player[]> => Promise.resolve([  //exported to end of game page 
     {
         playerId: 1,
         username: "user1",
@@ -46,12 +46,48 @@ const getPlayers = (): Promise<Player[]> => Promise.resolve([
         createdAt: new Date(),
         updatedAt: new Date(),
         lastLogin: new Date()
+    },
+    {
+        playerId: 3,
+        username: "user3",
+        firstName: "User",
+        lastName: "three",
+        email: "user3@example.com",
+        passwordHash: "hashed",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: new Date()
+    }, 
+    {
+        playerId: 4,
+        username: "user4",
+        firstName: "User",
+        lastName: "four",
+        email: "user4@example.com",
+        passwordHash: "hashed",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: new Date()
+    }, 
+    {
+        playerId: 5,
+        username: "user5",
+        firstName: "User",
+        lastName: "five",
+        email: "user5@example.com",
+        passwordHash: "hashed",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastLogin: new Date()
     }
 ]);
 
-const getScores = (): Promise<Score[]> => Promise.resolve([
+export const getScores = (): Promise<Score[]> => Promise.resolve([   //exported to end of game page 
     { scoreId: 1, playerId: 1, gameStatsId: 101, scores: 5000, rank: 1, rewards: 100 },
-    { scoreId: 2, playerId: 2, gameStatsId: 102, scores: 4200, rank: 2, rewards: 80 }
+    { scoreId: 2, playerId: 2, gameStatsId: 102, scores: 4200, rank: 2, rewards: 800 },
+    { scoreId: 3, playerId: 3, gameStatsId: 103, scores: 3000, rank: 3, rewards: 200 },
+    { scoreId: 4, playerId: 4, gameStatsId: 104, scores: 5030, rank: 5, rewards: 120 },
+    { scoreId: 5, playerId: 5, gameStatsId: 105, scores: 7030, rank: 4, rewards: 183 }
 ]);
 
 // React Component
