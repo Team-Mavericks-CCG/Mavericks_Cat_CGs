@@ -1,0 +1,33 @@
+
+.profile-header {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+  
+  .profile-info {
+    flex: 1;
+  }
+  
+  .friend-list {
+    margin-top: 24px;
+  }
+  
+  .friend-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .friend-item:last-child {
+    border-bottom: none;
+  }
+  
+  @media (max-width: 600px) {
+    .profile-header {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+  
