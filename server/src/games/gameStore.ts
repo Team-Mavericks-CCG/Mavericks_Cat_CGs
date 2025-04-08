@@ -37,7 +37,15 @@ export const gameStore = {
 
   // Factory methods for specific game types
   createBlackjackGame(numPlayers: number): { gameId: string; game: Blackjack } {
-    return this.createGame(GameType.BLACKJACK, () => new Blackjack(numPlayers));
+    const result = this.createGame(
+      GameType.BLACKJACK,
+      () => new Blackjack(numPlayers)
+    );
+    // Set the game ID explicitly on the Blackjack instance
+    result.game.setGameId(result.gameId);
+    // Initialize the game state by dealing cards
+    result.game.deal();
+    return result;
   },
 
   // Add similar methods for other game types
@@ -78,6 +86,33 @@ export const gameStore = {
   // Remove a player from game mapping
   removePlayer(playerId: string): void {
     playerGameMap.delete(playerId);
+  },
+
+  // Get all active games
+  getAllGames(): Map<string, GameInfo> {
+    return activeGames;
+  },
+
+  // Get player count for a specific game
+  getPlayerCount(gameId: string): number {
+    let count = 0;
+    for (const [, mappedGameId] of playerGameMap.entries()) {
+      if (mappedGameId === gameId) {
+        count++;
+      }
+    }
+    return count;
+  },
+
+  // Get all players in a game
+  getGamePlayers(gameId: string): string[] {
+    const players: string[] = [];
+    for (const [playerId, mappedGameId] of playerGameMap.entries()) {
+      if (mappedGameId === gameId) {
+        players.push(playerId);
+      }
+    }
+    return players;
   },
 
   // Clean up inactive games (call periodically)

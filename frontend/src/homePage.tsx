@@ -8,8 +8,11 @@ function HomePage() {
   return (
     <div className="home-page">
       <h1>Homepage!</h1>
-      <div>
+      <div className="game-buttons">
         <button onClick={() => void navigate("/solitaire")}>Solitaire</button>
+        <button onClick={() => void navigate("/blackjack")}>
+          Multiplayer Blackjack
+        </button>
       </div>
     </div>
   );

@@ -27,6 +27,8 @@ enum GameStatus {
 interface Hand {
   cards: Card[];
   status: HandStatus;
+  playerId?: string; // Track which socket owns this hand
+  playerName?: string; // Track player name for display
 }
 
 // Game state for client
@@ -37,6 +39,8 @@ interface BlackjackState {
     cards: Card[];
     status: string;
     value?: number;
+    playerId?: string;
+    playerName?: string;
   }[];
   dealerHand: {
     cards: Card[];
@@ -45,6 +49,27 @@ interface BlackjackState {
   deck: {
     remaining: number;
   };
+  gameId?: string; // Game ID for client reference
+}
+
+// Client-friendly game state (with processed data for frontend)
+export interface ClientGameState {
+  gameId: string;
+  players: {
+    id: string;
+    name: string;
+    cards: Card[];
+    score: number;
+    isBusted: boolean;
+    hasStood: boolean;
+    isActive: boolean;
+  }[];
+  dealerCards: Card[];
+  dealerScore: number;
+  dealerHasHiddenCard: boolean;
+  currentPlayerId: string | null;
+  gameStatus: "waiting" | "playing" | "roundOver" | "gameOver";
+  winner: string | null;
 }
 
 export class Blackjack implements Game {
@@ -55,9 +80,12 @@ export class Blackjack implements Game {
   private numPlayers: number;
   private status: GameStatus = GameStatus.DEALING;
   public lastActivityTime: number;
+  private gameId?: string;
+  private playerMap: Map<number, string> = new Map<number, string>(); // Maps hand index to player ID
 
-  constructor(numPlayers: number) {
+  constructor(numPlayers: number, gameId?: string) {
     this.numPlayers = numPlayers;
+    this.gameId = gameId;
     this.deck = Deck.createShuffled({}, 6);
     this.initializeHands();
     this.lastActivityTime = Date.now();
@@ -310,7 +338,20 @@ export class Blackjack implements Game {
       this.deck.shuffle();
     }
 
+    // Preserve player IDs and names when reinitializing hands
+    const playerIds = this.hands.map((hand) => hand.playerId);
+    const playerNames = this.hands.map((hand) => hand.playerName);
+
     this.initializeHands();
+
+    // Restore player information
+    for (let i = 0; i < this.hands.length; i++) {
+      if (i < playerIds.length && playerIds[i]) {
+        this.hands[i].playerId = playerIds[i];
+        this.hands[i].playerName = playerNames[i];
+      }
+    }
+
     this.status = GameStatus.DEALING;
     this.updateActivity();
   }
@@ -329,6 +370,8 @@ export class Blackjack implements Game {
         cards: hand.cards,
         status: hand.status,
         value: this.calculateHandValue(hand.cards),
+        playerId: hand.playerId,
+        playerName: hand.playerName,
       })),
       dealerHand: {
         cards: this.dealerHand,
@@ -337,6 +380,159 @@ export class Blackjack implements Game {
       deck: {
         remaining: this.deck.getCount(),
       },
+      gameId: this.gameId,
     };
+  }
+
+  // NEW METHODS FOR PLAYER MANAGEMENT
+
+  // Set the game ID
+  public setGameId(gameId: string): void {
+    this.gameId = gameId;
+  }
+
+  // Get the game ID
+  public getGameId(): string | undefined {
+    return this.gameId;
+  }
+
+  // Add a player to the game
+  public addPlayer(playerId: string, playerName: string): number {
+    // Find an empty seat
+    for (let i = 0; i < this.hands.length; i++) {
+      if (!this.hands[i].playerId) {
+        this.hands[i].playerId = playerId;
+        this.hands[i].playerName = playerName;
+        this.playerMap.set(i, playerId); // Map the hand index to player ID
+        return i; // Return the seat index
+      }
+    }
+
+    throw new Error("Game is full");
+  }
+
+  // Remove a player from the game
+  public removePlayer(playerId: string): void {
+    for (let i = 0; i < this.hands.length; i++) {
+      if (this.hands[i].playerId === playerId) {
+        this.hands[i].playerId = undefined;
+        this.hands[i].playerName = undefined;
+        this.playerMap.delete(i);
+        break;
+      }
+    }
+  }
+
+  // Find player index by player ID
+  public getPlayerIndex(playerId: string): number {
+    for (let i = 0; i < this.hands.length; i++) {
+      if (this.hands[i].playerId === playerId) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  // Check if it's a player's turn
+  public isPlayerTurn(playerId: string): boolean {
+    const playerIndex = this.getPlayerIndex(playerId);
+    return (
+      playerIndex === this.currentPlayer &&
+      this.status === GameStatus.PLAYER_TURN
+    );
+  }
+
+  // Get number of active players
+  public getPlayerCount(): number {
+    return this.hands.filter((hand) => hand.playerId !== undefined).length;
+  }
+
+  // Check if the game is ready to start
+  public isReadyToStart(): boolean {
+    return this.getPlayerCount() >= 1 && this.status === GameStatus.DEALING;
+  }
+
+  // Check if this player can hit
+  public canHit(playerId: string): boolean {
+    const playerIndex = this.getPlayerIndex(playerId);
+    if (playerIndex === -1) return false;
+
+    return (
+      this.status === GameStatus.PLAYER_TURN &&
+      playerIndex === this.currentPlayer &&
+      this.hands[playerIndex].status === HandStatus.PLAYING
+    );
+  }
+
+  // Check if this player can stand
+  public canStand(playerId: string): boolean {
+    return this.canHit(playerId); // Same conditions as hit
+  }
+
+  // Convert the game state to client-friendly format
+  public getClientGameState(): ClientGameState {
+    const state = this.getGameState();
+
+    return {
+      gameId: this.gameId ?? "",
+      players: this.hands
+        .filter((hand) => hand.playerId !== undefined)
+        .map((hand, index) => ({
+          id: hand.playerId ?? "",
+          name: hand.playerName ?? `Player ${String(index + 1)}`,
+          cards: hand.cards,
+          score: this.calculateHandValue(hand.cards),
+          isBusted: hand.status === HandStatus.BUSTED,
+          hasStood:
+            hand.status === HandStatus.STOOD ||
+            hand.status === HandStatus.BLACKJACK,
+          isActive:
+            state.currentPlayer === index &&
+            state.status === GameStatus.PLAYER_TURN,
+        })),
+      dealerCards: state.dealerHand.cards,
+      dealerScore: state.dealerHand.value ?? 0,
+      dealerHasHiddenCard: state.status === GameStatus.PLAYER_TURN,
+      currentPlayerId:
+        ((state.status === GameStatus.PLAYER_TURN &&
+          state.currentPlayer >= 0 &&
+          this.hands[state.currentPlayer]?.playerId) as string | null) ?? null,
+      gameStatus: this.mapGameStatus(state.status),
+      winner: this.determineWinner(),
+    };
+  }
+
+  // Map internal game status to client-friendly format
+  private mapGameStatus(
+    status: GameStatus
+  ): "waiting" | "playing" | "roundOver" | "gameOver" {
+    switch (status) {
+      case GameStatus.DEALING:
+        return "waiting";
+      case GameStatus.PLAYER_TURN:
+      case GameStatus.DEALER_TURN:
+        return "playing";
+      case GameStatus.RESOLVING:
+      case GameStatus.COMPLETE:
+        return "roundOver";
+      default:
+        return "waiting";
+    }
+  }
+
+  // Determine winner for client display
+  private determineWinner(): string | null {
+    if (this.status !== GameStatus.COMPLETE) {
+      return null;
+    }
+
+    // Find winning player
+    for (const hand of this.hands) {
+      if (hand.status === HandStatus.WIN && hand.playerId) {
+        return hand.playerId ?? null;
+      }
+    }
+
+    return null;
   }
 }
