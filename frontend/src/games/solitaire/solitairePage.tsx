@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
-import {
-  getCardImage,
-  getCardBackImage,
-  getAllCardImages,
-} from "../utils/CardImage";
+import { getAllCardImages } from "../utils/CardImage";
 import { Button, styled } from "@mui/material";
+import { CardComponent } from "../utils/CardComponent";
 
 const UndoButton = styled(Button)(() => ({
   position: "absolute",
@@ -36,36 +33,6 @@ const UndoButton = styled(Button)(() => ({
     color: "rgba(255, 255, 255, 0.5)",
   },
 }));
-
-// Card component with fallback handling
-const CardComponent: React.FC<{
-  card: Card;
-  isClickable: boolean;
-  onClick: () => void;
-}> = ({ card, isClickable, onClick }) => {
-  const [imageError, setImageError] = useState(false);
-
-  const imageSrc = card.faceUp ? getCardImage(card) : getCardBackImage();
-  const altText = card.faceUp ? card.toString() : "🂠";
-
-  return (
-    <div
-      className={`card${card.faceUp ? " face-up" : ""}${isClickable ? " clickable" : ""}`}
-      onClick={() => onClick()}
-    >
-      {!imageError ? (
-        <img
-          src={imageSrc}
-          alt={altText}
-          className="card-image"
-          onError={() => setImageError(true)}
-        />
-      ) : (
-        <div className="card-text-fallback">{altText}</div>
-      )}
-    </div>
-  );
-};
 
 export const SolitairePage: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

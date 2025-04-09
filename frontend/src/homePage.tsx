@@ -1,13 +1,23 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./homePage.css";
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton, Tabs, Tab, Typography, Stack } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  Tabs,
+  Tab,
+  Typography,
+  Stack,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import AppTheme from "./shared-theme/AppTheme";
-import ColorModeSelect from "./shared-theme/ColorModeSelect";
 
-// Styled Card component with custom styles
 const Card = styled("div")(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -26,7 +36,6 @@ const Card = styled("div")(({ theme }) => ({
   }),
 }));
 
-// Styled HomePage container component with background gradient
 const HomePageContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
@@ -45,14 +54,13 @@ const HomePageContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-// Interface for the GameDialog component props
 interface GameDialogProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   game: string;
   tabs: {
     label: string;
-    content: React.ReactNode;
+    content: string;
     buttonLabel: string;
     navigateTo: string;
   }[];
@@ -61,7 +69,6 @@ interface GameDialogProps {
   navigateTo: (path: string) => void;
 }
 
-// GameDialog component that renders dialog with tabs for each game
 const GameDialog: React.FC<GameDialogProps> = ({
   open,
   setOpen,
@@ -75,7 +82,6 @@ const GameDialog: React.FC<GameDialogProps> = ({
     <Dialog open={open} onClose={() => setOpen(false)}>
       <DialogTitle>
         {game}
-        {/* Close icon button for closing the dialog */}
         <IconButton
           edge="end"
           color="inherit"
@@ -87,7 +93,6 @@ const GameDialog: React.FC<GameDialogProps> = ({
         </IconButton>
       </DialogTitle>
       <DialogActions>
-        {/* Tabs to switch between different game sections */}
         <Tabs
           value={selectedTab}
           onChange={(_, newValue: number) => setSelectedTab(newValue)}
@@ -100,26 +105,22 @@ const GameDialog: React.FC<GameDialogProps> = ({
           ))}
         </Tabs>
       </DialogActions>
-      {/* Display content based on selected tab */}
       {tabs.map((tab, index) => (
         <DialogContent
           key={index}
           style={{ display: selectedTab === index ? "block" : "none" }}
         >
           <DialogContentText>{tab.content}</DialogContentText>
-          {/* Display button only if not on the "Leaderboard" tab */}
-          {tab.label !== "Leaderboard" && (
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setOpen(false);
-                  void navigateTo(tab.navigateTo);
-                }}
-              >
-                {tab.buttonLabel}
-              </Button>
-            </DialogActions>
-          )}
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setOpen(false);
+                void navigateTo(tab.navigateTo);
+              }}
+            >
+              {tab.buttonLabel}
+            </Button>
+          </DialogActions>
         </DialogContent>
       ))}
     </Dialog>
@@ -128,29 +129,16 @@ const GameDialog: React.FC<GameDialogProps> = ({
 
 function HomePage() {
   const navigate = useNavigate();
-  // State hooks for managing the open status of each game dialog
   const [openSolitaire, setOpenSolitaire] = useState(false);
   const [openWar, setOpenWar] = useState(false);
   const [openPoker, setOpenPoker] = useState(false);
   const [openBlackjack, setOpenBlackjack] = useState(false);
 
-  // General state to manage selected tabs for all games
-  const [selectedTabs, setSelectedTabs] = useState({
-    solitaire: 0,
-    war: 0,
-    poker: 0,
-    blackjack: 0,
-  });
+  const [selectedSolitaireTab, setSelectedSolitaireTab] = useState(0);
+  const [selectedWarTab, setSelectedWarTab] = useState(0);
+  const [selectedPokerTab, setSelectedPokerTab] = useState(0);
+  const [selectedBlackjackTab, setSelectedBlackjackTab] = useState(0);
 
-  // Function to handle tab changes for each game
-  const handleTabChange = (game: string, newValue: number) => {
-    setSelectedTabs((prevState) => ({
-      ...prevState,
-      [game]: newValue,
-    }));
-  };
-
-  // Tabs and content for Solitaire game
   const solitaireTabs = [
     {
       label: "Start",
@@ -166,34 +154,10 @@ function HomePage() {
     },
   ];
 
-  // Tabs and content for War game
   const warTabs = [
     {
       label: "Start",
-      content: (
-        <>
-          <p>Click the 'Start' button to begin War.</p>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              void navigate("/CreateWarLobby");
-            }}
-            style={{ marginRight: "1rem" }}
-          >
-            Create Lobby
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => {
-              void navigate("/JoinWarLobby");
-            }}
-          >
-            Join Lobby
-          </Button>
-        </>
-      ),
+      content: "Click the 'Start' button to begin War.",
       buttonLabel: "Start",
       navigateTo: "/War",
     },
@@ -203,36 +167,24 @@ function HomePage() {
       buttonLabel: "Leaderboard",
       navigateTo: "/WarLeaderboard",
     },
+    {
+      label: "Create Lobby",
+      content: "Create a War lobby.",
+      buttonLabel: "Create",
+      navigateTo: "/CreateLobby",
+    },
+    {
+      label: "Join Lobby",
+      content: "Join a War lobby.",
+      buttonLabel: "Join",
+      navigateTo: "/JoinLobby",
+    },
   ];
 
-  // Tabs and content for Poker game
   const pokerTabs = [
     {
       label: "Start",
-      content: (
-        <>
-          <p>Click the 'Start' button to begin Poker.</p>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              void navigate("/CreatePokerLobby");
-            }}
-            style={{ marginRight: "1rem" }}
-          >
-            Create Lobby
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => {
-              void navigate("/JoinPokerLobby");
-            }}
-          >
-            Join Lobby
-          </Button>
-        </>
-      ),
+      content: "Click the 'Start' button to begin Poker.",
       buttonLabel: "Start",
       navigateTo: "/Poker",
     },
@@ -242,36 +194,24 @@ function HomePage() {
       buttonLabel: "Leaderboard",
       navigateTo: "/PokerLeaderboard",
     },
+    {
+      label: "Create Lobby",
+      content: "Create a Poker lobby.",
+      buttonLabel: "Create",
+      navigateTo: "/PokerCreateLobby",
+    },
+    {
+      label: "Join Lobby",
+      content: "Join a Poker lobby.",
+      buttonLabel: "Join",
+      navigateTo: "/PokerJoinLobby",
+    },
   ];
 
-  // Tabs and content for Blackjack game
   const blackjackTabs = [
     {
       label: "Start",
-      content: (
-        <>
-          <p>Click the 'Start' button to begin Blackjack.</p>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              void navigate("/CreateBlackjackLobby");
-            }}
-            style={{ marginRight: "1rem" }}
-          >
-            Create Lobby
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => {
-              void navigate("/JoinBlackjackLobby");
-            }}
-          >
-            Join Lobby
-          </Button>
-        </>
-      ),
+      content: "Click the 'Start' button to begin Blackjack.",
       buttonLabel: "Start",
       navigateTo: "/Blackjack",
     },
@@ -281,13 +221,22 @@ function HomePage() {
       buttonLabel: "Leaderboard",
       navigateTo: "/BlackjackLeaderboard",
     },
+    {
+      label: "Create Lobby",
+      content: "Create a Blackjack lobby.",
+      buttonLabel: "Create",
+      navigateTo: "/BlackjackCreateLobby",
+    },
+    {
+      label: "Join Lobby",
+      content: "Join a Blackjack lobby.",
+      buttonLabel: "Join",
+      navigateTo: "/BlackjackJoinLobby",
+    },
   ];
 
   return (
     <AppTheme>
-      {/* Color mode selector button */}
-      <ColorModeSelect sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
-      {/* Main container for home page */}
       <HomePageContainer direction="column" justifyContent="space-between">
         <Card sx={{ flex: 1 }}>
           <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
@@ -296,41 +245,24 @@ function HomePage() {
           <p>Choose a game to play:</p>
           <div className="button-container">
             <div className="button-row">
-              {/* Solitaire button with an image icon */}
-              <button onClick={() => setOpenSolitaire(true)} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <img
-                  src="/rosemarie/Desktop/Solitaire.png" 
-                  style={{ width: "24px", height: "24px" }}
-                />
-                Solitaire
-              </button>
+              <button onClick={() => setOpenSolitaire(true)}>Solitaire</button>
               <button onClick={() => setOpenWar(true)}>War</button>
             </div>
             <div className="button-row">
               <button onClick={() => setOpenPoker(true)}>Poker</button>
               <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
             </div>
-            <div className="button-row">
-              <button onClick={() => { void navigate("/Leaderboard"); }}>
-                Leaderboard
-              </button>
-            </div>
           </div>
         </Card>
       </HomePageContainer>
 
-      {/* Dialogs for each game */}
       <GameDialog
         open={openSolitaire}
         setOpen={setOpenSolitaire}
         game="Solitaire"
         tabs={solitaireTabs}
-        selectedTab={selectedTabs.solitaire}
-        setSelectedTab={(newValue) => {
-          if (typeof newValue === "number") {
-            handleTabChange("solitaire", newValue);
-          }
-        }}
+        selectedTab={selectedSolitaireTab}
+        setSelectedTab={setSelectedSolitaireTab}
         navigateTo={(path) => {
           void navigate(path);
         }}
@@ -341,12 +273,8 @@ function HomePage() {
         setOpen={setOpenWar}
         game="War"
         tabs={warTabs}
-        selectedTab={selectedTabs.war}
-        setSelectedTab={(newValue) => {
-          if (typeof newValue === "number") {
-            handleTabChange("war", newValue);
-          }
-        }}
+        selectedTab={selectedWarTab}
+        setSelectedTab={setSelectedWarTab}
         navigateTo={(path) => {
           void navigate(path);
         }}
@@ -357,11 +285,8 @@ function HomePage() {
         setOpen={setOpenPoker}
         game="Poker"
         tabs={pokerTabs}
-        selectedTab={selectedTabs.poker}
-        setSelectedTab={(newValue) => setSelectedTabs((prevState) => ({
-          ...prevState,
-          poker: typeof newValue === "function" ? newValue(prevState.poker) : newValue,
-        }))}
+        selectedTab={selectedPokerTab}
+        setSelectedTab={setSelectedPokerTab}
         navigateTo={(path) => {
           void navigate(path);
         }}
@@ -372,12 +297,8 @@ function HomePage() {
         setOpen={setOpenBlackjack}
         game="Blackjack"
         tabs={blackjackTabs}
-        selectedTab={selectedTabs.blackjack}
-        setSelectedTab={(newValue) => {
-          if (typeof newValue === "number") {
-            handleTabChange("blackjack", newValue);
-          }
-        }}
+        selectedTab={selectedBlackjackTab}
+        setSelectedTab={setSelectedBlackjackTab}
         navigateTo={(path) => {
           void navigate(path);
         }}

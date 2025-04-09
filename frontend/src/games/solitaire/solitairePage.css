@@ -1,13 +1,14 @@
 .solitaire-page {
   background-color: #033814;
   height: 100vh;
-  width: 100vw;
+  width: 100%;
   color: white;
   padding: 20px;
   box-sizing: border-box;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
 
   user-select: none; /* Prevent selection on the entire page */
   -webkit-user-select: none;
@@ -56,8 +57,11 @@ h1 {
 .stock-area {
   position: absolute;
   top: 20px;
-  left: 20px;
+  margin: 20px;
+  display: flex;
+  flex-direction: column;
   width: 90px;
+  align-self: flex-start;
 }
 
 .stock {

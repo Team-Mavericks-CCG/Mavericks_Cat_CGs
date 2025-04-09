@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import Player from "../models/userModel.js";
-import argon2 from "argon2";
+import argon2 from "@node-rs/argon2";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { UniqueConstraintError as SequelizeUniqueConstraintError } from "sequelize";

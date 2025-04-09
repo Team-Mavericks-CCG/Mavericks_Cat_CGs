@@ -28,6 +28,7 @@ Player.init(
     password: {
       type: DataTypes.STRING,
       allowNull: false,
+      field: "hashedPassword", // Map the password attribute to hashedPassword column
     },
     lastLogin: {
       type: DataTypes.DATE,
