@@ -165,7 +165,7 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
   return (
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
-      <ColorModeToggle sx={{ position: "fixed", top: "1rem", right: "1rem" }} />
+      <ColorModeToggle />
       <SignUpContainer direction="column" justifyContent="space-between">
         <Card variant="outlined">
           <Typography

@@ -1,33 +1,41 @@
 import React from "react";
-import { Switch, SxProps, Theme, Box } from "@mui/material";
-import Brightness4Icon from "@mui/icons-material/Brightness4"; // Dark mode icon
-import Brightness7Icon from "@mui/icons-material/Brightness7"; // Light mode icon
+import { IconButton, Tooltip } from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { useColorScheme } from "@mui/material/styles";
 
-interface ThemeToggleProps {
-  sx?: SxProps<Theme>;
-}
-
-const ThemeToggle: React.FC<ThemeToggleProps> = ({ sx }) => {
+const ColorModeToggle: React.FC = () => {
   const { mode, setMode } = useColorScheme();
-  const isDarkMode = mode === "dark";
+
+  const handleToggleColorMode = () => {
+    setMode(mode === "light" ? "dark" : "light");
+  };
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", ...sx }}>
-      <Brightness7Icon
-        sx={{ mr: 1, color: isDarkMode ? "text.disabled" : "primary.main" }}
-      />
-      <Switch
-        checked={isDarkMode}
-        onChange={(_, checked) => setMode(checked ? "dark" : "light")}
+    <Tooltip title={`Switch to ${mode === "light" ? "dark" : "light"} mode`}>
+      <IconButton
+        onClick={handleToggleColorMode}
         color="primary"
-        inputProps={{ "aria-label": "theme toggle switch" }}
-      />
-      <Brightness4Icon
-        sx={{ ml: 1, color: isDarkMode ? "primary.main" : "text.disabled" }}
-      />
-    </Box>
+        aria-label="toggle light/dark mode"
+        sx={{
+          width: 40,
+          height: 40,
+          padding: 1,
+          mx: 2,
+          transition: "transform 0.15s",
+          "&:hover": {
+            transform: "scale(1.05)",
+            backgroundColor:
+              mode === "dark"
+                ? "rgba(255, 255, 255, 0.05)"
+                : "rgba(0, 0, 0, 0.04)",
+          },
+        }}
+      >
+        {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+      </IconButton>
+    </Tooltip>
   );
 };
 
-export default ThemeToggle;
+export default ColorModeToggle;

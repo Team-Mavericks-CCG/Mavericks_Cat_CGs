@@ -156,9 +156,9 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     <AppTheme {...props}>
       <CssBaseline enableColorScheme />
       <SignInContainer direction="column" justifyContent="space-between">
-        <ColorModeToggle
-          sx={{ position: "fixed", top: "1rem", right: "1rem" }}
-        />
+        <Box sx={{ position: "fixed", top: "1rem", right: "1rem" }}>
+          <ColorModeToggle />
+        </Box>
         <Card variant="outlined">
           <Typography
             component="h1"
