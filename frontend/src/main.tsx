@@ -1,39 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Experimental_CssVarsProvider as CssVarsProvider } from "@mui/material/styles";
-import { Box } from "@mui/material";
 import "./index.css";
 import SignIn from "./SignInComponent/SignIn";
 import { SolitairePage } from "./games/solitaire/solitairePage";
 import HomePage from "./homePage";
 import Register from "./register/register";
-import TopBar from "./shared-theme/TopBar";
 import BlackjackWrapper from "./games/blackjack/blackjackWrapper";
-
-// Layout with TopBar
-const MainLayout = () => {
-  return (
-    <>
-      <TopBar />
-      <Box
-        component="main"
-        sx={{
-          pt: 8, // Add padding top equal to TopBar height
-          minHeight: "100vh",
-          width: "100%",
-        }}
-      >
-        <Outlet />
-      </Box>
-    </>
-  );
-};
-
-// Auth layout without TopBar
-const AuthLayout = () => {
-  return <Outlet />;
-};
+import MainLayout from "./foundation-components/MainLayout";
+import AuthLayout from "./foundation-components/AuthLayout";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
