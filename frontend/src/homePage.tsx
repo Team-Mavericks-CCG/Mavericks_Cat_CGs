@@ -60,7 +60,7 @@ interface GameDialogProps {
   game: string;
   tabs: {
     label: string;
-    content: string;
+    content: string | React.ReactNode;
     buttonLabel: string;
     navigateTo: string;
   }[];
@@ -114,8 +114,8 @@ const GameDialog: React.FC<GameDialogProps> = ({
           <DialogActions>
             <Button
               onClick={() => {
-                setOpen(false);
-                void navigateTo(tab.navigateTo);
+                void navigateTo(tab.navigateTo);  // Navigate first
+                setOpen(false);  // Close the dialog after navigation
               }}
             >
               {tab.buttonLabel}
@@ -157,7 +157,29 @@ function HomePage() {
   const warTabs = [
     {
       label: "Start",
-      content: "Click the 'Start' button to begin War.",
+      content: (
+        <>
+          <p>Click the 'Start' button to begin War, or create/join a lobby.</p>
+          
+          <Button
+            onClick={() => {
+              setOpenWar(false);
+              void navigate("/CreateWarLobby");
+            }}
+          >
+            Create Lobby
+          </Button>
+          <br />
+          <Button
+            onClick={() => {
+              setOpenWar(false);
+              void navigate("/JoinWarLobby");
+            }}
+          >
+            Join Lobby
+          </Button>
+        </>
+      ),
       buttonLabel: "Start",
       navigateTo: "/War",
     },
@@ -167,24 +189,33 @@ function HomePage() {
       buttonLabel: "Leaderboard",
       navigateTo: "/WarLeaderboard",
     },
-    {
-      label: "Create Lobby",
-      content: "Create a War lobby.",
-      buttonLabel: "Create",
-      navigateTo: "/CreateLobby",
-    },
-    {
-      label: "Join Lobby",
-      content: "Join a War lobby.",
-      buttonLabel: "Join",
-      navigateTo: "/JoinLobby",
-    },
   ];
-
+  
   const pokerTabs = [
     {
       label: "Start",
-      content: "Click the 'Start' button to begin Poker.",
+      content: (
+        <>
+          <p>Click the 'Start' button to begin Poker, or create/join a lobby.</p>
+          <Button
+            onClick={() => {
+              setOpenPoker(false);
+              void navigate("/CreatePokerLobby");
+            }}
+          >
+            Create Lobby
+          </Button>
+          <br />
+          <Button
+            onClick={() => {
+              setOpenPoker(false);
+              void navigate("/JoinPokerLobby");
+            }}
+          >
+            Join Lobby
+          </Button>
+        </>
+      ),
       buttonLabel: "Start",
       navigateTo: "/Poker",
     },
@@ -194,24 +225,33 @@ function HomePage() {
       buttonLabel: "Leaderboard",
       navigateTo: "/PokerLeaderboard",
     },
-    {
-      label: "Create Lobby",
-      content: "Create a Poker lobby.",
-      buttonLabel: "Create",
-      navigateTo: "/PokerCreateLobby",
-    },
-    {
-      label: "Join Lobby",
-      content: "Join a Poker lobby.",
-      buttonLabel: "Join",
-      navigateTo: "/PokerJoinLobby",
-    },
   ];
-
+  
   const blackjackTabs = [
     {
       label: "Start",
-      content: "Click the 'Start' button to begin Blackjack.",
+      content: (
+        <>
+          <p>Click the 'Start' button to begin Blackjack, or create/join a lobby.</p>
+          <Button
+            onClick={() => {
+              setOpenBlackjack(false);
+              void navigate("/CreateBlackjackLobby");
+            }}
+          >
+            Create Lobby
+          </Button>
+          <br />
+          <Button
+            onClick={() => {
+              setOpenBlackjack(false);
+              void navigate("/JoinBlackjackLobby");
+            }}
+          >
+            Join Lobby
+          </Button>
+        </>
+      ),
       buttonLabel: "Start",
       navigateTo: "/Blackjack",
     },
@@ -221,19 +261,9 @@ function HomePage() {
       buttonLabel: "Leaderboard",
       navigateTo: "/BlackjackLeaderboard",
     },
-    {
-      label: "Create Lobby",
-      content: "Create a Blackjack lobby.",
-      buttonLabel: "Create",
-      navigateTo: "/BlackjackCreateLobby",
-    },
-    {
-      label: "Join Lobby",
-      content: "Join a Blackjack lobby.",
-      buttonLabel: "Join",
-      navigateTo: "/BlackjackJoinLobby",
-    },
   ];
+  
+  
 
   return (
     <AppTheme>
@@ -245,7 +275,10 @@ function HomePage() {
           <p>Choose a game to play:</p>
           <div className="button-container">
             <div className="button-row">
-              <button onClick={() => setOpenSolitaire(true)}>Solitaire</button>
+              <button className="game-button" onClick={() => setOpenSolitaire(true)}>
+                <img src="/src/images/Solitaire.png" alt="Solitaire" className="game-icon" />
+                <span className="game-label">Solitaire</span>
+              </button>
               <button onClick={() => setOpenWar(true)}>War</button>
             </div>
             <div className="button-row">

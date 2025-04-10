@@ -34,6 +34,7 @@ body {
   gap: 20px;
 }
 
+
 button {
   background-color: #3f51b5;
   color: white;
@@ -50,3 +51,42 @@ button {
 button:hover {
   background-color: #303f9f;
 }
+
+.game-button {
+  width: 300px; 
+  height: 200px; 
+  border-radius: 16px;
+  background-color: white;
+  position: relative; /* Position the text over the image */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Position the text at the bottom */
+  align-items: center;
+  padding: 0; 
+  overflow: hidden; /* Hide any excess image parts */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.game-button:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.08);
+}
+
+.game-icon {
+  width: 100%; /* Make sure the image covers the entire button */
+  height: 100%;
+  object-fit: cover; /* Ensure the image doesn't stretch or distort */
+}
+
+.game-label {
+  position: relative; /* Place the text above the image */
+  z-index: 1; /* Ensure text is on top */
+  font-size: 16px;
+  color: black; /* Make the text stand out against the image */
+  padding: 8px 0; /* Adjust padding to position the text at the bottom */
+  text-align: center;
+  width: 100%; /* Ensure text spans the entire width */
+  background: none;
+}
+
