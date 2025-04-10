@@ -13,7 +13,6 @@ import AppTheme from "./shared-theme/AppTheme";
 import { CssBaseline } from "@mui/material";
 import Profile from "./profile/profilePage";
 
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AppTheme>
@@ -29,8 +28,13 @@ createRoot(document.getElementById("root")!).render(
           {/* Main routes with TopBar */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
-            <Route path="/solitaire" element={<SolitairePage />} />
-            <Route path="/blackjack" element={<BlackjackWrapper />} />
+
+            {/* Games routes */}
+            <Route path="/games">
+              <Route path="solitaire" element={<SolitairePage />} />
+              <Route path="blackjack" element={<BlackjackWrapper />} />
+              {/* Add other game routes here */}
+            </Route>
             <Route path="/profile" element={<Profile />} />
             {/* Add other routes that should have the TopBar */}
           </Route>

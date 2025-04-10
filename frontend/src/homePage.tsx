@@ -18,8 +18,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import AppTheme from "./shared-theme/AppTheme";
 
-
-
 const HomePageContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
@@ -98,8 +96,8 @@ const GameDialog: React.FC<GameDialogProps> = ({
           <DialogActions>
             <Button
               onClick={() => {
-                void navigateTo(tab.navigateTo);  // Navigate first
-                setOpen(false);  // Close the dialog after navigation
+                void navigateTo(tab.navigateTo); // Navigate first
+                setOpen(false); // Close the dialog after navigation
               }}
             >
               {tab.buttonLabel}
@@ -128,13 +126,13 @@ function HomePage() {
       label: "Start",
       content: "Click the 'Start' button to begin the game.",
       buttonLabel: "Start",
-      navigateTo: "/Solitaire",
+      navigateTo: "/games/solitaire",
     },
     {
       label: "Leaderboard",
       content: "Here is the leaderboard for Solitaire:",
       buttonLabel: "Leaderboard",
-      navigateTo: "/SolitaireLeaderboard",
+      navigateTo: "/leaderboard",
     },
   ];
 
@@ -144,11 +142,11 @@ function HomePage() {
       content: (
         <>
           <p>Click the 'Start' button to begin War, or create/join a lobby.</p>
-          
+
           <Button
             onClick={() => {
               setOpenWar(false);
-              void navigate("/CreateWarLobby");
+              void navigate("/games/war/create-lobby");
             }}
           >
             Create Lobby
@@ -157,7 +155,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenWar(false);
-              void navigate("/JoinWarLobby");
+              void navigate("/games/war/join-lobby");
             }}
           >
             Join Lobby
@@ -165,26 +163,28 @@ function HomePage() {
         </>
       ),
       buttonLabel: "Start",
-      navigateTo: "/War",
+      navigateTo: "/games/war",
     },
     {
       label: "Leaderboard",
       content: "Here is the leaderboard for War:",
       buttonLabel: "Leaderboard",
-      navigateTo: "/WarLeaderboard",
+      navigateTo: "/leaderboard",
     },
   ];
-  
+
   const pokerTabs = [
     {
       label: "Start",
       content: (
         <>
-          <p>Click the 'Start' button to begin Poker, or create/join a lobby.</p>
+          <p>
+            Click the 'Start' button to begin Poker, or create/join a lobby.
+          </p>
           <Button
             onClick={() => {
               setOpenPoker(false);
-              void navigate("/CreatePokerLobby");
+              void navigate("/games/poker/create-lobby");
             }}
           >
             Create Lobby
@@ -193,7 +193,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenPoker(false);
-              void navigate("/JoinPokerLobby");
+              void navigate("/games/poker/join-lobby");
             }}
           >
             Join Lobby
@@ -201,26 +201,28 @@ function HomePage() {
         </>
       ),
       buttonLabel: "Start",
-      navigateTo: "/Poker",
+      navigateTo: "/games/poker",
     },
     {
       label: "Leaderboard",
       content: "Here is the leaderboard for Poker:",
       buttonLabel: "Leaderboard",
-      navigateTo: "/PokerLeaderboard",
+      navigateTo: "/leaderboard",
     },
   ];
-  
+
   const blackjackTabs = [
     {
       label: "Start",
       content: (
         <>
-          <p>Click the 'Start' button to begin Blackjack, or create/join a lobby.</p>
+          <p>
+            Click the 'Start' button to begin Blackjack, or create/join a lobby.
+          </p>
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              void navigate("/CreateBlackjackLobby");
+              void navigate("/games/blackjack/create-lobby");
             }}
           >
             Create Lobby
@@ -229,7 +231,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              void navigate("/JoinBlackjackLobby");
+              void navigate("/games/blackjack/join-lobby");
             }}
           >
             Join Lobby
@@ -237,38 +239,43 @@ function HomePage() {
         </>
       ),
       buttonLabel: "Start",
-      navigateTo: "/Blackjack",
+      navigateTo: "/games/blackjack",
     },
     {
       label: "Leaderboard",
       content: "Here is the leaderboard for Blackjack:",
       buttonLabel: "Leaderboard",
-      navigateTo: "/BlackjackLeaderboard",
+      navigateTo: "/leaderboard",
     },
   ];
-  
-  
 
   return (
     <AppTheme>
       <HomePageContainer direction="column" justifyContent="space-between">
-          <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
-            Welcome to Mavericks Cat Card Games!
-          </Typography>
-          <p>Choose a game to play:</p>
-          <div className="button-container">
-            <div className="button-row1">
-              <button className="game-button" onClick={() => setOpenSolitaire(true)}>
-                <img src="/src/images/Solitaire.png" alt="Solitaire" className="game-icon" />
-                <span className="game-label">Solitaire</span>
-              </button>
-              <button onClick={() => setOpenWar(true)}>War</button>
-            </div>
-            <div className="button-row">
-              <button onClick={() => setOpenPoker(true)}>Poker</button>
-              <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
-            </div>
+        <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
+          Welcome to Mavericks Cat Card Games!
+        </Typography>
+        <p>Choose a game to play:</p>
+        <div className="button-container">
+          <div className="button-row1">
+            <button
+              className="game-button"
+              onClick={() => setOpenSolitaire(true)}
+            >
+              <img
+                src="/src/images/Solitaire.png"
+                alt="Solitaire"
+                className="game-icon"
+              />
+              <span className="game-label">Solitaire</span>
+            </button>
+            <button onClick={() => setOpenWar(true)}>War</button>
           </div>
+          <div className="button-row">
+            <button onClick={() => setOpenPoker(true)}>Poker</button>
+            <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
+          </div>
+        </div>
       </HomePageContainer>
 
       <GameDialog

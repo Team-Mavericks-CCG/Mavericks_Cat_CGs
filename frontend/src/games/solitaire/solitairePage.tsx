@@ -35,12 +35,11 @@ const UndoButton = styled(Button)(() => ({
 }));
 
 export const SolitairePage: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_gameState, setGameState] = useState(0);
-
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
   const [canUndo, setCanUndo] = useState(false);
+
+  const [forceRerender, setForceRerender] = useState(0);
 
   // disable right click context menu
   useEffect(() => {
@@ -91,7 +90,7 @@ export const SolitairePage: React.FC = () => {
     const success = game.moveCard(source, target, index);
     if (success) {
       setCanUndo(true);
-      setGameState((prev) => prev + 1);
+      setForceRerender((prev) => prev + 1);
       if (game.checkWin()) {
         win();
       }
@@ -162,13 +161,13 @@ export const SolitairePage: React.FC = () => {
   const handleStockClick = () => {
     game.draw();
     setCanUndo(true);
-    setGameState((prev) => prev + 1);
+    setForceRerender((prev) => prev + 1);
   };
 
   const handleUndo = () => {
     const success = game.undo();
     if (success) {
-      setGameState((prev) => prev - 1);
+      setForceRerender((prev) => prev - 1);
 
       setCanUndo(game.hasHistory());
     }
@@ -187,7 +186,7 @@ export const SolitairePage: React.FC = () => {
             if (
               game.moveCard(column, foundation, column.cards.length - 1, false)
             ) {
-              setGameState((prev) => prev + 1);
+              setForceRerender((prev) => prev + 1);
               break;
             }
           }
@@ -313,7 +312,7 @@ export const SolitairePage: React.FC = () => {
   };
 
   return (
-    <div className="solitaire-page">
+    <div className="solitaire-page" key={forceRerender}>
       {!imagesLoaded ? (
         <div className="loading-overlay">
           <div className="loading-spinner">Loading cards...</div>
@@ -321,32 +320,38 @@ export const SolitairePage: React.FC = () => {
       ) : (
         <>
           <h1>Solitaire</h1>
-          <div className="foundation">
-            {game.foundation.map((pile, index) => (
-              <div key={index} className="foundation-pile">
-                {renderFoundation(pile)}
+          <div className="game-container">
+            <div className="top-row">
+              <div className="stock-area">
+                <div className="stock">{renderStock(game.stock)}</div>
+                <div className="waste">{renderWaste(game.stock)}</div>
               </div>
-            ))}
-          </div>
-          <div className="tableau">
-            {game.tableau.map((pile, index) => (
-              <div key={index} className="tableau-pile">
-                {renderColumn(pile)}
+              <div className="foundation">
+                {game.foundation.map((pile, index) => (
+                  <div key={index} className="foundation-pile">
+                    {renderFoundation(pile)}
+                  </div>
+                ))}
               </div>
-            ))}
+              <div className="controls-area">
+                <UndoButton
+                  className="undo-button"
+                  onClick={handleUndo}
+                  disabled={!canUndo}
+                  aria-label="Undo last move"
+                >
+                  Undo
+                </UndoButton>
+              </div>
+            </div>
+            <div className="tableau">
+              {game.tableau.map((pile, index) => (
+                <div key={index} className="tableau-pile">
+                  {renderColumn(pile)}
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="stock-area">
-            <div className="stock">{renderStock(game.stock)}</div>
-            <div className="waste">{renderWaste(game.stock)}</div>
-          </div>
-          <UndoButton
-            className="undo-button"
-            onClick={handleUndo}
-            disabled={!canUndo}
-            aria-label="Undo last move"
-          >
-            Undo
-          </UndoButton>
           <div>{game.score}</div>
         </>
       )}

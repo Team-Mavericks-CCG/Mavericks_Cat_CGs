@@ -15,7 +15,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ThemeToggle from "../shared-theme/ColorModeToggle";
 import { useColorScheme } from "@mui/material/styles";
-import CardThemeSelector from "./CardThemeSelector";
+import CardThemeSelector from "../foundation-components/CardThemeSelector";
 
 const TopBar: React.FC = () => {
   const navigate = useNavigate();
@@ -68,6 +68,7 @@ const TopBar: React.FC = () => {
           component={RouterLink}
           to="/"
           sx={{
+            flexGrow: 1,
             display: "flex",
             alignItems: "center",
             fontWeight: "bold",
@@ -82,9 +83,9 @@ const TopBar: React.FC = () => {
         </Typography>
 
         {/* Navigation Links */}
-        <Box sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center" }}>
+          {/* Card Theme Selector */}
           <CardThemeSelector compact={true} />
-
           <Tooltip title="Home">
             <IconButton
               color="primary"
