@@ -11,6 +11,8 @@ import MainLayout from "./foundation-components/MainLayout";
 import AuthLayout from "./foundation-components/AuthLayout";
 import AppTheme from "./shared-theme/AppTheme";
 import { CssBaseline } from "@mui/material";
+import Profile from "./profile/profilePage";
+
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -29,6 +31,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/" element={<HomePage />} />
             <Route path="/solitaire" element={<SolitairePage />} />
             <Route path="/blackjack" element={<BlackjackWrapper />} />
+            <Route path="/profile" element={<Profile />} />
             {/* Add other routes that should have the TopBar */}
           </Route>
         </Routes>

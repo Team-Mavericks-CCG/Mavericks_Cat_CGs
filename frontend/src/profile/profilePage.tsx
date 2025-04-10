@@ -17,6 +17,16 @@ import IconButton from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
 import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
+
+interface UserResponse {
+  message: string;
+  user: {
+    username: string;
+    lastLogin: string;
+  };
+}
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: 'flex',
@@ -35,47 +45,122 @@ const Card = styled(MuiCard)(({ theme }) => ({
 const ProfileHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing(3),
-  marginBottom: theme.spacing(4),
+  marginBottom: theme.spacing(3),
   [theme.breakpoints.down('sm')]: {
     flexDirection: 'column',
     alignItems: 'center',
   },
 }));
 
-const mockFriends = [
-  { id: 1, name: 'Alice Johnson', avatar: '' },
-  { id: 2, name: 'Bob Smith', avatar: '' },
-  { id: 3, name: 'Carol Williams', avatar: '' },
-];
+interface UserData {
+  username: string;
+  password: string;
+  newPassword: string;
+  confirmPassword: string;
+  avatarUrl: string;
+  joinDate: string;
+};
 
-export default function ProfilePage(props: { disableCustomTheme?: boolean }) {
+export default function ProfilePage(props: { disableCustomTheme?: boolean }): React.JSX.Element {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = React.useState(false);
-  const [userData, setUserData] = React.useState({
-    username: 'JohnDoe',
-    email: 'john@example.com',
+  const [userData, setUserData] = React.useState<UserData>({
+    username: '',
+    password: '',
+    newPassword: '',
+    confirmPassword: '',
     avatarUrl: '',
-    bio: 'Cat games enthusiast',
-    joinDate: 'Joined March 2024'
+    joinDate: ''
   });
   const [editData, setEditData] = React.useState(userData);
+  const [errors, setErrors] = React.useState({
+    username: '',
+    password: '',
+    confirmPassword: ''
+  });
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditData(userData);
+  React.useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      void navigate('/signin');
+      return;
+    }
+
+    // Verify token and get user data
+    axios.get('http://localhost:5000/api/auth/verify', {
+      headers: { 'Authorization': token }
+    })
+    .then((response) => {
+      const data = response.data as UserResponse;
+      setUserData({
+        ...userData,
+        username: data.user.username,
+        joinDate: `Joined ${new Date(data.user.lastLogin).toLocaleDateString()}`
+      });
+      setEditData({
+        ...editData,
+        username: data.user.username
+      });
+    })
+    .catch(() => {
+      localStorage.removeItem('authToken');
+      void navigate('/signin');
+    });
+  }, []);
+
+  const validateForm = () => {
+    const username = document.getElementById("username") as HTMLInputElement;
+    const password = document.getElementById("password") as HTMLInputElement;
+    const confirmPassword = document.getElementById("confirmPassword") as HTMLInputElement;
+    const newErrors = { username: '', password: '', confirmPassword: '' };
+    let isValid = true;
+
+    if (!username.value || username.value.length < 3) {
+      newErrors.username = "Username must be at least 3 characters long.";
+      isValid = false;
+    }
+
+    if (password.value && password.value.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long.";
+      isValid = false;
+    }
+
+    if (confirmPassword.value !== password.value) {
+      newErrors.confirmPassword = "Passwords must match";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSave = async () => {
+    if (!validateForm()) return;
+
     try {
-      const response = await fetch('/api/profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editData),
+      const token = localStorage.getItem('authToken');
+      await axios.post('http://localhost:5000/api/auth/change-password', {
+        username: editData.username,
+        password: editData.password,
+        newPassword: editData.newPassword
+      }, {
+        headers: { 'Authorization': token }
       });
-      if (!response.ok) throw new Error('Failed to save profile');
-      setUserData(editData);
+
+      setUserData({
+        ...userData,
+        username: editData.username
+      });
       setIsEditing(false);
-    } catch (error) {
-      console.error('Error saving profile:', error);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        const status = err.response.status;
+        if (status === 409) {
+          setErrors(prev => ({ ...prev, username: "Username already taken" }));
+        } else if (status === 401) {
+          setErrors(prev => ({ ...prev, password: "Current password is incorrect" }));
+        }
+      }
     }
   };
 
@@ -97,57 +182,65 @@ export default function ProfilePage(props: { disableCustomTheme?: boolean }) {
                   {userData.username}
                 </Typography>
                 {!isEditing && (
-                  <IconButton onClick={handleEdit} size="small">
+                  <IconButton onClick={() => setIsEditing(true)} size="small">
                     <EditIcon />
                   </IconButton>
                 )}
               </Box>
-              <Typography color="text.secondary" gutterBottom>
-                {userData.email}
-              </Typography>
-              <Typography>{userData.bio}</Typography>
-              <Box sx={{ mt: 2 }}>
-                <Typography color="text.secondary">🗓 {userData.joinDate}</Typography>
-              </Box>
+              <Typography color="text.secondary">🗓 {userData.joinDate}</Typography>
             </Box>
           </ProfileHeader>
 
           {isEditing ? (
             <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <TextField
+                id="username"
                 label="Username"
                 value={editData.username}
                 onChange={(e) => setEditData({ ...editData, username: e.target.value })}
+                error={!!errors.username}
+                helperText={errors.username}
               />
               <TextField
-                label="Email"
-                value={editData.email}
-                onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                id="password"
+                label="Current Password"
+                type="password"
+                value={editData.password}
+                onChange={(e) => setEditData({ ...editData, password: e.target.value })}
+                error={!!errors.password}
+                helperText={errors.password}
               />
               <TextField
-                label="Bio"
-                multiline
-                rows={3}
-                value={editData.bio}
-                onChange={(e) => setEditData({ ...editData, bio: e.target.value })}
+                id="newPassword"
+                label="New Password"
+                type="password"
+                value={editData.newPassword}
+                onChange={(e) => setEditData({ ...editData, newPassword: e.target.value })}
+              />
+              <TextField
+                id="confirmPassword"
+                label="Confirm New Password"
+                type="password"
+                value={editData.confirmPassword}
+                onChange={(e) => setEditData({ ...editData, confirmPassword: e.target.value })}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword}
               />
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                 <Button onClick={() => setIsEditing(false)}>Cancel</Button>
-                <Button variant="contained" onClick={handleSave}>Save Changes</Button>
+                <Button variant="contained" onClick={() => void handleSave()}>Save Changes</Button>
               </Box>
             </Box>
           ) : (
             <>
-              <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>Friends</Typography>
+              <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>Profile Information</Typography>
               <List>
-                {mockFriends.map((friend) => (
-                  <ListItem key={friend.id}>
-                    <ListItemAvatar>
-                      <Avatar src={friend.avatar}>{friend.name[0]}</Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={friend.name} />
-                  </ListItem>
-                ))}
+                <ListItem>
+                  <ListItemAvatar>
+                    <Avatar>{userData.username[0]}</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText primary={userData.username} secondary={userData.joinDate} />
+                </ListItem>
               </List>
             </>
           )}
