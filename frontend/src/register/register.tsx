@@ -1,7 +1,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
 import FormControl from "@mui/material/FormControl";
@@ -11,7 +10,6 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
-import AppTheme from "../shared-theme/AppTheme";
 import ColorModeToggle from "../shared-theme/ColorModeToggle";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
@@ -61,7 +59,7 @@ const SignUpContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function Register(props: { disableCustomTheme?: boolean }) {
+export default function Register() {
   const [usernameError, setUsernameError] = React.useState(false);
   const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
@@ -163,115 +161,114 @@ export default function Register(props: { disableCustomTheme?: boolean }) {
   };
 
   return (
-    <AppTheme {...props}>
-      <CssBaseline enableColorScheme />
-      <ColorModeToggle />
-      <SignUpContainer direction="column" justifyContent="space-between">
-        <Card variant="outlined">
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-          >
-            Register
-          </Typography>
-          <Box
-            component="form"
-            onSubmit={(e) => {
-              void handleSubmit(e);
-            }}
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-          >
-            <FormControl sx={{ height: "90px", mb: 1 }}>
-              <FormLabel htmlFor="username">Username</FormLabel>
-              <TextField
-                error={usernameError}
-                helperText={usernameErrorMessage}
-                id="username"
-                type="text"
-                name="username"
-                placeholder="username"
-                autoComplete="username"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                onChange={validateUsername}
-                color={usernameError ? "error" : "primary"}
-                sx={{
-                  "& .MuiFormHelperText-root": {
-                    minHeight: "20px",
-                    margin: "3px 14px 0",
-                  },
-                }}
-              />
-            </FormControl>
-            <FormControl sx={{ height: "90px", mb: 1 }}>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                onChange={validatePassword}
-                color={passwordError ? "error" : "primary"}
-                sx={{
-                  "& .MuiFormHelperText-root": {
-                    minHeight: "20px",
-                    margin: "3px 14px 0",
-                  },
-                }}
-              />
-            </FormControl>
-            <FormControl sx={{ height: "90px", mb: 1 }}>
-              <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
-              <TextField
-                error={confirmPasswordError}
-                helperText={confirmPasswordErrorMessage}
-                name="confirmPassword"
-                placeholder="••••••"
-                type="password"
-                id="confirmPassword"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                onChange={samePassword}
-                color={passwordError ? "error" : "primary"}
-                sx={{
-                  "& .MuiFormHelperText-root": {
-                    minHeight: "20px",
-                    margin: "3px 14px 0",
-                  },
-                }}
-              />
-            </FormControl>
+    <SignUpContainer direction="column" justifyContent="space-between">
+      <Box sx={{ position: "fixed", top: "1rem", right: "1rem" }}>
+        <ColorModeToggle />
+      </Box>
+      <Card variant="outlined">
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+        >
+          Register
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={(e) => {
+            void handleSubmit(e);
+          }}
+          sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+        >
+          <FormControl sx={{ height: "90px", mb: 1 }}>
+            <FormLabel htmlFor="username">Username</FormLabel>
+            <TextField
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              type="text"
+              name="username"
+              placeholder="username"
+              autoComplete="username"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              onChange={validateUsername}
+              color={usernameError ? "error" : "primary"}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  minHeight: "20px",
+                  margin: "3px 14px 0",
+                },
+              }}
+            />
+          </FormControl>
+          <FormControl sx={{ height: "90px", mb: 1 }}>
+            <FormLabel htmlFor="password">Password</FormLabel>
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              onChange={validatePassword}
+              color={passwordError ? "error" : "primary"}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  minHeight: "20px",
+                  margin: "3px 14px 0",
+                },
+              }}
+            />
+          </FormControl>
+          <FormControl sx={{ height: "90px", mb: 1 }}>
+            <FormLabel htmlFor="confirmPassword">Confirm Password</FormLabel>
+            <TextField
+              error={confirmPasswordError}
+              helperText={confirmPasswordErrorMessage}
+              name="confirmPassword"
+              placeholder="••••••"
+              type="password"
+              id="confirmPassword"
+              autoComplete="current-password"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              onChange={samePassword}
+              color={passwordError ? "error" : "primary"}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  minHeight: "20px",
+                  margin: "3px 14px 0",
+                },
+              }}
+            />
+          </FormControl>
 
-            <Button type="submit" fullWidth variant="contained">
-              Sign up
-            </Button>
-          </Box>
-          <Divider>
-            <Typography sx={{ color: "text.secondary" }}>or</Typography>
-          </Divider>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            <Typography sx={{ textAlign: "center" }}>
-              Already have an account?{" "}
-              <Link href="./" variant="body2" sx={{ alignSelf: "center" }}>
-                Sign in
-              </Link>
-            </Typography>
-          </Box>
-        </Card>
-      </SignUpContainer>
-    </AppTheme>
+          <Button type="submit" fullWidth variant="contained">
+            Sign up
+          </Button>
+        </Box>
+        <Divider>
+          <Typography sx={{ color: "text.secondary" }}>or</Typography>
+        </Divider>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <Typography sx={{ textAlign: "center" }}>
+            Already have an account?{" "}
+            <Link href="./signin" variant="body2" sx={{ alignSelf: "center" }}>
+              Sign in
+            </Link>
+          </Typography>
+        </Box>
+      </Card>
+    </SignUpContainer>
   );
 }

@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Experimental_CssVarsProvider as CssVarsProvider } from "@mui/material/styles";
 import "./index.css";
 import SignIn from "./SignInComponent/SignIn";
 import { SolitairePage } from "./games/solitaire/solitairePage";
@@ -10,10 +9,13 @@ import Register from "./register/register";
 import BlackjackWrapper from "./games/blackjack/blackjackWrapper";
 import MainLayout from "./foundation-components/MainLayout";
 import AuthLayout from "./foundation-components/AuthLayout";
+import AppTheme from "./shared-theme/AppTheme";
+import { CssBaseline } from "@mui/material";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <CssVarsProvider defaultMode="system">
+    <AppTheme>
+      <CssBaseline enableColorScheme />
       <BrowserRouter>
         <Routes>
           {/* Auth routes without TopBar */}
@@ -31,6 +33,6 @@ createRoot(document.getElementById("root")!).render(
           </Route>
         </Routes>
       </BrowserRouter>
-    </CssVarsProvider>
+    </AppTheme>
   </StrictMode>
 );
