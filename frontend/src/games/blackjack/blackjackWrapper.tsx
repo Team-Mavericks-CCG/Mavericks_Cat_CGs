@@ -9,12 +9,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { socketManager } from "../utils/socketManager";
 import { useGameSocket } from "../utils/useGameSocket";
-import GameLobby from "../lobby";
 import BlackjackPage from "./blackjackPage";
 
 const BlackjackWrapper: React.FC = () => {
   const navigate = useNavigate();
-  const [showLobby, setShowLobby] = useState(false);
   const [isConnecting, setIsConnecting] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -45,19 +43,14 @@ const BlackjackWrapper: React.FC = () => {
     };
   }, [connect]);
 
-  // Open the lobby when connected but no game is joined
+  // If we have no game state after connection, and we're not in a lobby,
+  // return to home page where the lobby is handled
   useEffect(() => {
-    if (isConnected && !gameState && !showLobby && !isLoading) {
-      setShowLobby(true);
+    if (isConnected && !gameState && !isLoading) {
+      // We're connected but have no game - redirect to home page to join through lobby
+      void navigate("/");
     }
-  }, [isConnected, gameState, showLobby, isLoading]);
-
-  // Handle game join from lobby
-  const handleGameJoined = (newGameState: unknown) => {
-    console.log("Game joined:", newGameState);
-    // The useGameSocket hook will automatically update the game state
-    setShowLobby(false);
-  };
+  }, [isConnected, gameState, isLoading, navigate]);
 
   // If still connecting, show loading
   if (isConnecting) {
@@ -128,12 +121,7 @@ const BlackjackWrapper: React.FC = () => {
           <Typography variant="body1" paragraph>
             {error}
           </Typography>
-          <Button
-            variant="contained"
-            onClick={() => {
-              setShowLobby(true);
-            }}
-          >
+          <Button variant="contained" onClick={() => void navigate("/")}>
             Return to Lobby
           </Button>
         </Paper>
@@ -151,53 +139,30 @@ const BlackjackWrapper: React.FC = () => {
           playerId={playerId}
         />
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-          <Button variant="outlined" onClick={() => setShowLobby(true)}>
-            Lobby
+          <Button variant="outlined" onClick={() => void navigate("/")}>
+            Return to Home
           </Button>
         </Box>
       </>
     );
   }
 
-  // Show lobby dialog
+  // Fallback - redirect to home for lobby selection
   return (
-    <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "80vh",
-        }}
-      >
-        <Typography variant="h3" gutterBottom>
-          Blackjack
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Play Blackjack against friends or other players online.
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          size="large"
-          onClick={() => setShowLobby(true)}
-        >
-          Enter Lobby
-        </Button>
-      </Box>
-
-      <GameLobby
-        open={showLobby}
-        onClose={() => {
-          // Don't navigate away, just close the lobby
-          setShowLobby(false);
-        }}
-        socket={socketManager.socket}
-        gameType="blackjack"
-        onGameJoined={handleGameJoined}
-      />
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "80vh",
+      }}
+    >
+      <CircularProgress size={60} />
+      <Typography variant="body1" sx={{ mt: 2 }}>
+        Returning to lobby...
+      </Typography>
+    </Box>
   );
 };
 

@@ -21,6 +21,7 @@ import {
   Chip,
 } from "@mui/material";
 import { Socket } from "socket.io-client";
+import { useNavigate } from "react-router-dom";
 
 interface GameInfo {
   gameId: string;
@@ -34,7 +35,10 @@ interface GameLobbyProps {
   onClose: () => void;
   socket: Socket | null;
   gameType: string;
-  onGameJoined: (gameState: unknown, playerId: string) => void;
+  // Optional callback for components that want to handle the game state directly
+  onGameJoined?: (gameState: unknown, playerId: string) => void;
+  // If standalone is true, the component will navigate to the game page when a game is joined
+  standalone?: boolean;
 }
 
 const GameLobby: React.FC<GameLobbyProps> = ({
@@ -43,7 +47,9 @@ const GameLobby: React.FC<GameLobbyProps> = ({
   socket,
   gameType,
   onGameJoined,
+  standalone = false,
 }) => {
+  const navigate = useNavigate();
   const [tabIndex, setTabIndex] = useState(0);
   const [playerName, setPlayerName] = useState("");
   const [gameId, setGameId] = useState("");
@@ -111,6 +117,24 @@ const GameLobby: React.FC<GameLobbyProps> = ({
     setTabIndex(1); // Switch to Join Game tab
   };
 
+  // Handle joining a game with navigation
+  const handleGameJoinedWithNavigation = useCallback(
+    (state: unknown, playerID: string) => {
+      // If there's a callback, use it
+      if (onGameJoined) {
+        onGameJoined(state, playerID);
+      }
+      // Otherwise navigate to the game page
+      else if (standalone) {
+        void navigate(`/${gameType.toLowerCase()}`);
+      }
+
+      // Close the dialog
+      onClose();
+    },
+    [navigate, gameType, onGameJoined, onClose, standalone]
+  );
+
   // Handle creating a new game
   const handleCreateGame = useCallback(() => {
     if (!socket || !playerName.trim()) return;
@@ -127,8 +151,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
       // Wait for initial game state
       socket.once("game-state", (state: unknown) => {
         setIsLoading(false);
-        onGameJoined(state, socket.id ?? "");
-        onClose();
+        handleGameJoinedWithNavigation(state, socket.id ?? "");
       });
     });
 
@@ -136,7 +159,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
       setIsLoading(false);
       setErrorMsg(error);
     });
-  }, [socket, playerName, gameType, onGameJoined, onClose]);
+  }, [socket, playerName, gameType, handleGameJoinedWithNavigation]);
 
   // Handle joining an existing game
   const handleJoinGame = useCallback(() => {
@@ -157,8 +180,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
       // Wait for game state
       socket.once("game-state", (state: unknown) => {
         setIsLoading(false);
-        onGameJoined(state, socket.id ?? "");
-        onClose();
+        handleGameJoinedWithNavigation(state, socket.id ?? "");
       });
     });
 
@@ -166,7 +188,7 @@ const GameLobby: React.FC<GameLobbyProps> = ({
       setIsLoading(false);
       setErrorMsg(error);
     });
-  }, [socket, gameId, playerName, gameType, onGameJoined, onClose]);
+  }, [socket, gameId, playerName, gameType, handleGameJoinedWithNavigation]);
 
   return (
     <Dialog
