@@ -84,6 +84,7 @@ export function login(req: Request, res: Response) {
           res.status(401).json({ message: error.message });
         }
         if (error instanceof ServerError) {
+          console.error(error);
           res.status(500).json({ message: error.message });
         }
       });

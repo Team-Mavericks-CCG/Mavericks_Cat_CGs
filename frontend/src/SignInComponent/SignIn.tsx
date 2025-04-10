@@ -104,7 +104,7 @@ export default function SignIn() {
       localStorage.setItem("authToken", response.data.token);
 
       /*window.location.href = "/solitaire";  full page reload, rm */
-      void navigate("/home"); /* routes to the solitaire page*/
+      void navigate("/"); /* routes to the solitaire page*/
     } catch (error) {
       console.error("Error during login:", error);
 
