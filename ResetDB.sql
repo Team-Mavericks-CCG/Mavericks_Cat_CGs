@@ -29,6 +29,6 @@ CREATE TABLE gameStats(
     winCount INT,
     loseCount INT,
     score INT,
-    CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid),
-    CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid)
+    CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid) ON DELETE CASCADE,
+    CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid) ON DELETE CASCADE
 );
