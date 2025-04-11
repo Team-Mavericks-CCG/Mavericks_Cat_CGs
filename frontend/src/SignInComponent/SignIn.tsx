@@ -15,7 +15,8 @@ import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import ForgotPassword from "./components/ForgotPassword";
 import ColorModeToggle from "../shared-theme/ColorModeToggle";
-import axios, { AxiosError } from "axios";
+import { AuthAPI } from "../utils/api";
+import { AxiosError } from "axios";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -88,20 +89,11 @@ export default function SignIn() {
     const username = data.get("username") as string;
     const password = data.get("password") as string;
 
-    interface LoginResponse {
-      token: string;
-    }
-
     try {
-      const response = await axios.post<LoginResponse>(
-        "http://localhost:5000/api/auth/login",
-        {
-          username,
-          password,
-        }
-      );
+      const response = await AuthAPI.login(username, password);
 
       localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem("username", username);
 
       /*window.location.href = "/solitaire";  full page reload, rm */
       void navigate("/"); /* routes to the solitaire page*/

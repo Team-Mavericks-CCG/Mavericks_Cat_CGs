@@ -1,4 +1,5 @@
 import { io, Socket } from "socket.io-client";
+import { SERVER_URL } from "../../utils/api";
 
 // Socket event types
 interface ServerToClientEvents {
@@ -79,7 +80,7 @@ class SocketManager {
 
       // Get the server URL from env or use the default
       const envUrl = import.meta.env.VITE_SOCKET_URL as string | undefined;
-      const serverUrl = envUrl ?? "http://localhost:5000";
+      const serverUrl = envUrl ?? SERVER_URL;
 
       // Create socket connection
       this.socket = io(serverUrl, {
