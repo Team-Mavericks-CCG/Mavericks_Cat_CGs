@@ -44,7 +44,7 @@ export const SolitairePage: React.FC = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [canUndo, setCanUndo] = useState(false);
   const [forceRerender, setForceRerender] = useState(0);
-  const [hasSavedGame, setHasSavedGame] = useState(false);
+  const [, setHasSavedGame] = useState(false);
 
   const [game] = useState(new SolitaireGame());
 
@@ -391,15 +391,14 @@ export const SolitairePage: React.FC = () => {
                 >
                   Undo
                 </UndoButton>
-                {hasSavedGame && (
-                  <UndoButton
-                    onClick={newGame}
-                    style={{ top: "60px" }}
-                    aria-label="New game"
-                  >
-                    New Game
-                  </UndoButton>
-                )}
+
+                <UndoButton
+                  onClick={newGame}
+                  style={{ top: "60px" }}
+                  aria-label="New game"
+                >
+                  New Game
+                </UndoButton>
               </div>
             </div>
             <div className="tableau">
