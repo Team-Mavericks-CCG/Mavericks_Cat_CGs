@@ -2,6 +2,29 @@
 import { Card, Rank, Suit } from "../utils/card";
 import { Deck } from "../utils/deck";
 
+// Update GameState interface to use serializable cards
+export interface GameState {
+  score: number;
+  tableau: Card[][];
+  foundation: Card[][];
+  stock: {
+    stock: Card[];
+    waste: Card[];
+  };
+}
+
+// Add serializable game state interface
+export interface SerializableGameState {
+  score: number;
+  tableau: Record<string, string | boolean>[][];
+  foundation: Record<string, string | boolean>[][];
+  stock: {
+    stock: Record<string, string | boolean>[];
+    waste: Record<string, string | boolean>[];
+  };
+  history: SerializableGameState[];
+}
+
 export class Column {
   readonly type = "column";
   cards: Card[];
@@ -64,16 +87,6 @@ export class Stock {
   removeCard(): Card | null {
     return this.cards.pop() ?? null;
   }
-}
-
-interface GameState {
-  score: number;
-  tableau: Card[][];
-  foundation: Card[][];
-  stock: {
-    stock: Card[];
-    waste: Card[];
-  };
 }
 
 export const almostWon: GameState = {
@@ -495,5 +508,131 @@ export class SolitaireGame {
     }
     // Cards left in the tableau and no more moves to foundation possible
     return false;
+  }
+
+  resetGame(): void {
+    this.score = 0;
+    this.tableau = Array.from({ length: 7 }, () => new Column());
+    this.foundation = [
+      new Foundation(Suit.SPADES),
+      new Foundation(Suit.CLUBS),
+      new Foundation(Suit.HEARTS),
+      new Foundation(Suit.DIAMONDS),
+    ];
+    this.stock = new Stock();
+    this.history = [];
+
+    this.initializeGame();
+  }
+
+  // Convert array of Cards to array of SerializableCards
+  private cardsToSerializable(
+    cards: Card[]
+  ): Record<string, string | boolean>[] {
+    return cards.map((card) => card.toJSON());
+  }
+
+  // Convert array of SerializableCards to array of Cards
+  private serializableToCards(
+    serialCards: Record<string, string | boolean>[]
+  ): Card[] {
+    console.log(serialCards);
+    return serialCards.map(
+      (serialCard) =>
+        new Card(
+          serialCard.rank as Rank,
+          serialCard.suit as Suit,
+          {
+            faceCardUniqueValues: true,
+          },
+          serialCard.faceUp as boolean
+        )
+    );
+  }
+
+  // Get serializable state for localStorage
+  getSerializableState(): SerializableGameState {
+    // Convert current game state
+    const serialState: SerializableGameState = {
+      score: this.score,
+      tableau: this.tableau.map((column) =>
+        this.cardsToSerializable(column.cards)
+      ),
+      foundation: this.foundation.map((foundation) =>
+        this.cardsToSerializable(foundation.cards)
+      ),
+      stock: {
+        stock: this.cardsToSerializable(this.stock.stock),
+        waste: this.cardsToSerializable(this.stock.cards),
+      },
+      history: [], // Skip history for now to avoid recursive serialization
+    };
+
+    // Optionally serialize history if needed
+    serialState.history = this.history.map((state) => ({
+      score: state.score,
+      tableau: state.tableau.map((cardArray) =>
+        this.cardsToSerializable(cardArray)
+      ),
+      foundation: state.foundation.map((cardArray) =>
+        this.cardsToSerializable(cardArray)
+      ),
+      stock: {
+        stock: this.cardsToSerializable(state.stock.stock),
+        waste: this.cardsToSerializable(state.stock.waste),
+      },
+      history: [], // Don't include nested history to avoid deep recursion
+    }));
+
+    return serialState;
+  }
+
+  // Load state from serialized data
+  loadState(serialState: SerializableGameState): void {
+    this.score = serialState.score;
+
+    // Restore tableau
+    this.tableau.forEach((column, index) => {
+      if (index < serialState.tableau.length) {
+        column.cards = this.serializableToCards(serialState.tableau[index]);
+      } else {
+        column.cards = [];
+      }
+    });
+
+    // Restore foundation
+    this.foundation.forEach((foundation, index) => {
+      if (index < serialState.foundation.length) {
+        foundation.cards = this.serializableToCards(
+          serialState.foundation[index]
+        );
+      } else {
+        foundation.cards = [];
+      }
+    });
+
+    // Restore stock and waste
+    this.stock.stock = this.serializableToCards(serialState.stock.stock);
+    this.stock.cards = this.serializableToCards(serialState.stock.waste);
+
+    // Restore history if included
+    this.history = serialState.history.map((historyState) => ({
+      score: historyState.score,
+      tableau: historyState.tableau.map((cardArray) =>
+        this.serializableToCards(cardArray)
+      ),
+      foundation: historyState.foundation.map((cardArray) =>
+        this.serializableToCards(cardArray)
+      ),
+      stock: {
+        stock: this.serializableToCards(historyState.stock.stock),
+        waste: this.serializableToCards(historyState.stock.waste),
+      },
+    }));
+  }
+
+  // Reset the game
+  reset(): void {
+    this.resetGame();
   }
 }

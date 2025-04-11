@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { SolitaireGame, Foundation, Column, Stock } from "./solitairePageModel";
+import {
+  SolitaireGame,
+  Foundation,
+  Column,
+  Stock,
+  SerializableGameState,
+} from "./solitairePageModel";
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
@@ -36,10 +42,30 @@ const UndoButton = styled(Button)(() => ({
 
 export const SolitairePage: React.FC = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
-
   const [canUndo, setCanUndo] = useState(false);
-
   const [forceRerender, setForceRerender] = useState(0);
+  const [hasSavedGame, setHasSavedGame] = useState(false);
+
+  const [game] = useState(new SolitaireGame());
+
+  // Check for saved game on component mount and load it if exists
+  useEffect(() => {
+    const savedGame = localStorage.getItem("solitaireGameState");
+    if (savedGame) {
+      setHasSavedGame(true);
+      try {
+        const parsedState = JSON.parse(savedGame) as SerializableGameState;
+        // Need to wait until game is initialized
+        setTimeout(() => {
+          game.loadState(parsedState);
+          setCanUndo(game.hasHistory());
+          setForceRerender((prev) => prev + 1);
+        }, 0);
+      } catch (error) {
+        console.error("Failed to load saved game:", error);
+      }
+    }
+  }, [game]);
 
   // disable right click context menu
   useEffect(() => {
@@ -80,7 +106,27 @@ export const SolitairePage: React.FC = () => {
     void preloadImages();
   }, []);
 
-  const [game] = useState(new SolitaireGame());
+  // Save game state to localStorage - called after every game state change
+  const saveGameState = () => {
+    try {
+      const gameState = game.getSerializableState();
+      console.log("Saving game state:", gameState);
+      localStorage.setItem("solitaireGameState", JSON.stringify(gameState));
+      setHasSavedGame(true);
+    } catch (error) {
+      console.error("Failed to save game:", error);
+    }
+  };
+
+  // Clear saved game
+  const newGame = () => {
+    localStorage.removeItem("solitaireGameState");
+    setHasSavedGame(false);
+    game.resetGame();
+    setCanUndo(false);
+    saveGameState();
+    setForceRerender((prev) => prev + 1);
+  };
 
   const moveCard = (
     source: Column | Stock,
@@ -91,6 +137,7 @@ export const SolitairePage: React.FC = () => {
     if (success) {
       setCanUndo(true);
       setForceRerender((prev) => prev + 1);
+      saveGameState(); // Auto-save after successful move
       if (game.checkWin()) {
         win();
       }
@@ -98,6 +145,7 @@ export const SolitairePage: React.FC = () => {
     }
     return false;
   };
+
   // Handle card click functionality with updated typing
   const handleCardClick = (
     card: Card | null,
@@ -162,14 +210,15 @@ export const SolitairePage: React.FC = () => {
     game.draw();
     setCanUndo(true);
     setForceRerender((prev) => prev + 1);
+    saveGameState(); // Auto-save after drawing from stock
   };
 
   const handleUndo = () => {
     const success = game.undo();
     if (success) {
       setForceRerender((prev) => prev - 1);
-
       setCanUndo(game.hasHistory());
+      saveGameState(); // Auto-save after undo
     }
   };
 
@@ -342,6 +391,15 @@ export const SolitairePage: React.FC = () => {
                 >
                   Undo
                 </UndoButton>
+                {hasSavedGame && (
+                  <UndoButton
+                    onClick={newGame}
+                    style={{ top: "60px" }}
+                    aria-label="New game"
+                  >
+                    New Game
+                  </UndoButton>
+                )}
               </div>
             </div>
             <div className="tableau">
