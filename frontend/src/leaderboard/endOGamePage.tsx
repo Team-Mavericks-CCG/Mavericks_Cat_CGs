@@ -6,10 +6,10 @@ import { Score } from './leaderboardpage';
 
 const PodiumItem = ({playerName, score, rank, position }) => (
   <div> 
-      <p><strong>Name:</strong> {playerName}</p>
-      <p><strong>Score:</strong> {score}</p>
-      <p><strong>Rank:</strong> {rank}</p>
-      <p><strong>Position:</strong>{position}</p>
+      <p>Name:{playerName}</p>
+      <p>Score: {score}</p>
+      <p>Rank: {rank}</p>
+      <p>Position:{position}</p>
   </div>
 );
 
@@ -98,8 +98,6 @@ const EndOGamePageLeaderboard: React.FC = () => {
       </>
       );
     };
-      
-
         return (
             <div className="leaderboard-container">
               <Podium />
