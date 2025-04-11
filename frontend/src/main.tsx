@@ -12,6 +12,7 @@ import AuthLayout from "./foundation-components/AuthLayout";
 import AppTheme from "./shared-theme/AppTheme";
 import { CssBaseline } from "@mui/material";
 import Profile from "./profile/profilePage";
+import LobbyPage from "./lobby/lobbyPage";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -36,7 +37,8 @@ createRoot(document.getElementById("root")!).render(
               {/* Add other game routes here */}
             </Route>
             <Route path="/profile" element={<Profile />} />
-            {/* Add other routes that should have the TopBar */}
+            {/* Add other routes that should have the TopBar */}\
+            <Route path="/lobby" element={<LobbyPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
