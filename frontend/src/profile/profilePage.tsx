@@ -106,7 +106,7 @@ export default function ProfilePage(props: {
       .catch(() => {
         void navigate("/signin");
       });
-  }, []);
+  }, [editData, navigate, userData]);
 
   const validateForm = () => {
     const username = document.getElementById("username") as HTMLInputElement;

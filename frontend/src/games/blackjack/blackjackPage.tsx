@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import React, { useCallback } from "react";
 import { Card } from "../utils/card";
 import "../solitaire/solitairePage.css";
