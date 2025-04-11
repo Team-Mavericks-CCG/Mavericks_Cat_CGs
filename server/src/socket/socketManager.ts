@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Server, Socket } from "socket.io";
 import { gameStore, GameType } from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
@@ -91,11 +87,11 @@ export function setupSocketServer(
   }, CLEANUP_INTERVAL);
 
   io.on("connection", (socket) => {
-    console.log(`New connection: ${socket.id as string}`);
+    console.log(`New connection: ${socket.id}`);
 
     // Initialize socket with unauthenticated status
     socket.data.isAuthenticated = false;
-    socket.data.playerId = socket.id as string;
+    socket.data.playerId = socket.id;
 
     // Handle get active games request (anonymous users can see available games)
     socket.on("get-active-games", () => {
@@ -165,14 +161,14 @@ export function setupSocketServer(
         socket.data.currentGameId = gameId;
 
         // Add the player to the game
-        game.addPlayer(socket.id as string, data.playerName);
+        game.addPlayer(socket.id, data.playerName);
 
         // Map player to game
-        gameStore.addPlayerToGame(socket.id as string, gameId);
-        playerSocketMap.set(socket.id as string, socket);
+        gameStore.addPlayerToGame(socket.id, gameId);
+        playerSocketMap.set(socket.id, socket);
 
         // Join socket to a room with the game ID
-        socket.join(gameId);
+        void socket.join(gameId);
 
         // Notify client of successful game creation
         socket.emit("game-created", { gameId });
@@ -215,18 +211,18 @@ export function setupSocketServer(
 
         // Add the player to the Blackjack game
         try {
-          game.addPlayer(socket.id as string, playerName);
+          game.addPlayer(socket.id, playerName);
         } catch {
           socket.emit("error", "Game is full. Please try another game.");
           return;
         }
 
         // Map player to game
-        gameStore.addPlayerToGame(socket.id as string, gameId);
-        playerSocketMap.set(socket.id as string, socket);
+        gameStore.addPlayerToGame(socket.id, gameId);
+        playerSocketMap.set(socket.id, socket);
 
         // Join socket to the game room
-        socket.join(gameId);
+        void socket.join(gameId);
 
         // Notify of successful join
         socket.emit("join-success", { gameId });
@@ -279,7 +275,7 @@ export function setupSocketServer(
     socket.on("blackjack-hit", (data) => {
       try {
         const { gameId } = data;
-        const playerId = socket.id as string;
+        const playerId = socket.id;
 
         const game = gameStore.getGame(gameId);
         if (game === undefined) {
@@ -325,7 +321,7 @@ export function setupSocketServer(
     socket.on("blackjack-stand", (data) => {
       try {
         const { gameId } = data;
-        const playerId = socket.id as string;
+        const playerId = socket.id;
 
         const game = gameStore.getGame(gameId);
         if (!game) {
@@ -397,9 +393,9 @@ export function setupSocketServer(
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      console.log(`Socket disconnected: ${socket.id as string}`);
+      console.log(`Socket disconnected: ${socket.id}`);
 
-      const playerId = socket.id as string;
+      const playerId = socket.id;
       const gameId = socket.data.currentGameId;
 
       if (gameId) {

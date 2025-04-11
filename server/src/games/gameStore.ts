@@ -28,8 +28,7 @@ export const gameStore = {
     gameType: GameType,
     createFn: () => T
   ): { gameId: string; game: T } {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    const gameId = v4() as string;
+    const gameId = v4();
     const game = createFn();
     activeGames.set(gameId, { game, type: gameType });
     return { gameId, game };
