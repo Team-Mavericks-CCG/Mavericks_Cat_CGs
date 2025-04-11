@@ -13,18 +13,19 @@ CREATE TABLE players (
 );
 
 CREATE TABLE games(
-    gameid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    gameName VARCHAR(255),
-    gameDescription TEXT
+    gameName VARCHAR(255) PRIMARY KEY
 );
 
 CREATE TABLE gameStats(
     playerid INT NOT NULL,
-    gameid INT NOT NULL,
-    totalGamesCount INT,
-    winCount INT,
-    loseCount INT,
-    score INT,
+    gameName VARCHAR(255) NOT NULL,
+    totalGamesCount INT DEFAULT 0,
+    winCount INT DEFAULT 0,
+    loseCount INT DEFAULT 0,
+    score INT DEFAULT 0,
+    "createdAt" TIMESTAMP WITH TIME ZONE,
+    "updatedAt" TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (playerid, gameName),
     CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid) ON DELETE CASCADE,
-    CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid) ON DELETE CASCADE
+    CONSTRAINT fk_game_name FOREIGN KEY (gameName) REFERENCES games (gameName) ON DELETE CASCADE
 );
