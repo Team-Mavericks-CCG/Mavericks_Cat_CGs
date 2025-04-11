@@ -2,7 +2,8 @@
 .leaderboard-container {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
+    background: #34a842;
+    background: radial-gradient(circle, rgba(52, 168, 66, 1) 0%, rgba(14, 66, 25, 1) 58%, rgba(5, 26, 6, 1) 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -10,7 +11,7 @@
 .podium-container {
     font-family: Arial, sans-serif;
     text-align: center;
-    background-color: #f4f4f4;
+    background-color: #3c7f41;
     min-height: 100vh;
     max-height: 200vh;
     padding: 20px;
@@ -51,14 +52,54 @@
     background-color: #dad5d5;
 }
 
-/* Hover Effect */
+/* Hover Effect 
 .leaderboard-table tr:hover {
     background-color: #ddd;
+}*/
+
+.podium-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  margin: 2rem 0;
 }
 
-.podium-first {
+
+.podium-label {
+  margin-top: auto;
+  font-weight: bold;
+  font-size: 1.1rem;
+  font-family:Copperplate; 
+  color:rgb(27, 26, 26)
+}
+
+.podium-name {
+  font-size: 1rem;
+  font-family:Copperplate; 
+  margin-top: 0.7rem;
+  color:rgb(27, 26, 26)
+}
+
+.podium-score {
+  font-size: 0.90rem;
+  margin-top: 0.25rem;
+  font-family:Copperplate; 
+  color:rgb(27, 26, 26)
+}
+
+
+.first {
     min-height: 300px;
-    background: rgb(255,172,37);
+    min-width: 100px;
+    background: rgb(236, 177, 82);
+    border-radius: 10px 10px 0 0;
+      color: white;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
   background: 
     linear-gradient(333deg, 
     rgba(255,172,37,1) 0%, 
@@ -67,16 +108,51 @@
     rgba(255,172,37,1) 100%);
   }
   
-  .podium-second {
+  .second {
     min-height: 200px;
-    background: yellow;
+    min-width: 100px;
+    background: rgb(202, 202, 87);
+    border-radius: 10px 10px 0 0;
+      color: white;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    background: 
+    linear-gradient(333deg, 
+    rgb(161, 156, 147) 0%, 
+    rgb(210, 208, 201) 13%, 
+    rgb(238, 238, 234) 53%, 
+    rgb(177, 175, 171) 100%);
   }
   
-  .podium-third {
+  
+  .third {
     min-height: 100px;
-    background: yellow;
+    min-width: 100px;
+    background: rgb(159, 159, 44);
+    border-radius: 10px 10px 0 0;
+      color: white;
+      padding: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    background: 
+    linear-gradient(333deg, 
+    rgb(140, 106, 52) 0%, 
+    rgba(151, 129, 58, 0.697) 13%, 
+    rgb(223, 206, 105) 53%, 
+    rgb(149, 112, 52) 100%);
   }
 
-  .podium__item {
-    width: 50px;
+  .podium-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 30px;
+    margin: 2rem auto;
+    max-width: 600px;
   }
+  

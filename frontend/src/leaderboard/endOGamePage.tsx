@@ -47,57 +47,44 @@ const EndOGamePageLeaderboard: React.FC = () => {
 
     //create podium 
     const Podium = () => {
-        return (
-          <>
-            <div className="podium-first">
-                {topThreeScores[0] && (() => {
-                const score = topThreeScores[0];
-                const player = players.find(p => p.playerId === score.playerId);
-                return (
-                  <PodiumItem
-                  key={score.scoreId}
-                  playerName={player ? `${player.firstName} ${player.lastName}` : "Unknown"}
-                  score={score.scores}
-                  rank={score.rank}
-                  position={1}
-                  />
-            );
-            })()}
-           </div>
-
-           <div className="podium-second">
-                {topThreeScores[1] && (() => {
-                const score = topThreeScores[1];
-                const player = players.find(p => p.playerId === score.playerId);
-                return (
-                  <PodiumItem
-                  key={score.scoreId}
-                  playerName={player ? `${player.firstName} ${player.lastName}` : "Unknown"}
-                  score={score.scores}
-                  rank={score.rank}
-                  position={2}
-                  />
-            );
-            })()}
-           </div>
-           <div className="podium-third">
-                {topThreeScores[2] && (() => {
-                const score = topThreeScores[2];
-                const player = players.find(p => p.playerId === score.playerId);
-                return (
-                  <PodiumItem
-                  key={score.scoreId}
-                  playerName={player ? `${player.firstName} ${player.lastName}` : "Unknown"}
-                  score={score.scores}
-                  rank={score.rank}
-                  position={3}
-                  />
-            );
-            })()}
-           </div>
-      </>
+  
+      const first = topThreeScores[0] 
+      const second = topThreeScores[1] 
+      const third = topThreeScores[2] 
+    
+      const getPlayerName = (score: Score | null) => {
+        if (!score) return "Unknown";
+        const player = players.find(p => p.playerId === score.playerId);
+        return player ? `${player.firstName} ${player.lastName}` : "Unknown";
+      };
+    
+      return (
+        <div className="podium-wrapper">
+          {/* 2nd */}
+          <div className="second">
+            <div className="podium-label">🥈 2nd</div>
+            <div className="podium-name">{getPlayerName(second)}</div>
+            <div className="podium-score">Score: {second?.scores ?? "-"}</div>
+          </div>
+    
+          {/* 1st*/}
+          <div className="first">
+            <div className="podium-label">🥇 1st</div>
+            <div className="podium-name">{getPlayerName(first)}</div>
+            <div className="podium-score">Score: {first?.scores ?? "-"}</div>
+          </div>
+    
+          {/* 3rd*/}
+          <div className="third">
+            <div className="podium-label">🥉 3rd</div>
+            <div className="podium-name">{getPlayerName(third)}</div>
+            <div className="podium-score">Score: {third?.scores ?? "-"}</div>
+          </div>
+        </div>
       );
     };
+    
+    
         return (
             <div className="leaderboard-container">
               <Podium />
@@ -127,5 +114,8 @@ const EndOGamePageLeaderboard: React.FC = () => {
             </div>
           );
         };
+
+
+
         
         export default EndOGamePageLeaderboard;
