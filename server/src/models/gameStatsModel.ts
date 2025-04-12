@@ -4,7 +4,7 @@ import sequelize from "../config/dbConfig.js";
 // Define the User model class
 class GameStats extends Model {
   declare playerid: number;
-  declare gameid: number;
+  declare gameName: string;
   declare totalGamesCount: number;
   declare winCount: number;
   declare loseCount: number;
@@ -27,8 +27,8 @@ GameStats.init(
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     },
-    gameid: {
-      type: DataTypes.INTEGER,
+    gameName: {
+      type: DataTypes.STRING,
       primaryKey: true,
       references: {
         model: "games",
@@ -52,7 +52,7 @@ GameStats.init(
   },
   {
     sequelize,
-    tableName: "gameStats",
+    tableName: "gamestats",
     timestamps: true,
   }
 );

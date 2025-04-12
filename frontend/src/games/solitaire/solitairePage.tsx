@@ -11,6 +11,7 @@ import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
 import { Button, styled } from "@mui/material";
 import { CardComponent } from "../utils/CardComponent";
+import { LeaderboardAPI } from "../../utils/api";
 
 const UndoButton = styled(Button)(() => ({
   position: "absolute",
@@ -110,7 +111,6 @@ export const SolitairePage: React.FC = () => {
   const saveGameState = () => {
     try {
       const gameState = game.getSerializableState();
-      console.log("Saving game state:", gameState);
       localStorage.setItem("solitaireGameState", JSON.stringify(gameState));
       setHasSavedGame(true);
     } catch (error) {
@@ -240,6 +240,15 @@ export const SolitairePage: React.FC = () => {
             }
           }
         }
+      }
+    }
+
+    if (localStorage.getItem("username") != null) {
+      try {
+        void LeaderboardAPI.saveGameStats("Solitaire", true, game.score);
+        console.log("Game stats saved");
+      } catch (error) {
+        console.error("Error saving game stats:", error);
       }
     }
   };
