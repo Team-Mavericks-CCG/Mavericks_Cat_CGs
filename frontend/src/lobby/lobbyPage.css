@@ -1,0 +1,120 @@
+.lobby-container {
+    background-color: #256029;
+    min-height: 100vh;
+    padding: 2rem;
+    color: white;
+    position: relative;
+    font-family: 'Arial Rounded MT Bold', sans-serif;
+  }
+  
+  .invite-btn {
+    position: absolute;
+    top: 20px;
+    left: 30px;
+    padding: 0.8rem 1.5rem;
+    background-color: #f4a340;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .lobby-title-svg {
+    width: 100%;
+    height: 150px;
+    margin-top: 80px;
+  }
+  
+  .lobby-arc-text {
+    font-weight: bold;
+    letter-spacing: 0.5rem;
+    text-shadow: 0 0 10px #f4a340;
+    fill: #f4a340;
+  }
+  
+  .player-cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .player-card {
+    width: 120px;
+    height: 180px;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    border: 5px solid white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transform-origin: bottom center;
+  }
+  
+  .player-card .player-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .player-card.blue {
+    background: #57a3d2;
+  }
+  
+  .player-card.green {
+    background: #3fbf60;
+  }
+  
+  .player-card.pink {
+    background: #e070b1;
+  }
+  
+  .player-card.purple {
+    background: #6a0f49;
+  }
+  
+  .bottom-panel {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .invite-code {
+    font-size: 1.3rem;
+    color: #f4a340;
+    font-weight: bold;
+  }
+  
+  .action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .start-btn,
+  .ready-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    color: white;
+  }
+  
+  .start-btn {
+    background-color: #f4a340;
+  }
+  
+  .ready-btn {
+    background-color: #4caf50;
+  }
+  
