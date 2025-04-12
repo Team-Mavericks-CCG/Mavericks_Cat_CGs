@@ -212,18 +212,8 @@ export default function ProfilePage(props: {
               sx={{ display: "flex", flexDirection: "column", gap: 2 }}
             >
               <TextField
-                id="username"
-                label="Username"
-                value={editData.username}
-                onChange={(e) =>
-                  setEditData({ ...editData, username: e.target.value })
-                }
-                error={!!errors.username}
-                helperText={errors.username}
-              />
-              <TextField
                 id="password"
-                label="Current Password"
+                label="Current Password"                                  //todo: fix current password
                 type="password"
                 value={editData.password}
                 onChange={(e) =>
