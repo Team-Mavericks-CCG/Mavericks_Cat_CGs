@@ -13,15 +13,15 @@ CREATE TABLE players (
 );
 
 CREATE TABLE games(
-    gameName VARCHAR(255) PRIMARY KEY
+    "gameName" VARCHAR(255) PRIMARY KEY
 );
 
 CREATE TABLE gameStats(
     playerid INT NOT NULL,
-    gameName VARCHAR(255) NOT NULL,
-    totalGamesCount INT DEFAULT 0,
-    winCount INT DEFAULT 0,
-    loseCount INT DEFAULT 0,
+    "gameName" VARCHAR(255) NOT NULL,
+    "totalGamesCount" INT DEFAULT 0,
+    "winCount" INT DEFAULT 0,
+    "loseCount" INT DEFAULT 0,
     score INT DEFAULT 0,
     "createdAt" TIMESTAMP WITH TIME ZONE,
     "updatedAt" TIMESTAMP WITH TIME ZONE,
