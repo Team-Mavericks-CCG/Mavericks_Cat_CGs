@@ -1,7 +1,10 @@
-
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./LobbyPage.css";
+import { useNavigate } from "react-router-dom";
 
+// players that will be displayed in the lobby 
+// this should be replaced with the actual players from the game
+// this is just a placeholder for now
 const players = [
   { name: "PLAYER 1", rank: "RANK #531", color: "blue", image: "🐱" },
   { name: "PLAYER 2", rank: "RANK #324", color: "green", image: "🐱" },
@@ -10,27 +13,56 @@ const players = [
 ];
 
 const LobbyPage: React.FC = () => {
+ 
+    // state for the invide code and ready state
+    const [inviteCode, setInviteCode] = useState("");
+    const [isReady, setIsReady] = useState(false);
+    const [isHost] = useState(true); // only host can start the game
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // generate a random 5 digit number for the invite code
+        const code = Math.floor(10000 + Math.random() * 90000).toString();
+        setInviteCode(code);
+    }, []);
+
+    // ready state for the start 
+    const toggleReady = () => setIsReady((prev) => !prev);
+
+    // navigation for the leave button (directs to the home page)
+    const handleLeave = () => {
+        void navigate("/");
+    }
+
+    // navigation for the start button (directs to the card game)
+    // for now, use blackjack 
+    const handleStart = () => {
+        if (isHost) {
+            void navigate("/games/blackjack");
+        }
+    };
+
   return (
     <div className="lobby-container">
-      <button className="invite-btn">INVITE</button>
-      <svg viewBox="0 0 400 150" className="lobby-title-svg">
-        <defs>
-            <path
-            id="arcPath"
-            d="M 50 150 A 150 150 0 0 1 340 150"
-            fill="none" />
-        </defs>
-        <text fontSize="40" fill="#f4a340" textAnchor="middle">
-            <textPath
-                href="#arcPath"
-                startOffset="53%"
-                textLength="300"
-                className="lobby-arc-text" >
-                LOBBY
-            </textPath>
+        <h1 className="lobby-header">Blackjack</h1>
+        <button className="invite-btn">INVITE</button>
+        <svg viewBox="0 0 400 150" className="lobby-title-svg">
+            <defs>
+                <path
+                id="arcPath"
+                d="M 50 150 A 150 150 0 0 1 340 150"
+                fill="none" />
+            </defs>
+            <text fontSize="40" fill="#f4a340" textAnchor="middle">
+                <textPath
+                    href="#arcPath"
+                    startOffset="53%"
+                    textLength="300"
+                    className="lobby-arc-text" >
+                    LOBBY
+                </textPath>
         </text>
         </svg>
-
 
 
       <div className="player-cards">
@@ -47,14 +79,23 @@ const LobbyPage: React.FC = () => {
         ))}
       </div>
 
-      <div className="bottom-panel">
-        <div className="invite-code">INVITE CODE: 73654</div>
-        <div className="action-buttons">
-          <button className="start-btn">START</button>
-          <button className="ready-btn">READY</button>
+      <div className="invite-code">INVITE CODE: {inviteCode}</div>
+
+        <div className="bottom-panel">
+        <div className="bottom-left"></div>
+
+        <div className="bottom-center">
+            <div className="ready-check" onClick={toggleReady}>
+                {isReady ? "☑ Ready!" : "☐ Ready?"}
+            </div>
+            <button className="start-btn" onClick={handleStart} disabled={!isHost} title={!isHost ? "Only the host can start the game" : ""} > START </button>
+        </div>
+
+        <div className="bottom-right">
+            <button className="leave-btn" onClick={handleLeave}>LEAVE</button>
+        </div>
         </div>
       </div>
-    </div>
   );
 };
 
