@@ -1,4 +1,4 @@
-// src/components/LobbyPage.tsx
+
 import React from "react";
 import "./LobbyPage.css";
 

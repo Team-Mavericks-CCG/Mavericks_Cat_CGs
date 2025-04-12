@@ -1,3 +1,13 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .lobby-container {
     background-color: #256029;
     min-height: 100vh;
@@ -116,5 +126,7 @@
   
   .ready-btn {
     background-color: #4caf50;
+    margin-top: 10px;
+    margin-bottom: 50px;;
   }
   
