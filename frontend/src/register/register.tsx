@@ -132,7 +132,7 @@ export default function Register() {
       localStorage.setItem("username", username);
 
       /*window.location.href = "/solitaire";  full page reload, rm */
-      void navigate("/home"); /* routes to the home page*/
+      void navigate("/"); /* routes to the home page*/
     } catch (error) {
       console.error("Error during register:", error);
 
