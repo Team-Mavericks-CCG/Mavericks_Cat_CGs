@@ -7,6 +7,7 @@ class Player extends Model {
   declare username: string;
   declare password: string;
   declare lastLogin: Date | null;
+  declare joinedAt: Date;
 
   // Timestamps
   declare readonly createdAt: Date;
