@@ -17,8 +17,10 @@ CREATE TABLE players (
 );
 
 CREATE TABLE games(
-    gameName VARCHAR(255) PRIMARY KEY
+    "gameName" VARCHAR(255) PRIMARY KEY
 );
+
+INSERT INTO games ("gameName") VALUES ('Solitaire'), ('Poker'), ('Blackjack'), ('War');
 
 CREATE TABLE gameStats(
     playerid INT NOT NULL,
@@ -29,7 +31,7 @@ CREATE TABLE gameStats(
     score INT DEFAULT 0,
     "createdAt" TIMESTAMP WITH TIME ZONE,
     "updatedAt" TIMESTAMP WITH TIME ZONE,
-    PRIMARY KEY (playerid, gameName),
+    PRIMARY KEY (playerid, "gameName"),
     CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid) ON DELETE CASCADE,
-    CONSTRAINT fk_game_name FOREIGN KEY (gameName) REFERENCES games (gameName) ON DELETE CASCADE
+    CONSTRAINT fk_game_name FOREIGN KEY ("gameName") REFERENCES games ("gameName") ON DELETE CASCADE
 );

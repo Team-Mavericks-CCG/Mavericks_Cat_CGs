@@ -16,6 +16,8 @@ CREATE TABLE games(
     "gameName" VARCHAR(255) PRIMARY KEY
 );
 
+INSERT INTO games ("gameName") VALUES ('Solitaire'), ('Poker'), ('Blackjack'), ('War');
+
 CREATE TABLE gameStats(
     playerid INT NOT NULL,
     "gameName" VARCHAR(255) NOT NULL,
