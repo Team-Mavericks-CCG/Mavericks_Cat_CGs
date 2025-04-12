@@ -6,18 +6,40 @@ import SignIn from "./SignInComponent/SignIn";
 import { SolitairePage } from "./games/solitaire/solitairePage";
 import HomePage from "./homePage";
 import Register from "./register/register";
+import BlackjackWrapper from "./games/blackjack/blackjackWrapper";
+import MainLayout from "./foundation-components/MainLayout";
+import AuthLayout from "./foundation-components/AuthLayout";
+import AppTheme from "./shared-theme/AppTheme";
+import { CssBaseline } from "@mui/material";
+import Profile from "./profile/profilePage";
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode> 
-    <BrowserRouter>
-    <Routes>
-        <Route path="/" element={<SignIn />} />  {/* / url is homepage but for now its the signin*/} 
-        <Route path="/home" element={<HomePage />} />           {/* homepage */}
-        <Route path="/solitaire" element={<SolitairePage />} /> {/* /solitaire url is solitaire*/} 
-        <Route path="/register" element={<Register />} /> {/* /register url is sign up*/} 
-      </Routes>
-    </BrowserRouter>
+  <StrictMode>
+    <AppTheme>
+      <CssBaseline enableColorScheme />
+      <BrowserRouter>
+        <Routes>
+          {/* Auth routes without TopBar */}
+          <Route element={<AuthLayout />}>
+            <Route path="/signin" element={<SignIn />} />
+            <Route path="/register" element={<Register />} />
+          </Route>
 
-    
+          {/* Main routes with TopBar */}
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<HomePage />} />
+
+            {/* Games routes */}
+            <Route path="/games">
+              <Route path="solitaire" element={<SolitairePage />} />
+              <Route path="blackjack" element={<BlackjackWrapper />} />
+              {/* Add other game routes here */}
+            </Route>
+            <Route path="/profile" element={<Profile />} />
+            {/* Add other routes that should have the TopBar */}
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AppTheme>
   </StrictMode>
 );

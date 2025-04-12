@@ -1,34 +1,35 @@
 -- permission for postgres user: GRANT INSERT, SELECT, UPDATE ON players TO <username>;
 
 DROP TABLE IF EXISTS gameStats;
-DROP TABLE IF EXISTS players;
 DROP TABLE IF EXISTS games;
+DROP TABLE IF EXISTS players;
 
 CREATE TABLE players (
    playerid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
    username VARCHAR(255) UNIQUE NOT NULL,
-   password VARCHAR(255) NOT NULL,
+   "hashedPassword" VARCHAR(255) NOT NULL,
    firstName VARCHAR(255),
    lastName VARCHAR(255),
+   "profilePicture" int,
    "createdAt" TIMESTAMP WITH TIME ZONE,
    "updatedAt" TIMESTAMP WITH TIME ZONE,
    "lastLogin" TIMESTAMP WITH TIME ZONE
 );
 
 CREATE TABLE games(
-    gameid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    gameName VARCHAR(255),
-    gameDescription TEXT
+    gameName VARCHAR(255) PRIMARY KEY
 );
 
 CREATE TABLE gameStats(
     playerid INT NOT NULL,
-    gameid INT NOT NULL,
-    totalGamesCount INT,
-    winCount INT,
-    loseCount INT,
-    score INT,
-    CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid),
-    CONSTRAINT fk_game FOREIGN KEY (gameid) REFERENCES games (gameid)    
-    CONSTRAINT gameStats_pk PRIMARY KEY (playerid, gameid)
+    gameName VARCHAR(255) NOT NULL,
+    totalGamesCount INT DEFAULT 0,
+    winCount INT DEFAULT 0,
+    loseCount INT DEFAULT 0,
+    score INT DEFAULT 0,
+    "createdAt" TIMESTAMP WITH TIME ZONE,
+    "updatedAt" TIMESTAMP WITH TIME ZONE,
+    PRIMARY KEY (playerid, gameName),
+    CONSTRAINT fk_game_player FOREIGN KEY (playerid) REFERENCES players (playerid) ON DELETE CASCADE,
+    CONSTRAINT fk_game_name FOREIGN KEY (gameName) REFERENCES games (gameName) ON DELETE CASCADE
 );

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import CssBaseline from "@mui/material/CssBaseline";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Divider from "@mui/material/Divider";
 import FormLabel from "@mui/material/FormLabel";
@@ -15,10 +14,9 @@ import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import { styled } from "@mui/material/styles";
 import ForgotPassword from "./components/ForgotPassword";
-import AppTheme from "../shared-theme/AppTheme";
-import ColorModeSelect from "../shared-theme/ColorModeSelect";
-import axios, { AxiosError } from "axios";
-
+import ColorModeToggle from "../shared-theme/ColorModeToggle";
+import { AuthAPI } from "../utils/api";
+import { AxiosError } from "axios";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -63,7 +61,7 @@ const SignInContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
-export default function SignIn(props: { disableCustomTheme?: boolean }) {
+export default function SignIn() {
   const [usernameError, setUsernameError] = React.useState(false);
   const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
   const [passwordError, setPasswordError] = React.useState(false);
@@ -91,25 +89,14 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
     const username = data.get("username") as string;
     const password = data.get("password") as string;
 
-    interface LoginResponse {
-      token: string;
-    }
-
     try {
-      const response = await axios.post<LoginResponse>(
-        "http://localhost:5000/api/auth/login",
-        {
-          username,
-          password,
-        }
-      );
-
-      console.log("Login successful:");
+      const response = await AuthAPI.login(username, password);
 
       localStorage.setItem("authToken", response.data.token);
+      localStorage.setItem("username", username);
 
       /*window.location.href = "/solitaire";  full page reload, rm */
-      void navigate("/homePage"); /* routes to the solitaire page*/
+      void navigate("/"); /* routes to the solitaire page*/
     } catch (error) {
       console.error("Error during login:", error);
 
@@ -125,10 +112,6 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
         alert("Network error. Please check your connection.");
       }
     }
-    console.log({
-      username: data.get("username"),
-      password: data.get("password"),
-    });
   };
 
   const validateUsername = (): boolean => {
@@ -160,119 +143,114 @@ export default function SignIn(props: { disableCustomTheme?: boolean }) {
   };
 
   return (
-    <AppTheme {...props}>
-      <CssBaseline enableColorScheme />
-      <SignInContainer direction="column" justifyContent="space-between">
-        <ColorModeSelect
-          sx={{ position: "fixed", top: "1rem", right: "1rem" }}
-        />
-        <Card variant="outlined">
-          <Typography
-            component="h1"
-            variant="h4"
-            sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
-          >
-            Sign in
-          </Typography>
-          <Box
-            component="form"
-            onSubmit={(e) => {
-              void handleSubmit(e);
-            }}
-            noValidate
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-              gap: 2,
-            }}
-          >
-            <FormControl sx={{ height: '90px', mb: 1 }}>
-              <FormLabel htmlFor="username">Username</FormLabel>
-              <TextField
-                error={usernameError}
-                helperText={usernameErrorMessage}
-                id="username"
-                type="text"
-                name="username"
-                placeholder="username"
-                autoComplete="username"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                onChange={validateUsername}
-                color={usernameError ? "error" : "primary"}
-                sx={{ 
-                  '& .MuiFormHelperText-root': {
-                    minHeight: '20px',
-                    margin: '3px 14px 0'
-                  }
-                }}
-              />
-            </FormControl>
-            <FormControl sx={{ height: '90px', mb: 1 }}>
-              <FormLabel htmlFor="password">Password</FormLabel>
-              <TextField
-                error={passwordError}
-                helperText={passwordErrorMessage}
-                name="password"
-                placeholder="••••••"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                autoFocus
-                required
-                fullWidth
-                variant="outlined"
-                onChange={validatePassword}
-                color={passwordError ? "error" : "primary"}
-                sx={{ 
-                  '& .MuiFormHelperText-root': {
-                    minHeight: '20px',
-                    margin: '3px 14px 0'
-                  }
-                }}
-              />
-            </FormControl>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
+    <SignInContainer direction="column" justifyContent="space-between">
+      <Box sx={{ position: "fixed", top: "1rem", right: "1rem" }}>
+        <ColorModeToggle />
+      </Box>
+      <Card variant="outlined">
+        <Typography
+          component="h1"
+          variant="h4"
+          sx={{ width: "100%", fontSize: "clamp(2rem, 10vw, 2.15rem)" }}
+        >
+          Sign in
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={(e) => {
+            void handleSubmit(e);
+          }}
+          noValidate
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            gap: 2,
+          }}
+        >
+          <FormControl sx={{ height: "90px", mb: 1 }}>
+            <FormLabel htmlFor="username">Username</FormLabel>
+            <TextField
+              error={usernameError}
+              helperText={usernameErrorMessage}
+              id="username"
+              type="text"
+              name="username"
+              placeholder="username"
+              autoComplete="username"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              onChange={validateUsername}
+              color={usernameError ? "error" : "primary"}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  minHeight: "20px",
+                  margin: "3px 14px 0",
+                },
+              }}
             />
-            <ForgotPassword open={open} handleClose={handleClose} />
-            <Button type="submit" fullWidth variant="contained">
-              Sign in
-            </Button>
-            <Link
-              component="button"
-              type="button"
-              onClick={handleClickOpen}
-              variant="body2"
-              sx={{ alignSelf: "center" }}
-            >
-              Forgot your password?
+          </FormControl>
+          <FormControl sx={{ height: "90px", mb: 1 }}>
+            <FormLabel htmlFor="password">Password</FormLabel>
+            <TextField
+              error={passwordError}
+              helperText={passwordErrorMessage}
+              name="password"
+              placeholder="••••••"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              autoFocus
+              required
+              fullWidth
+              variant="outlined"
+              onChange={validatePassword}
+              color={passwordError ? "error" : "primary"}
+              sx={{
+                "& .MuiFormHelperText-root": {
+                  minHeight: "20px",
+                  margin: "3px 14px 0",
+                },
+              }}
+            />
+          </FormControl>
+          <FormControlLabel
+            control={<Checkbox value="remember" color="primary" />}
+            label="Remember me"
+          />
+          <ForgotPassword open={open} handleClose={handleClose} />
+          <Button type="submit" fullWidth variant="contained">
+            Sign in
+          </Button>
+          <Link
+            component="button"
+            type="button"
+            onClick={handleClickOpen}
+            variant="body2"
+            sx={{ alignSelf: "center" }}
+          >
+            Forgot your password?
+          </Link>
+        </Box>
+        <Divider>or</Divider>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            marginTop: "auto", // Added marginTop
+          }}
+        >
+          <Typography sx={{ textAlign: "center" }}>
+            Don&apos;t have an account?{" "}
+            <Link href="/register" variant="body2" sx={{ alignSelf: "center" }}>
+              Sign up
             </Link>
-          </Box>
-          <Divider>or</Divider>
-          <Box sx={{ 
-              display: "flex", 
-              flexDirection: "column", 
-              gap: 2,
-              marginTop: "auto" // Added marginTop
-            }}>
-            <Typography sx={{ textAlign: "center" }}>
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/material-ui/getting-started/templates/sign-in/"
-                variant="body2"
-                sx={{ alignSelf: "center" }}
-              >
-                Sign up
-              </Link>
-            </Typography>
-          </Box>
-        </Card>
-      </SignInContainer>
-    </AppTheme>
+          </Typography>
+        </Box>
+      </Card>
+    </SignInContainer>
   );
 }

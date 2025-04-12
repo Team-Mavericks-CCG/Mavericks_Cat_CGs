@@ -44,8 +44,8 @@ export class Card {
    * @param rank - The card rank from Rank enum
    */
   constructor(
-    suit: Suit,
     rank: Rank,
+    suit: Suit,
     options: CardRankOptions = {},
     faceUp = true
   ) {
@@ -97,7 +97,7 @@ export class Card {
     return this.suit;
   }
 
-  flip(): Card {
+  flip(): this {
     this.faceUp = !this.faceUp;
     return this;
   }
@@ -114,16 +114,17 @@ export class Card {
    * Creates a JSON representation of the card
    * @returns An object with suit, value, and color properties
    */
-  toJSON(): Record<string, string> {
+  toJSON(): Record<string, string | boolean> {
     return {
       suit: this.suit,
       rank: this.rank,
       color: this.color,
+      faceUp: this.faceUp,
     };
   }
 
   clone(): Card {
-    const cloned = new Card(this.suit, this.rank, this.options, this.faceUp);
+    const cloned = new Card(this.rank, this.suit, this.options, this.faceUp);
     return cloned;
   }
 }

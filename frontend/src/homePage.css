@@ -1,12 +1,104 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+p{
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .home-page {
-    background-color: #9798eaea;
-    height: 100vh;
-    width: 100vw;
-    color: white;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-  }
- 
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align content to the top */
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  padding-top: 10px; /* Reduced padding-top to move buttons higher */
+  padding-bottom: 3rem; /* Space for footer */
+}
+
+.button-row1 {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between buttons in a row */
+  flex-wrap: wrap; /* Allow buttons to wrap to the next line if needed */
+  padding-top: 10px; /* Reduced padding-top to move buttons higher */
+  padding-bottom: 3rem;
+}
+
+.button-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Space between buttons in a row */
+  flex-wrap: wrap; /* Allow buttons to wrap to the next line if needed */
+  padding-top: 200px; /* Reduced padding-top to move buttons higher */
+  padding-bottom: 10rem;
+}
+
+button {
+  background-color: #3f51b5;
+  color: white;
+  padding: 16px 32px;
+  margin: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 220px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #303f9f;
+}
+
+.game-button {
+  width: 300px; 
+  height: 200px; 
+  border-radius: 16px;
+  background-color: white;
+  position: relative; /* Position the text over the image */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end; /* Position the text at the bottom */
+  align-items: center;
+  padding: 0; 
+  overflow: hidden; /* Hide any excess image parts */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.game-button:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.08);
+}
+
+.game-icon {
+  width: 100%; /* Make sure the image covers the entire button */
+  height: 100%;
+  object-fit: cover; /* Ensure the image doesn't stretch or distort */
+}
+
+.game-label {
+  position: relative; /* Place the text above the image */
+  z-index: 1; /* Ensure text is on top */
+  font-size: 16px;
+  color: black; /* Make the text stand out against the image */
+  padding: 8px 0; /* Adjust padding to position the text at the bottom */
+  text-align: center;
+  width: 100%; /* Ensure text spans the entire width */
+  background: none;
+}

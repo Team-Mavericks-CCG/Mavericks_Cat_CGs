@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile-backend
+    ports:
+      - "5000:5000"
+
+    #set PASSWORD and JWT_SeCRET
+    environment:
+      - DB_NAME=mavericks_db
+      - DB_USER=postgres
+      - DB_PASSWORD=
+      - DB_HOST=db
+      - JWT_SECRET=supersecurejwtsecret
+      - PORT=5000
+    depends_on:
+      db:
+        condition: service_healthy
+        
+#set PASSWORD
+  db:
+    image: postgres:14
+    environment:
+      POSTGRES_DB: mavericks_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./Database.sql:/docker-entrypoint-initdb.d/Database.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
