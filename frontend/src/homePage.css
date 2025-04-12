@@ -95,9 +95,9 @@ button:hover {
 .game-label {
   position: relative; /* Place the text above the image */
   z-index: 1; /* Ensure text is on top */
-  font-size: 16px;
+  font-size: 14px;
   color: black; /* Make the text stand out against the image */
-  padding: 8px 0; /* Adjust padding to position the text at the bottom */
+  padding: 2px 0; /* Adjust padding to position the text at the bottom */
   text-align: center;
   width: 100%; /* Ensure text spans the entire width */
   background: none;

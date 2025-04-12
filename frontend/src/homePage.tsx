@@ -263,17 +263,48 @@ function HomePage() {
               onClick={() => setOpenSolitaire(true)}
             >
               <img
-                src="/src/images/Solitaire.png"
+                src="./assets/cards/images/solitaireButton.png"
                 alt="Solitaire"
                 className="game-icon"
               />
               <span className="game-label">Solitaire</span>
             </button>
-            <button onClick={() => setOpenWar(true)}>War</button>
+            <button
+              className="game-button"
+              onClick={() => setOpenWar(true)}
+              >
+              <img
+                src="./assets/cards/images/warIcon.png"
+                alt="Solitaire"
+                className="game-icon"
+              />
+              <span className="game-label">War</span>
+              </button>
+              <button 
+                className="game-button"
+                onClick={() => setOpenBlackjack(true)}
+                >
+                <img
+                src="./assets/cards/images/blackjackButton.png"
+                alt="Solitaire"
+                className="game-icon"
+                /> 
+                <span className="game-label">BlackJack</span>
+                </button>
+                <button 
+                  className="game-button"
+                  onClick={() => setOpenPoker(true)}
+                  >
+                  <img
+                  src="./assets/cards/images/pokerButton.png"
+                  alt="Solitaire"
+                  className="game-icon"
+                  />
+                  <span className="game-label">Poker</span>
+                  </button>
           </div>
           <div className="button-row">
-            <button onClick={() => setOpenPoker(true)}>Poker</button>
-            <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
+          
           </div>
         </div>
       </HomePageContainer>
