@@ -1,14 +1,26 @@
-version: '3.8'
-
 services:
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile-frontend
     ports:
-      - "5173:5173"
+      - "8080:80"
     depends_on:
       - backend
+    profiles: ["prod"]
+
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile-frontend.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    depends_on:
+      - backend-dev
+    profiles: ["dev"]
 
   backend:
     build:
@@ -16,26 +28,50 @@ services:
       dockerfile: Dockerfile-backend
     ports:
       - "5000:5000"
-
     #set PASSWORD and JWT_SeCRET
     environment:
       - DB_NAME=mavericks_db
       - DB_USER=postgres
-      - DB_PASSWORD=
+      - DB_PASSWORD=postgres_password
       - DB_HOST=db
       - JWT_SECRET=supersecurejwtsecret
+      - NODE_ENV=production
       - PORT=5000
     depends_on:
       db:
         condition: service_healthy
-        
-#set PASSWORD
+    profiles: ["prod"]
+
+  backend-dev:
+    build:
+      context: ./server
+      dockerfile: Dockerfile-backend.dev
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/usr/src/app
+      - /usr/src/app/node_modules
+    #set PASSWORD and JWT_SeCRET
+    environment:
+      - DB_NAME=mavericks_db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_password
+      - DB_HOST=db
+      - JWT_SECRET=supersecurejwtsecret
+      - NODE_ENV=development
+      - PORT=5000
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["dev"]
+
+  #set PASSWORD
   db:
     image: postgres:14
     environment:
       POSTGRES_DB: mavericks_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 
+      POSTGRES_PASSWORD: postgres_password
     ports:
       - "5432:5432"
     volumes:
@@ -46,6 +82,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
 volumes:
   pgdata:

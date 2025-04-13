@@ -3,6 +3,7 @@ import {
   login,
   register,
   changePassword,
+  getProfile,
 } from "../controllers/authController.js";
 import { auth, verifyToken } from "../middleware/auth.js";
 
@@ -33,6 +34,8 @@ router.get("/verify", verifyToken, (req: Request, res: Response): void => {
     },
   });
 });
+
+router.get("/profile", verifyToken, getProfile);
 
 // Route for testing auth middleware
 router.get("/test", auth, (_req, res: Response) => {

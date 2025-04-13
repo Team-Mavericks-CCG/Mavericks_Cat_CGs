@@ -536,7 +536,6 @@ export class SolitaireGame {
   private serializableToCards(
     serialCards: Record<string, string | boolean>[]
   ): Card[] {
-    console.log(serialCards);
     return serialCards.map(
       (serialCard) =>
         new Card(

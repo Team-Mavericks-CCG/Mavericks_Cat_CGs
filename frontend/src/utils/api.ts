@@ -69,9 +69,10 @@ export const AuthAPI = {
     }),
 };
 
-// Game-related API calls
-export const GameAPI = {
-  getLeaderboard: () => API.get<LeaderboardEntry[]>("/game/leaderboard"),
+export const LeaderboardAPI = {
+  getLeaderboard: () => API.get<LeaderboardEntry[]>("/leaderboard"),
+  saveGameStats: (gameName: string, won: boolean, score: number) =>
+    API.post("/leaderboard/save-stats", { gameName, won, score }),
 };
 
 // Export the base API for other direct usages

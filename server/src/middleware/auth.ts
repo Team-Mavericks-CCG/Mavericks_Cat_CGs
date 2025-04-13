@@ -9,6 +9,8 @@ export interface AuthUser {
   playerid: number;
   username?: string;
   lastLogin?: Date | null;
+  joinedAt?: Date | null;
+  profilePicture?: number;
 }
 
 declare module "express-serve-static-core" {
@@ -89,6 +91,8 @@ export const verifyToken = asyncHandler(
         playerid: user.playerid,
         username: user.username,
         lastLogin: user.lastLogin,
+        joinedAt: user.joinedAt,
+        profilePicture: user.profilePicture,
       };
 
       next();

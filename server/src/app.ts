@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import authRoutes from "./routes/authRoutes.js";
 import gameRoutes from "./routes/gameRoutes.js";
+import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import { setupSocketServer } from "./socket/socketManager.js";
 import dotenv from "dotenv";
 
@@ -18,7 +19,6 @@ const server = createServer(app);
 const PORT = (process.env.PORT ?? 5000).toString();
 
 // Create socket.io server with CORS configured
-// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
 const io = new Server(server, {
   cors: {
     origin: process.env.CORS_ORIGIN ?? "http://localhost:5173", // Frontend URL
@@ -28,6 +28,7 @@ const io = new Server(server, {
 });
 
 // Set up socket handling
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 setupSocketServer(io);
 
 // Middleware
@@ -43,6 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 // Define routes
 app.use("/api/auth", authRoutes);
 app.use("/api/games", gameRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 // Health check endpoint
 app.get("/health", (_req, res) => {

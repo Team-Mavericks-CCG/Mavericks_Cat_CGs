@@ -11,7 +11,8 @@ import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
 import { Button, styled } from "@mui/material";
 import { CardComponent } from "../utils/CardComponent";
-import { GameRules } from '../components/GameRules';
+import { GameRules } from "../components/GameRules";
+import { LeaderboardAPI } from "../../utils/api";
 
 const UndoButton = styled(Button)(() => ({
   position: "absolute",
@@ -111,7 +112,6 @@ export const SolitairePage: React.FC = () => {
   const saveGameState = () => {
     try {
       const gameState = game.getSerializableState();
-      console.log("Saving game state:", gameState);
       localStorage.setItem("solitaireGameState", JSON.stringify(gameState));
       setHasSavedGame(true);
     } catch (error) {
@@ -243,6 +243,15 @@ export const SolitairePage: React.FC = () => {
         }
       }
     }
+
+    if (localStorage.getItem("username") != null) {
+      try {
+        void LeaderboardAPI.saveGameStats("Solitaire", true, game.score);
+        console.log("Game stats saved");
+      } catch (error) {
+        console.error("Error saving game stats:", error);
+      }
+    }
   };
 
   const renderColumn = (column: Column) => (
@@ -369,8 +378,10 @@ export const SolitairePage: React.FC = () => {
         </div>
       ) : (
         <>
-          <h1>Solitaire <GameRules gameType="solitaire" /></h1> 
-        
+          <h1>
+            Solitaire <GameRules gameType="solitaire" />
+          </h1>
+
           <div className="game-container">
             <div className="top-row">
               <div className="stock-area">
@@ -401,7 +412,6 @@ export const SolitairePage: React.FC = () => {
                 >
                   New Game
                 </UndoButton>
-              
               </div>
             </div>
             <div className="tableau">
@@ -413,7 +423,6 @@ export const SolitairePage: React.FC = () => {
             </div>
           </div>
           <div>{game.score}</div>
-          
         </>
       )}
     </div>
