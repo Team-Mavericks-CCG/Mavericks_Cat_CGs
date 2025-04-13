@@ -166,7 +166,7 @@ function HomePage() {
                 return;
               }
               // Navigate to the lobby with the invite code
-              void navigate("/lobby/${inviteCode}");
+              void navigate(`/games/war/lobby/${inviteCode}`);
             }}
           >
             Join Lobby
@@ -215,7 +215,7 @@ function HomePage() {
                 return;
               }
               // Navigate to the lobby with the invite code
-              void navigate("/lobby/${inviteCode}");
+              void navigate(`/games/poker/lobby/${inviteCode}`);
             }}
           >
             Join Lobby
@@ -264,7 +264,7 @@ function HomePage() {
                 return;
               }
               // Navigate to the lobby with the invite code
-              void navigate("/lobby/${inviteCode}");
+              void navigate(`/games/blackjack/lobby/${inviteCode}`);
             }}
           >
             Join Lobby

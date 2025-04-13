@@ -20,7 +20,7 @@ const LobbyPage: React.FC = () => {
     const [isHost] = useState(true); // only host can start the game
     const navigate = useNavigate();
     const { game, inviteCode: inviteCodeFromURL } = useParams();
-
+    
     // useEffect to set the invite code from the URL or generate a new one
     // this will be used to join the game
     useEffect(() => {
@@ -49,7 +49,7 @@ const LobbyPage: React.FC = () => {
 
   return (
     <div className="lobby-container">
-        <h1 className="lobby-header">{game ?.toUpperCase()}</h1>
+        <h1 className="lobby-header">{game ? game.toUpperCase() : "Loading..."}</h1>
         <button className="invite-btn">INVITE</button>
         <svg viewBox="0 0 400 150" className="lobby-title-svg">
             <defs>

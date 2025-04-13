@@ -34,12 +34,12 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/games">
               <Route path="solitaire" element={<SolitairePage />} />
               <Route path="blackjack" element={<BlackjackWrapper />} />
+              <Route path="/games/:game/lobby/:inviteCode" element={<LobbyPage />} />
               {/* Add other game routes here */}
             </Route>
             <Route path="/profile" element={<Profile />} />
             {/* Add other routes that should have the TopBar */}\
             <Route path="/lobby" element={<LobbyPage />} />
-            <Route path="/games/:game/lobby/:inviteCode" element={<LobbyPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
