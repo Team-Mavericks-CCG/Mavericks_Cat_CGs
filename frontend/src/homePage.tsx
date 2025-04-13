@@ -146,7 +146,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenWar(false);
-              void navigate("/games/war/create-lobby");
+              void navigate("/lobby");
             }}
           >
             Create Lobby
@@ -155,7 +155,18 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenWar(false);
-              void navigate("/games/war/join-lobby");
+              // Prompt for invite code
+              const inviteCode = prompt("Enter the invite code:");
+              if (!inviteCode){
+                alert("Please enter a valid invite code.");
+                return;
+              }
+              else if (inviteCode.length !== 5) {
+                alert("Please enter a valid 5 digit invite code.");
+                return;
+              }
+              // Navigate to the lobby with the invite code
+              void navigate("/lobby/${inviteCode}");
             }}
           >
             Join Lobby
@@ -184,7 +195,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenPoker(false);
-              void navigate("/games/poker/create-lobby");
+              void navigate("/lobby");
             }}
           >
             Create Lobby
@@ -193,7 +204,18 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenPoker(false);
-              void navigate("/games/poker/join-lobby");
+              // Prompt for invite code
+              const inviteCode = prompt("Enter the invite code:");
+              if (!inviteCode){
+                alert("Please enter a valid invite code.");
+                return;
+              }
+              else if (inviteCode.length !== 5) {
+                alert("Please enter a valid 5 digit invite code.");
+                return;
+              }
+              // Navigate to the lobby with the invite code
+              void navigate("/lobby/${inviteCode}");
             }}
           >
             Join Lobby
@@ -222,7 +244,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              void navigate("/games/blackjack/create-lobby");
+              void navigate("/lobby");
             }}
           >
             Create Lobby
@@ -231,7 +253,18 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              void navigate("/games/blackjack/join-lobby");
+              // Prompt for invite code
+              const inviteCode = prompt("Enter the invite code:");
+              if (!inviteCode){
+                alert("Please enter a valid invite code.");
+                return;
+              }
+              else if (inviteCode.length !== 5) {
+                alert("Please enter a valid 5 digit invite code.");
+                return;
+              }
+              // Navigate to the lobby with the invite code
+              void navigate("/lobby/${inviteCode}");
             }}
           >
             Join Lobby
@@ -263,17 +296,48 @@ function HomePage() {
               onClick={() => setOpenSolitaire(true)}
             >
               <img
-                src="/src/images/Solitaire.png"
+                src="./assets/cards/images/solitaireButton.png"
                 alt="Solitaire"
                 className="game-icon"
               />
               <span className="game-label">Solitaire</span>
             </button>
-            <button onClick={() => setOpenWar(true)}>War</button>
+            <button
+              className="game-button"
+              onClick={() => setOpenWar(true)}
+              >
+              <img
+                src="./assets/cards/images/warIcon.png"
+                alt="Solitaire"
+                className="game-icon"
+              />
+              <span className="game-label">War</span>
+              </button>
+              <button 
+                className="game-button"
+                onClick={() => setOpenBlackjack(true)}
+                >
+                <img
+                src="./assets/cards/images/blackjackButton.png"
+                alt="Solitaire"
+                className="game-icon"
+                /> 
+                <span className="game-label">BlackJack</span>
+                </button>
+                <button 
+                  className="game-button"
+                  onClick={() => setOpenPoker(true)}
+                  >
+                  <img
+                  src="./assets/cards/images/pokerButton.png"
+                  alt="Solitaire"
+                  className="game-icon"
+                  />
+                  <span className="game-label">Poker</span>
+                  </button>
           </div>
           <div className="button-row">
-            <button onClick={() => setOpenPoker(true)}>Poker</button>
-            <button onClick={() => setOpenBlackjack(true)}>BlackJack</button>
+          
           </div>
         </div>
       </HomePageContainer>

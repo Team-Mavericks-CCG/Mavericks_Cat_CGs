@@ -11,6 +11,7 @@ import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
 import { Button, styled } from "@mui/material";
 import { CardComponent } from "../utils/CardComponent";
+import { GameRules } from "../components/GameRules";
 import { LeaderboardAPI } from "../../utils/api";
 
 const UndoButton = styled(Button)(() => ({
@@ -377,7 +378,10 @@ export const SolitairePage: React.FC = () => {
         </div>
       ) : (
         <>
-          <h1>Solitaire</h1>
+          <h1>
+            Solitaire <GameRules gameType="solitaire" />
+          </h1>
+
           <div className="game-container">
             <div className="top-row">
               <div className="stock-area">

@@ -1,3 +1,23 @@
+.lobby-header {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #f4a340;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    font-family: 'Courier New', Courier, monospace;
+    letter-spacing: 2px;
+  }
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 .lobby-container {
     background-color: #256029;
     min-height: 100vh;
@@ -13,6 +33,49 @@
     left: 30px;
     padding: 0.8rem 1.5rem;
     background-color: #f4a340;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+  }
+
+  .start-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: green;
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+  }
+
+  .start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .ready-check {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+  
+  .ready-check:hover {
+    transform: scale(1.1);
+  }
+
+  .leave-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: red;
     border: none;
     border-radius: 15px;
     font-size: 1.2rem;
@@ -88,33 +151,41 @@
   }
   
   .invite-code {
+    position: absolute;
+    top: 20px;
+    right: 30px;
     font-size: 1.3rem;
     color: #f4a340;
     font-weight: bold;
   }
   
-  .action-buttons {
+  .bottom-panel {
+    position: absolute;
+    bottom: 30px;
+    left: 30px;
+    right: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .bottom-left {
+    width: 100px; /* Placeholder, can be empty */
+  }
+  
+  .bottom-center {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 1rem;
+    margin-top: 20px;
+    margin-bottom: 40px;
   }
   
-  .start-btn,
-  .ready-btn {
-    padding: 0.8rem 2rem;
-    font-size: 1.1rem;
-    border-radius: 12px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    color: white;
+  .bottom-right {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: 90px;
+    margin-bottom: 10px;
   }
-  
-  .start-btn {
-    background-color: #f4a340;
-  }
-  
-  .ready-btn {
-    background-color: #4caf50;
-  }
-  

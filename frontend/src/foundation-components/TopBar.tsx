@@ -35,10 +35,10 @@ const TopBar: React.FC = () => {
 
   const handleLogout = () => {
     // Clear user data from localStorage
-    localStorage.removeItem("token");
+    localStorage.removeItem("authToken");
     localStorage.removeItem("username");
-    // Navigate to login page
-    void navigate("/signin");
+    // Navigate to home page
+    void navigate("/");
     handleMenuClose();
   };
 
