@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./LobbyPage.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 // players that will be displayed in the lobby 
 // this should be replaced with the actual players from the game
@@ -14,17 +14,23 @@ const players = [
 
 const LobbyPage: React.FC = () => {
  
-    // state for the invide code and ready state
+    // state for the invite code and ready state
     const [inviteCode, setInviteCode] = useState("");
     const [isReady, setIsReady] = useState(false);
     const [isHost] = useState(true); // only host can start the game
     const navigate = useNavigate();
+    const { game, inviteCode: inviteCodeFromURL } = useParams();
 
+    // useEffect to set the invite code from the URL or generate a new one
+    // this will be used to join the game
     useEffect(() => {
-        // generate a random 5 digit number for the invite code
-        const code = Math.floor(10000 + Math.random() * 90000).toString();
-        setInviteCode(code);
-    }, []);
+        if (inviteCodeFromURL) {
+          setInviteCode(inviteCodeFromURL);
+        } else {
+          const code = Math.floor(10000 + Math.random() * 90000).toString();
+          setInviteCode(code);
+        }
+      }, [inviteCodeFromURL]);
 
     // ready state for the start 
     const toggleReady = () => setIsReady((prev) => !prev);
@@ -35,16 +41,15 @@ const LobbyPage: React.FC = () => {
     }
 
     // navigation for the start button (directs to the card game)
-    // for now, use blackjack 
     const handleStart = () => {
-        if (isHost) {
-            void navigate("/games/blackjack");
+        if (isHost && game) {
+            void navigate(`/games/${game}`);
         }
     };
 
   return (
     <div className="lobby-container">
-        <h1 className="lobby-header">Blackjack</h1>
+        <h1 className="lobby-header">{game ?.toUpperCase()}</h1>
         <button className="invite-btn">INVITE</button>
         <svg viewBox="0 0 400 150" className="lobby-title-svg">
             <defs>

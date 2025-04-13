@@ -39,6 +39,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/profile" element={<Profile />} />
             {/* Add other routes that should have the TopBar */}\
             <Route path="/lobby" element={<LobbyPage />} />
+            <Route path="/games/:game/lobby/:inviteCode" element={<LobbyPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
