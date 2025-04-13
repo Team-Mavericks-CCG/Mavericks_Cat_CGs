@@ -1,9 +1,9 @@
 {
   "scripts": {
-    "docker:dev": "docker-compose --profile dev up",
-    "docker:prod": "docker-compose --profile prod up",
-    "docker:build:dev": "docker-compose --profile dev build",
-    "docker:build:prod": "docker-compose --profile prod build"
+    "docker:dev": "docker compose --profile dev up",
+    "docker:prod": "docker compose --profile prod up",
+    "docker:build:dev": "docker compose --profile dev build",
+    "docker:build:prod": "docker compose --profile prod build"
   },
   "devDependencies": {
     "esbuild": "^0.25.2"
