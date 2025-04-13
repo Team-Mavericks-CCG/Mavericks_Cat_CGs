@@ -166,3 +166,26 @@ export function changePassword(req: Request, res: Response) {
     res.status(500).json({ message: "Server Error" });
   }
 }
+
+export function getProfile(req: Request, res: Response) {
+  try {
+    // get the user from the request object
+    const user = req.user;
+
+    // if user is not found, reject with an error message
+    if (!user) {
+      throw new AuthenticationError("User not found");
+    }
+
+    // send success message
+    res.status(200).json({
+      username: user.username,
+      joinedAt: user.joinedAt,
+      profilePicture: user.profilePicture,
+    });
+  } catch (error: unknown) {
+    if (error instanceof AuthenticationError) {
+      res.status(401).json({ message: error.message });
+    }
+  }
+}
