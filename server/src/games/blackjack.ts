@@ -1,106 +1,68 @@
 import { Card, Rank } from "../utils/card.js";
 import { Deck } from "../utils/deck.js";
 import { Game } from "./game.js";
+import { GameStatus } from "./game.js";
 
+enum BlackjackAction {
+  HIT = "hit",
+  STAND = "stand",
+  SPLIT = "split",
+}
 // Hand status
 enum HandStatus {
+  // hand is dealt, not current turn
   WAITING = "waiting",
+  // hand is active, player can hit or stand
   PLAYING = "playing",
+  // player joined mid round
+  INACTIVE = "inactive",
   STOOD = "stood",
   BUSTED = "busted",
-  BLACKJACK = "blackjack",
-  PUSH = "push",
   WIN = "win",
   LOSE = "lose",
-}
-
-// Game status
-enum GameStatus {
-  DEALING = "dealing",
-  PLAYER_TURN = "playerTurn",
-  DEALER_TURN = "dealerTurn",
-  RESOLVING = "resolving",
-  COMPLETE = "complete",
 }
 
 // Player hand
 interface Hand {
   cards: Card[];
   status: HandStatus;
-  playerId?: string; // Track which socket owns this hand
-  playerName?: string; // Track player name for display
-}
-
-// Game state for client
-interface BlackjackState {
-  status: GameStatus;
-  currentPlayer: number;
-  hands: {
-    cards: Card[];
-    status: string;
-    value?: number;
-    playerId?: string;
-    playerName?: string;
-  }[];
-  dealerHand: {
-    cards: Card[];
-    value?: number;
-  };
-  deck: {
-    remaining: number;
-  };
-  gameId?: string; // Game ID for client reference
+  value: number; // to avoid recalculating
 }
 
 // Client-friendly game state (with processed data for frontend)
-export interface ClientGameState {
+export interface BlackjackClientGameState {
   gameId: string;
+  gameStatus: GameStatus;
+  activePlayer: string | null;
   players: {
     id: string;
     name: string;
-    cards: Card[];
-    score: number;
-    isBusted: boolean;
-    hasStood: boolean;
-    isActive: boolean;
+    hands: Hand[];
   }[];
-  dealerCards: Card[];
-  dealerScore: number;
-  dealerHasHiddenCard: boolean;
-  currentPlayerId: string | null;
-  gameStatus: "waiting" | "playing" | "roundOver" | "gameOver";
-  winner: string | null;
+  dealerHand: {
+    cards: Card[];
+    value: number;
+  };
 }
 
-export class Blackjack implements Game {
+export class Blackjack extends Game {
   private deck: Deck;
-  private hands: Hand[] = [];
-  private dealerHand: Card[] = [];
-  private currentPlayer = 0;
-  private numPlayers: number;
-  private status: GameStatus = GameStatus.DEALING;
-  public lastActivityTime: number;
-  private gameId?: string;
-  private playerMap: Map<number, string> = new Map<number, string>(); // Maps hand index to player ID
+  private hands: Map<string, Hand[]>;
+  private dealerHand: Card[];
 
-  constructor(numPlayers: number, gameId?: string) {
-    this.numPlayers = numPlayers;
-    this.gameId = gameId;
+  constructor(gameId: string) {
+    super(gameId);
+    this.hands = new Map();
+    this.dealerHand = [];
     this.deck = Deck.createShuffled({}, 6);
-    this.initializeHands();
-    this.lastActivityTime = Date.now();
   }
 
-  // Initialize player hands
-  private initializeHands(): void {
-    this.hands = [];
-    for (let i = 0; i < this.numPlayers; i++) {
-      this.hands.push({
-        cards: [],
-        status: HandStatus.WAITING,
-      });
+  startGame(): void {
+    if (this.status !== GameStatus.READY) {
+      throw new Error("Game is already started or in progress");
     }
-    this.dealerHand = [];
+    this.deal();
+    this.updateActivity();
   }
 
   // Calculate the value of a hand
@@ -129,11 +91,6 @@ export class Blackjack implements Game {
     return value;
   }
 
-  // Check if a hand is a blackjack
-  private isBlackjack(cards: Card[]): boolean {
-    return cards.length === 2 && this.calculateHandValue(cards) === 21;
-  }
-
   private draw(): Card {
     const card = this.deck.draw();
     // will never actually be empty
@@ -144,58 +101,78 @@ export class Blackjack implements Game {
     return card;
   }
 
+  private nextTurn(): void {
+    // Move to next player
+    const { wrapped } = this.getNextPlayer();
+
+    // If we wrapped around to first player, everyone has played
+    if (wrapped) {
+      this.dealerPlay();
+    } else {
+      this.status = GameStatus.IN_PROGRESS;
+    }
+  }
+
   // Deal initial cards
   public deal(): void {
-    if (this.status !== GameStatus.DEALING) {
+    if (this.status !== GameStatus.READY) {
       throw new Error("Cannot deal now");
     }
 
-    // Deal first card to each player
-    for (let i = 0; i < this.numPlayers; i++) {
-      this.hands[i].cards.push(this.draw());
-      this.hands[i].status = HandStatus.PLAYING;
+    // reset/initialize hands
+    this.hands = new Map();
+    for (const playerId of this.players.keys()) {
+      this.hands.set(playerId, [
+        {
+          cards: [],
+          status: HandStatus.WAITING,
+          value: 0,
+        },
+      ]);
+    }
+
+    // deal 1 card to each player
+    for (const playerHands of this.hands.values()) {
+      // only going to be 1 hand while dealing
+      for (const hand of playerHands) {
+        hand.cards.push(this.draw());
+        hand.status = HandStatus.WAITING;
+      }
     }
 
     // Deal first card to dealer
     this.dealerHand.push(this.draw());
+    this.dealerHand[0].flip(); // Dealer's first card is face down
 
     // Deal second card to each player
-    for (let i = 0; i < this.numPlayers; i++) {
-      this.hands[i].cards.push(this.draw());
-
-      // Check for blackjack
-      if (this.isBlackjack(this.hands[i].cards)) {
-        this.hands[i].status = HandStatus.BLACKJACK;
+    for (const playerHands of this.hands.values()) {
+      // only going to be 1 hand while dealing
+      for (const hand of playerHands) {
+        hand.cards.push(this.draw());
+        hand.value = this.calculateHandValue(hand.cards);
+        hand.status = HandStatus.WAITING;
       }
     }
 
     // Deal second card to dealer
     this.dealerHand.push(this.draw());
 
-    // Move to player turn or check if all players have blackjack
-    this.status = GameStatus.PLAYER_TURN;
-    this.currentPlayer = this.findNextActivePlayer(-1);
-
-    // If no active players, move to dealer turn
-    if (this.currentPlayer === -1) {
-      this.status = GameStatus.DEALER_TURN;
-      this.dealerPlay();
-    }
+    this.nextTurn();
 
     this.updateActivity();
   }
 
   // Player hits (takes another card)
-  public hit(playerID: number): void {
-    if (this.status !== GameStatus.PLAYER_TURN) {
-      throw new Error("Not player's turn");
-    }
-
-    if (playerID !== this.currentPlayer) {
+  public hit(playerID: string, index = 0): void {
+    if (playerID !== this.activePlayer) {
       throw new Error("Not this player's turn");
     }
 
-    const hand = this.hands[playerID];
+    const playerHands = this.hands.get(playerID);
+    if (!playerHands) {
+      throw new Error(`Player with ID ${playerID} not found`);
+    }
+    const hand = playerHands[index];
 
     if (hand.status !== HandStatus.PLAYING) {
       throw new Error("Cannot hit on this hand");
@@ -203,36 +180,29 @@ export class Blackjack implements Game {
 
     // Draw a card
     hand.cards.push(this.draw());
+    hand.value = this.calculateHandValue(hand.cards);
 
-    // Check hand value
-    const value = this.calculateHandValue(hand.cards);
-
-    if (value > 21) {
+    if (hand.value > 21) {
       hand.status = HandStatus.BUSTED;
-      // Move to next player
-      this.currentPlayer = this.findNextActivePlayer(playerID);
 
-      // If no more active players, move to dealer turn
-      if (this.currentPlayer === -1) {
-        this.status = GameStatus.DEALER_TURN;
-        this.dealerPlay();
-      }
+      // Move to next player
+      this.nextTurn();
     }
 
     this.updateActivity();
   }
 
   // Player stands (ends turn)
-  public stand(playerID: number): void {
-    if (this.status !== GameStatus.PLAYER_TURN) {
-      throw new Error("Not player's turn");
-    }
-
-    if (playerID !== this.currentPlayer) {
+  public stand(playerID: string, index = 0): void {
+    if (playerID !== this.activePlayer) {
       throw new Error("Not this player's turn");
     }
 
-    const hand = this.hands[playerID];
+    const playerHands = this.hands.get(playerID);
+    if (!playerHands) {
+      throw new Error(`Player with ID ${playerID} not found`);
+    }
+    const hand = playerHands[index];
 
     if (hand.status !== HandStatus.PLAYING) {
       throw new Error("Cannot stand on this hand");
@@ -240,33 +210,16 @@ export class Blackjack implements Game {
 
     hand.status = HandStatus.STOOD;
 
-    // Move to next player
-    this.currentPlayer = this.findNextActivePlayer(playerID);
-
-    // If no more active players, move to dealer turn
-    if (this.currentPlayer === -1) {
-      this.status = GameStatus.DEALER_TURN;
-      this.dealerPlay();
-    }
+    this.nextTurn();
 
     this.updateActivity();
-  }
-
-  // Find the next active player
-  private findNextActivePlayer(currentID: number): number {
-    for (let i = currentID + 1; i < this.numPlayers; i++) {
-      if (this.hands[i].status === HandStatus.PLAYING) {
-        return i;
-      }
-    }
-    return -1; // No more active players
   }
 
   // Dealer plays their turn
   private dealerPlay(): void {
     // Check if any player has a non-busted hand
-    const activePlayers = this.hands.some(
-      (h) => h.status === HandStatus.STOOD || h.status === HandStatus.BLACKJACK
+    const activePlayers = Array.from(this.hands.values()).some((hands) =>
+      hands.some((hand) => hand.status === HandStatus.STOOD)
     );
 
     // If no active players, dealer doesn't need to draw
@@ -285,74 +238,48 @@ export class Blackjack implements Game {
 
   // Resolve all hands and determine winners
   private resolveHands(): void {
-    this.status = GameStatus.RESOLVING;
-
     const dealerValue = this.calculateHandValue(this.dealerHand);
-    const dealerHasBlackjack = this.isBlackjack(this.dealerHand);
 
-    for (let i = 0; i < this.numPlayers; i++) {
-      const hand = this.hands[i];
+    // only consider hands that are not busted
+    const playerHands = Array.from(this.hands.values()).filter((hands) =>
+      hands.some((hand) => hand.status === HandStatus.STOOD)
+    );
 
-      // Skip already resolved hands (busted)
-      if (hand.status === HandStatus.BUSTED) {
-        continue;
-      }
-
-      const playerValue = this.calculateHandValue(hand.cards);
-
-      // Handle blackjacks
-      if (hand.status === HandStatus.BLACKJACK) {
-        if (dealerHasBlackjack) {
-          hand.status = HandStatus.LOSE;
-        } else {
-          hand.status = HandStatus.WIN;
+    for (const hands of playerHands) {
+      for (const hand of hands) {
+        if (hand.status != HandStatus.STOOD) {
+          continue; // Skip busted hands
         }
-        continue;
-      }
 
-      // Dealer busts, all standing players win
-      if (dealerValue > 21) {
-        if (hand.status === HandStatus.STOOD) {
-          hand.status = HandStatus.WIN;
+        if (dealerValue > 21) {
+          hand.status = HandStatus.WIN; // Dealer busted, player wins
+          continue;
         }
-      }
-      // Compare dealer and player values
-      else {
-        if (playerValue > dealerValue) {
-          hand.status = HandStatus.WIN;
+
+        // hand should always have a value at this point
+        // the ?? is just for type safety
+        if (hand.value > dealerValue) {
+          hand.status = HandStatus.WIN; // Player wins
         } else {
           hand.status = HandStatus.LOSE;
-        }
+        } // Player loses
       }
     }
 
-    this.status = GameStatus.COMPLETE;
+    this.status = GameStatus.FINISHED;
     this.updateActivity();
   }
 
   // Start a new round
-  public newRound(): void {
+  public newGame(): void {
     // If we're running low on cards, get a new deck
     if (this.deck.getCount() < 30) {
       this.deck = new Deck();
       this.deck.shuffle();
     }
 
-    // Preserve player IDs and names when reinitializing hands
-    const playerIds = this.hands.map((hand) => hand.playerId);
-    const playerNames = this.hands.map((hand) => hand.playerName);
-
-    this.initializeHands();
-
-    // Restore player information
-    for (let i = 0; i < this.hands.length; i++) {
-      if (i < playerIds.length && playerIds[i]) {
-        this.hands[i].playerId = playerIds[i];
-        this.hands[i].playerName = playerNames[i];
-      }
-    }
-
-    this.status = GameStatus.DEALING;
+    this.status = GameStatus.READY;
+    this.deal();
     this.updateActivity();
   }
 
@@ -361,178 +288,76 @@ export class Blackjack implements Game {
     this.lastActivityTime = Date.now();
   }
 
-  // Get the current game state
-  public getGameState(): BlackjackState {
+  // Add a player to the game
+  public addPlayer(playerID: string, playerName: string): void {
+    super.addPlayer(playerID, playerName);
+
+    if (this.hands.size >= Blackjack.MAX_PLAYERS) {
+      throw new Error("Game is full");
+    }
+
+    this.hands.set(playerID, [
+      {
+        cards: [],
+        status: HandStatus.INACTIVE,
+        value: 0,
+      },
+    ]);
+  }
+
+  // Remove a player from the game
+  public removePlayer(playerID: string): void {
+    super.removePlayer(playerID);
+
+    this.hands.delete(playerID);
+  }
+
+  // Check if it's a player's turn
+  public isPlayerTurn(playerID: string): boolean {
+    return (
+      playerID === this.activePlayer && this.status === GameStatus.IN_PROGRESS
+    );
+  }
+
+  // Convert the game state to client-friendly format
+  public getClientGameState(): BlackjackClientGameState {
     return {
-      status: this.status,
-      currentPlayer: this.currentPlayer,
-      hands: this.hands.map((hand) => ({
-        cards: hand.cards,
-        status: hand.status,
-        value: this.calculateHandValue(hand.cards),
-        playerId: hand.playerId,
-        playerName: hand.playerName,
+      gameId: this.gameId,
+      gameStatus: this.status,
+      activePlayer: this.activePlayer,
+      players: Array.from(this.hands.entries()).map(([id, hands]) => ({
+        id,
+        name: this.players.get(id) ?? "Unknown",
+        hands: hands.map((hand) => ({
+          cards: hand.cards,
+          status: hand.status,
+          value: hand.value,
+        })),
       })),
       dealerHand: {
         cards: this.dealerHand,
         value: this.calculateHandValue(this.dealerHand),
       },
-      deck: {
-        remaining: this.deck.getCount(),
-      },
-      gameId: this.gameId,
     };
   }
 
-  // NEW METHODS FOR PLAYER MANAGEMENT
-
-  // Set the game ID
-  public setGameId(gameId: string): void {
-    this.gameId = gameId;
-  }
-
-  // Get the game ID
-  public getGameId(): string | undefined {
-    return this.gameId;
-  }
-
-  // Add a player to the game
-  public addPlayer(playerId: string, playerName: string): number {
-    // Find an empty seat
-    for (let i = 0; i < this.hands.length; i++) {
-      if (!this.hands[i].playerId) {
-        this.hands[i].playerId = playerId;
-        this.hands[i].playerName = playerName;
-        this.playerMap.set(i, playerId); // Map the hand index to player ID
-        return i; // Return the seat index
-      }
+  handleAction(playerID: string, action: string) {
+    if (this.players.get(playerID) === undefined) {
+      throw new Error("Player not in game");
+    }
+    if (!Object.values(BlackjackAction).includes(action as BlackjackAction)) {
+      throw new Error("Invalid action");
     }
 
-    throw new Error("Game is full");
-  }
-
-  // Remove a player from the game
-  public removePlayer(playerId: string): void {
-    for (let i = 0; i < this.hands.length; i++) {
-      if (this.hands[i].playerId === playerId) {
-        this.hands[i].playerId = undefined;
-        this.hands[i].playerName = undefined;
-        this.playerMap.delete(i);
+    switch (action as BlackjackAction) {
+      case BlackjackAction.HIT:
+        this.hit(playerID);
         break;
-      }
+      case BlackjackAction.STAND:
+        this.stand(playerID);
+        break;
+      case BlackjackAction.SPLIT:
+        throw new Error("Split action not implemented yet");
     }
-  }
-
-  // Find player index by player ID
-  public getPlayerIndex(playerId: string): number {
-    for (let i = 0; i < this.hands.length; i++) {
-      if (this.hands[i].playerId === playerId) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  // Check if it's a player's turn
-  public isPlayerTurn(playerId: string): boolean {
-    const playerIndex = this.getPlayerIndex(playerId);
-    return (
-      playerIndex === this.currentPlayer &&
-      this.status === GameStatus.PLAYER_TURN
-    );
-  }
-
-  // Get number of active players
-  public getPlayerCount(): number {
-    return this.hands.filter((hand) => hand.playerId !== undefined).length;
-  }
-
-  // Check if the game is ready to start
-  public isReadyToStart(): boolean {
-    return this.getPlayerCount() >= 1 && this.status === GameStatus.DEALING;
-  }
-
-  // Check if this player can hit
-  public canHit(playerId: string): boolean {
-    const playerIndex = this.getPlayerIndex(playerId);
-    if (playerIndex === -1) return false;
-
-    return (
-      this.status === GameStatus.PLAYER_TURN &&
-      playerIndex === this.currentPlayer &&
-      this.hands[playerIndex].status === HandStatus.PLAYING
-    );
-  }
-
-  // Check if this player can stand
-  public canStand(playerId: string): boolean {
-    return this.canHit(playerId); // Same conditions as hit
-  }
-
-  // Convert the game state to client-friendly format
-  public getClientGameState(): ClientGameState {
-    const state = this.getGameState();
-
-    return {
-      gameId: this.gameId ?? "",
-      players: this.hands
-        .filter((hand) => hand.playerId !== undefined)
-        .map((hand, index) => ({
-          id: hand.playerId ?? "",
-          name: hand.playerName ?? `Player ${String(index + 1)}`,
-          cards: hand.cards,
-          score: this.calculateHandValue(hand.cards),
-          isBusted: hand.status === HandStatus.BUSTED,
-          hasStood:
-            hand.status === HandStatus.STOOD ||
-            hand.status === HandStatus.BLACKJACK,
-          isActive:
-            state.currentPlayer === index &&
-            state.status === GameStatus.PLAYER_TURN,
-        })),
-      dealerCards: state.dealerHand.cards,
-      dealerScore: state.dealerHand.value ?? 0,
-      dealerHasHiddenCard: state.status === GameStatus.PLAYER_TURN,
-      currentPlayerId:
-        ((state.status === GameStatus.PLAYER_TURN &&
-          state.currentPlayer >= 0 &&
-          this.hands[state.currentPlayer]?.playerId) as string | null) ?? null,
-      gameStatus: this.mapGameStatus(state.status),
-      winner: this.determineWinner(),
-    };
-  }
-
-  // Map internal game status to client-friendly format
-  private mapGameStatus(
-    status: GameStatus
-  ): "waiting" | "playing" | "roundOver" | "gameOver" {
-    switch (status) {
-      case GameStatus.DEALING:
-        return "waiting";
-      case GameStatus.PLAYER_TURN:
-      case GameStatus.DEALER_TURN:
-        return "playing";
-      case GameStatus.RESOLVING:
-      case GameStatus.COMPLETE:
-        return "roundOver";
-      default:
-        return "waiting";
-    }
-  }
-
-  // Determine winner for client display
-  private determineWinner(): string | null {
-    if (this.status !== GameStatus.COMPLETE) {
-      return null;
-    }
-
-    // Find winning player
-    for (const hand of this.hands) {
-      if (hand.status === HandStatus.WIN && hand.playerId) {
-        return hand.playerId ?? null;
-      }
-    }
-
-    return null;
   }
 }

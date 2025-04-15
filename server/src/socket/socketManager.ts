@@ -1,18 +1,19 @@
 import { Server, Socket } from "socket.io";
-import { gameStore, GameType } from "../games/gameStore.js";
+import { gameStore, GameType, isValidGameType } from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
 import jwt from "jsonwebtoken";
 import Player from "../models/userModel.js";
+import { Game, GameStatus } from "../games/game.js";
 
 interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
   "game-state": (state: unknown) => void;
-  "game-created": (data: { gameId: string }) => void;
-  "join-success": (data: { gameId: string }) => void;
+  "lobby-created": (data: { gameID: string }) => void;
+  "join-success": (data: { gameID: string }) => void;
   "lobby-update": (
     data: {
-      gameId: string;
+      gameID: string;
       type: string;
       playerCount: number;
       joinable: boolean;
@@ -20,21 +21,19 @@ interface ServerToClientEvents {
   ) => void;
 
   // Blackjack specific events
-  "blackjack-round-over": (winner: string | null) => void;
-  "blackjack-game-over": (winner: string | null) => void;
+  "round-over": (winner: string | null) => void;
+  "game-over": (winner: string | null) => void;
 }
 
 interface ClientToServerEvents {
-  // Common events
-  "create-blackjack": (data: { playerName: string }) => void;
-  "join-blackjack": (data: { gameId: string; playerName: string }) => void;
+  "create-lobby": (data: { playerName: string; gameType: string }) => void;
+  "join-lobby": (data: { gameID: string; playerName: string }) => void;
   "get-active-games": () => void;
-
-  // Game specific events
-  "start-blackjack": (data: { gameId: string }) => void;
-  "blackjack-hit": (data: { gameId: string }) => void;
-  "blackjack-stand": (data: { gameId: string }) => void;
-  "blackjack-new-round": (data: { gameId: string }) => void;
+  "start-game": (data: { gameID: string }) => void;
+  "new-round": (data: { gameID: string }) => void;
+  "leave-game": (data: { gameID: string }) => void;
+  // generic action event for all games and actions, individual games can handle their own actions
+  "game-action": (data: { gameID: string; action: string }) => void;
 
   // Authentication (now optional)
   authenticate: (
@@ -53,7 +52,7 @@ interface InterServerEvents {
 interface SocketData {
   userId?: number;
   username?: string;
-  playerId?: string;
+  playerID?: string;
   currentGameId?: string;
   playerName?: string;
   isAuthenticated: boolean;
@@ -91,7 +90,7 @@ export function setupSocketServer(
 
     // Initialize socket with unauthenticated status
     socket.data.isAuthenticated = false;
-    socket.data.playerId = socket.id;
+    socket.data.playerID = socket.id;
 
     // Handle get active games request (anonymous users can see available games)
     socket.on("get-active-games", () => {
@@ -99,14 +98,21 @@ export function setupSocketServer(
         // Get all active games
         const allGames = Array.from(gameStore.getAllGames().entries());
 
+        // get max player count for this game type
+        const gameTypeMaxPlayers = {
+          [GameType.BLACKJACK]: Blackjack.MAX_PLAYERS,
+          // Add other game types here
+        };
+
         // Format for client
-        const activeGames = allGames.map(([gameId, gameInfo]) => ({
-          gameId,
+        const activeGames = allGames.map(([gameID, gameInfo]) => ({
+          gameID,
           type: gameInfo.type,
-          playerCount: gameStore.getPlayerCount(gameId),
+          playerCount: gameInfo.game.getPlayerCount(),
           joinable:
             gameInfo.type === GameType.BLACKJACK
-              ? gameStore.getPlayerCount(gameId) < 4
+              ? gameInfo.game.getPlayerCount() <
+                gameTypeMaxPlayers[gameInfo.type]
               : true, // Blackjack allows up to 4 players
         }));
 
@@ -150,28 +156,54 @@ export function setupSocketServer(
       }
     });
 
-    // Handle Blackjack game creation
-    socket.on("create-blackjack", (data) => {
+    // TODO: handle lobby separate from game
+    socket.on("create-lobby", (data) => {
       try {
         // Set player name (works for both authenticated and anonymous users)
         socket.data.playerName = data.playerName;
 
-        // Create a new Blackjack game (initially for 4 players)
-        const { gameId, game } = gameStore.createBlackjackGame(4);
-        socket.data.currentGameId = gameId;
+        if (!data.gameType) {
+          socket.emit("error", "Game type is required.");
+          return;
+        }
+
+        if (!isValidGameType(data.gameType)) {
+          socket.emit("error", "Unsupported game type.");
+          return;
+        }
+
+        let gameID: string;
+        let game: Game;
+        switch (data.gameType) {
+          case GameType.BLACKJACK: {
+            // Create a Blackjack game
+            const result = gameStore.createGame(
+              GameType.BLACKJACK,
+              (gameID: string) => gameStore.createBlackjackGame(gameID)
+            );
+            gameID = result.gameID;
+            game = result.game;
+            break;
+          }
+          // Add cases for other game types as needed
+          default: {
+            socket.emit("error", "Unsupported game type.");
+            return;
+          }
+        }
+
+        socket.data.currentGameId = gameID;
 
         // Add the player to the game
         game.addPlayer(socket.id, data.playerName);
 
-        // Map player to game
-        gameStore.addPlayerToGame(socket.id, gameId);
         playerSocketMap.set(socket.id, socket);
 
         // Join socket to a room with the game ID
-        void socket.join(gameId);
+        void socket.join(gameID);
 
         // Notify client of successful game creation
-        socket.emit("game-created", { gameId });
+        socket.emit("lobby-created", { gameID });
 
         // Send initial game state
         socket.emit("game-state", game.getClientGameState());
@@ -181,13 +213,13 @@ export function setupSocketServer(
       }
     });
 
-    // Handle joining a Blackjack game
-    socket.on("join-blackjack", (data) => {
+    // TODO: handle join game
+    socket.on("join-lobby", (data) => {
       try {
-        const { gameId, playerName } = data;
+        const { gameID, playerName } = data;
 
         // Check if game exists
-        const gameInfo = gameStore.getGameWithType(gameId);
+        const gameInfo = gameStore.getGameWithType(gameID);
         if (!gameInfo) {
           socket.emit("error", "Game not found. Please check the game ID.");
           return;
@@ -207,7 +239,7 @@ export function setupSocketServer(
 
         // Set player data
         socket.data.playerName = playerName;
-        socket.data.currentGameId = gameId;
+        socket.data.currentGameId = gameID;
 
         // Add the player to the Blackjack game
         try {
@@ -217,33 +249,31 @@ export function setupSocketServer(
           return;
         }
 
-        // Map player to game
-        gameStore.addPlayerToGame(socket.id, gameId);
         playerSocketMap.set(socket.id, socket);
 
         // Join socket to the game room
-        void socket.join(gameId);
+        void socket.join(gameID);
 
         // Notify of successful join
-        socket.emit("join-success", { gameId });
+        socket.emit("join-success", { gameID });
 
         // Send current game state to the new player
         socket.emit("game-state", game.getClientGameState());
 
         // Update all other players
-        socket.to(gameId).emit("game-state", game.getClientGameState());
+        socket.to(gameID).emit("game-state", game.getClientGameState());
       } catch (error) {
         console.error("Error joining game:", error);
         socket.emit("error", "Failed to join game. Please try again.");
       }
     });
 
-    // Handle starting a Blackjack game
-    socket.on("start-blackjack", (data) => {
+    // TODO: handle starting game
+    socket.on("start-game", (data) => {
       try {
-        const { gameId } = data;
+        const { gameID } = data;
 
-        const game = gameStore.getGame(gameId);
+        const game = gameStore.getGame(gameID);
         if (game === undefined) {
           socket.emit("error", "Game not found.");
           return;
@@ -255,7 +285,7 @@ export function setupSocketServer(
         }
 
         // Check if game is ready to start
-        if (!game.isReadyToStart()) {
+        if (game.getStatus() !== GameStatus.READY) {
           socket.emit("error", "Game is not ready to start yet.");
           return;
         }
@@ -264,127 +294,52 @@ export function setupSocketServer(
         game.deal();
 
         // Update all clients with new game state
-        io.to(gameId).emit("game-state", game.getClientGameState());
+        io.to(gameID).emit("game-state", game.getClientGameState());
       } catch (error) {
         console.error("Error starting game:", error);
         socket.emit("error", "Failed to start game.");
       }
     });
 
-    // Handle player hit action
-    socket.on("blackjack-hit", (data) => {
+    socket.on("game-action", (data) => {
       try {
-        const { gameId } = data;
-        const playerId = socket.id;
+        const { gameID, action } = data;
+        const playerID = socket.id;
 
-        const game = gameStore.getGame(gameId);
+        const game = gameStore.getGame(gameID);
         if (game === undefined) {
           socket.emit("error", "Game not found.");
           return;
         }
-
-        if (!(game instanceof Blackjack)) {
-          socket.emit("error", "Game is not a Blackjack game.");
-          return;
-        }
-
-        // Check if player can hit
-        if (!game.canHit(playerId)) {
-          socket.emit("error", "You cannot hit right now.");
-          return;
-        }
-
-        // Find player index in the game
-        const playerIndex = game.getPlayerIndex(playerId);
-
-        // Execute hit action
-        game.hit(playerIndex);
-
-        // Update all clients with new game state
-        io.to(gameId).emit("game-state", game.getClientGameState());
-
-        // If game is complete, emit the round over event
-        const clientState = game.getClientGameState();
-        if (clientState.gameStatus === "roundOver") {
-          io.to(gameId).emit("blackjack-round-over", clientState.winner);
-        }
+        game.handleAction(playerID, action);
+        io.to(gameID).emit("game-state", game.getClientGameState());
       } catch (error) {
-        console.error("Error processing hit:", error);
-        socket.emit(
-          "error",
-          "Failed to hit. " + (error instanceof Error ? error.message : "")
-        );
+        console.error("Error processing game action:", error);
+        socket.emit("error", "Failed to process game action.");
       }
     });
 
-    // Handle player stand action
-    socket.on("blackjack-stand", (data) => {
+    // TODO: implement new round
+    socket.on("new-round", (data) => {
       try {
-        const { gameId } = data;
-        const playerId = socket.id;
-
-        const game = gameStore.getGame(gameId);
-        if (!game) {
-          socket.emit("error", "Game not found.");
-          return;
-        }
-
-        if (!(game instanceof Blackjack)) {
-          socket.emit("error", "Game is not a Blackjack game.");
-          return;
-        }
-
-        // Check if player can stand
-        if (!game.canStand(playerId)) {
-          socket.emit("error", "You cannot stand right now.");
-          return;
-        }
-
-        // Find player index in the game
-        const playerIndex = game.getPlayerIndex(playerId);
-
-        // Execute stand action
-        game.stand(playerIndex);
-
-        // Update all clients with new game state
-        io.to(gameId).emit("game-state", game.getClientGameState());
-
-        // If game is complete, emit the round over event
-        const clientState = game.getClientGameState();
-        if (clientState.gameStatus === "roundOver") {
-          io.to(gameId).emit("blackjack-round-over", clientState.winner);
-        }
-      } catch (error) {
-        console.error("Error processing stand:", error);
-        socket.emit(
-          "error",
-          "Failed to stand. " + (error instanceof Error ? error.message : "")
-        );
-      }
-    });
-
-    // Handle new round request
-    socket.on("blackjack-new-round", (data) => {
-      try {
-        const { gameId } = data;
-        const game = gameStore.getGame(gameId);
+        const { gameID } = data;
+        const game = gameStore.getGame(gameID);
 
         if (!game) {
           socket.emit("error", "Game not found.");
           return;
         }
 
-        if (!(game instanceof Blackjack)) {
-          socket.emit("error", "Game is not a Blackjack game.");
+        if (game.getStatus() !== GameStatus.FINISHED) {
+          socket.emit("error", "Game is not finished yet.");
           return;
         }
 
         // Start a new round
-        game.newRound();
-        game.deal();
+        game.newGame();
 
         // Update all clients with new game state
-        io.to(gameId).emit("game-state", game.getClientGameState());
+        io.to(gameID).emit("game-state", game.getClientGameState());
       } catch (error) {
         console.error("Error starting new round:", error);
         socket.emit("error", "Failed to start new round.");
@@ -395,34 +350,31 @@ export function setupSocketServer(
     socket.on("disconnect", () => {
       console.log(`Socket disconnected: ${socket.id}`);
 
-      const playerId = socket.id;
-      const gameId = socket.data.currentGameId;
+      const playerID = socket.id;
+      const gameID = socket.data.currentGameId;
 
-      if (gameId) {
+      if (gameID) {
         try {
-          const game = gameStore.getGame(gameId);
+          const game = gameStore.getGame(gameID);
           if (game) {
             // Remove player from the game
-            game.removePlayer(playerId);
+            game.removePlayer(playerID);
 
             // Notify remaining players
-            socket.to(gameId).emit("game-state", game.getClientGameState());
+            socket.to(gameID).emit("game-state", game.getClientGameState());
 
             // If the game is now empty, remove it
             if (game.getPlayerCount() === 0) {
-              gameStore.removeGame(gameId);
+              gameStore.removeGame(gameID);
             }
           }
         } catch (error) {
           console.error("Error handling player disconnect:", error);
         }
-
-        // Clean up player-game association
-        gameStore.removePlayer(playerId);
       }
 
       // Remove from player-socket map
-      playerSocketMap.delete(playerId);
+      playerSocketMap.delete(playerID);
     });
   });
 }

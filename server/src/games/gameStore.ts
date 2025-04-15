@@ -4,10 +4,10 @@ import { v4 } from "uuid";
 
 // Define game types
 export enum GameType {
-  BLACKJACK = "blackjack",
+  BLACKJACK = "Blackjack",
   // Add other game types as you create them
-  POKER = "poker",
-  SOLITAIRE = "solitaire",
+  POKER = "Poker",
+  WAR = "War",
 }
 
 // Store game instance with its type
@@ -15,6 +15,10 @@ interface GameInfo {
   game: Game;
   type: GameType;
 }
+
+export const isValidGameType = (gameType: string): gameType is GameType => {
+  return Object.values(GameType).includes(gameType as GameType);
+};
 
 // Store all active games with their IDs
 const activeGames = new Map<string, GameInfo>();
@@ -26,65 +30,40 @@ export const gameStore = {
   // Generic game creation with type discrimination
   createGame<T extends Game>(
     gameType: GameType,
-    createFn: () => T
-  ): { gameId: string; game: T } {
-    const gameId = v4();
-    const game = createFn();
-    activeGames.set(gameId, { game, type: gameType });
-    return { gameId, game };
+    createFn: (gameID: string) => T
+  ): { gameID: string; game: T } {
+    const gameID = v4();
+    const game = createFn(gameID);
+    activeGames.set(gameID, { game, type: gameType });
+    return { gameID, game };
   },
 
   // Factory methods for specific game types
-  createBlackjackGame(numPlayers: number): { gameId: string; game: Blackjack } {
-    const result = this.createGame(
-      GameType.BLACKJACK,
-      () => new Blackjack(numPlayers)
-    );
-    // Set the game ID explicitly on the Blackjack instance
-    result.game.setGameId(result.gameId);
-    // Initialize the game state by dealing cards
-    result.game.deal();
-    return result;
+  createBlackjackGame(gameID: string): Blackjack {
+    return new Blackjack(gameID);
   },
 
   // Add similar methods for other game types
   // createPokerGame(...) { ... }
 
   // Get game with type safety
-  getGame(gameId: string): Game | undefined {
-    const gameInfo = activeGames.get(gameId);
+  getGame(gameID: string): Game | undefined {
+    const gameInfo = activeGames.get(gameID);
     return gameInfo ? gameInfo.game : undefined;
   },
 
   // Get game with type information
-  getGameWithType(gameId: string): { game: Game; type: GameType } | undefined {
-    return activeGames.get(gameId);
+  getGameWithType(gameID: string): { game: Game; type: GameType } | undefined {
+    return activeGames.get(gameID);
   },
 
   // Get game type
-  getGameType(gameId: string): GameType | undefined {
-    return activeGames.get(gameId)?.type;
+  getGameType(gameID: string): GameType | undefined {
+    return activeGames.get(gameID)?.type;
   },
 
-  removeGame(gameId: string): boolean {
-    return activeGames.delete(gameId);
-  },
-
-  // Associate a player with a game
-  addPlayerToGame(playerId: string, gameId: string): void {
-    playerGameMap.set(playerId, gameId);
-  },
-
-  // Get a player's game with generic return type
-  getPlayerGame(playerId: string): Game | undefined {
-    const gameId = playerGameMap.get(playerId);
-    if (!gameId) return undefined;
-    return this.getGame(gameId);
-  },
-
-  // Remove a player from game mapping
-  removePlayer(playerId: string): void {
-    playerGameMap.delete(playerId);
+  removeGame(gameID: string): boolean {
+    return activeGames.delete(gameID);
   },
 
   // Get all active games
@@ -92,38 +71,16 @@ export const gameStore = {
     return activeGames;
   },
 
-  // Get player count for a specific game
-  getPlayerCount(gameId: string): number {
-    let count = 0;
-    for (const [, mappedGameId] of playerGameMap.entries()) {
-      if (mappedGameId === gameId) {
-        count++;
-      }
-    }
-    return count;
-  },
-
-  // Get all players in a game
-  getGamePlayers(gameId: string): string[] {
-    const players: string[] = [];
-    for (const [playerId, mappedGameId] of playerGameMap.entries()) {
-      if (mappedGameId === gameId) {
-        players.push(playerId);
-      }
-    }
-    return players;
-  },
-
   // Clean up inactive games (call periodically)
   cleanupInactiveGames(maxAgeMs: number): void {
     const now = Date.now();
-    for (const [gameId, gameInfo] of activeGames.entries()) {
+    for (const [gameID, gameInfo] of activeGames.entries()) {
       if (now - gameInfo.game.lastActivityTime > maxAgeMs) {
-        activeGames.delete(gameId);
+        activeGames.delete(gameID);
         // Also remove player mappings for this game
-        for (const [playerId, mappedGameId] of playerGameMap.entries()) {
-          if (mappedGameId === gameId) {
-            playerGameMap.delete(playerId);
+        for (const [playerID, mappedGameId] of playerGameMap.entries()) {
+          if (mappedGameId === gameID) {
+            playerGameMap.delete(playerID);
           }
         }
       }
