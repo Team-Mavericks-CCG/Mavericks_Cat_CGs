@@ -296,7 +296,7 @@ function HomePage() {
               onClick={() => setOpenSolitaire(true)}
             >
               <img
-                src="./assets/cards/images/solitaireButton.png"
+                src="/assets/images/solitaireButton.png"
                 alt="Solitaire"
                 className="game-icon"
               />
@@ -307,7 +307,7 @@ function HomePage() {
               onClick={() => setOpenWar(true)}
               >
               <img
-                src="./assets/cards/images/warIcon.png"
+                src="/assets/images/warIcon.png"
                 alt="Solitaire"
                 className="game-icon"
               />
@@ -318,7 +318,7 @@ function HomePage() {
                 onClick={() => setOpenBlackjack(true)}
                 >
                 <img
-                src="./assets/cards/images/blackjackButton.png"
+                src="/assets/images/blackjackButton.png"
                 alt="Solitaire"
                 className="game-icon"
                 /> 
@@ -329,7 +329,7 @@ function HomePage() {
                   onClick={() => setOpenPoker(true)}
                   >
                   <img
-                  src="./assets/cards/images/pokerButton.png"
+                  src="/assets/images/pokerButton.png"
                   alt="Solitaire"
                   className="game-icon"
                   />
