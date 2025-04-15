@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./LobbyPage.css";
+//import "./snake.tsx";
 import { useNavigate, useParams } from "react-router-dom";
 
 // players that will be displayed in the lobby 
@@ -100,6 +101,7 @@ const LobbyPage: React.FC = () => {
             <button className="leave-btn" onClick={handleLeave}>LEAVE</button>
         </div>
         </div>
+        
       </div>
   );
 };
