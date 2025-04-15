@@ -1,11 +1,8 @@
 import React, { useState } from "react";
-import {
-  getCardImage,
-  getCardBackImage,
-} from "../utils/CardImage";
-import "./blackjack.css";
-import { Button, Typography, Box, Paper} from "@mui/material";
-import { BlackjackGame, Card } from "./blackjackModel"; 
+import { getCardImage, getCardBackImage } from "../utils/CardImage";
+import "./blackjackStyle.css";
+import { Button, Typography, Box, Paper } from "@mui/material";
+import { BlackjackGame, Card } from "./blackjackModel";
 
 const BlackjackPage: React.FC = () => {
   const [game, setGame] = useState<BlackjackGame>(new BlackjackGame());
@@ -30,7 +27,13 @@ const BlackjackPage: React.FC = () => {
 
   const stand = () => {
     game.playerStand(); // Player stands (dealer's turn)
-    setGameResult(game.result === "win" ? "You win!" : game.result === "lose" ? "You lose!" : "It's a draw!");
+    setGameResult(
+      game.result === "win"
+        ? "You win!"
+        : game.result === "lose"
+          ? "You lose!"
+          : "It's a draw!"
+    );
     setIsGameOver(true);
     setGame(new BlackjackGame()); // Trigger re-render
   };
@@ -38,9 +41,10 @@ const BlackjackPage: React.FC = () => {
   const renderHand = (hand: Card[], hideFirst = false) => (
     <Box display="flex" gap={1}>
       {hand.map((card, idx) => {
-        const imgSrc = hideFirst && idx === 0 && !isGameOver
-          ? getCardBackImage()
-          : getCardImage(card);
+        const imgSrc =
+          hideFirst && idx === 0 && !isGameOver
+            ? getCardBackImage()
+            : getCardImage(card);
         return (
           <img
             key={idx}
@@ -61,7 +65,8 @@ const BlackjackPage: React.FC = () => {
 
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="h6">Dealer's Hand</Typography>
-        {renderHand(game.dealerHand.cards, true)} {/* Hide the dealer's first card initially */}
+        {renderHand(game.dealerHand.cards, true)}{" "}
+        {/* Hide the dealer's first card initially */}
       </Paper>
 
       <Paper sx={{ p: 2, mb: 2 }}>
@@ -73,34 +78,33 @@ const BlackjackPage: React.FC = () => {
         {gameResult && <span>{gameResult}</span>}
       </Typography>
 
-        <Box display="flex" justifyContent="center" gap={2}>
-            <Button
-            variant="contained"
-            color="primary"
-            onClick={startGame}
-            disabled={!isGameOver}
-            >
-            Start New Game
-            </Button>
-            <Button
-            variant="contained"
-            color="secondary"
-            onClick={hit}
-            disabled={isGameOver}
-            >
-            Hit
-            </Button>
-            <Button
-            variant="contained"
-            color="secondary"
-            onClick={stand}
-            disabled={isGameOver}
-            >
-            Stand
-            </Button>
-
-        </Box>
+      <Box display="flex" justifyContent="center" gap={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={startGame}
+          disabled={!isGameOver}
+        >
+          Start New Game
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={hit}
+          disabled={isGameOver}
+        >
+          Hit
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={stand}
+          disabled={isGameOver}
+        >
+          Stand
+        </Button>
       </Box>
+    </Box>
   );
 };
 
