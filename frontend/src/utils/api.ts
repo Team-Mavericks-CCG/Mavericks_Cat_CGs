@@ -16,7 +16,8 @@ interface AuthResponse {
 interface UserProfileResponse {
   user: {
     username: string;
-    lastLogin: string;
+    createdAt: string;
+    profilePicture: number;
   };
 }
 
@@ -64,7 +65,7 @@ export const AuthAPI = {
 
   logout: () => localStorage.removeItem("authToken"),
 
-  getProfile: () => API.get<UserProfileResponse>("/auth/verify"),
+  getProfile: () => API.get<UserProfileResponse>("/auth/profile"),
 
   changePassword: (username: string, password: string, newPassword: string) =>
     API.post<{ success: boolean; message: string }>("/auth/change-password", {

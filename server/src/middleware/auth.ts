@@ -9,7 +9,7 @@ export interface AuthUser {
   playerid: number;
   username?: string;
   lastLogin?: Date | null;
-  joinedAt?: Date | null;
+  createdAt?: Date | null;
   profilePicture?: number;
 }
 
@@ -91,7 +91,7 @@ export const verifyToken = asyncHandler(
         playerid: user.playerid,
         username: user.username,
         lastLogin: user.lastLogin,
-        joinedAt: user.joinedAt,
+        createdAt: user.createdAt,
         profilePicture: user.profilePicture,
       };
 

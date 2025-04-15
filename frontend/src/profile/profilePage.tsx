@@ -8,6 +8,7 @@ import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
+import FormLabel from "@mui/material/FormLabel";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
@@ -19,6 +20,7 @@ import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import { AuthAPI } from "../utils/api";
 import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
+import { FormControl } from "@mui/material";
 
 interface UserResponse {
   message: string;
@@ -34,7 +36,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   alignSelf: "center",
   width: "100%",
   padding: theme.spacing(4),
-  gap: theme.spacing(2),
+  gap: theme.spacing(1),
   margin: "auto",
   boxShadow: theme.shadows[1],
   [theme.breakpoints.up("sm")]: {
@@ -44,8 +46,8 @@ const Card = styled(MuiCard)(({ theme }) => ({
 
 const ProfileHeader = styled(Box)(({ theme }) => ({
   display: "flex",
-  gap: theme.spacing(3),
-  marginBottom: theme.spacing(3),
+  gap: theme.spacing(1),
+  marginBottom: theme.spacing(1),
   [theme.breakpoints.down("sm")]: {
     flexDirection: "column",
     alignItems: "center",
@@ -75,11 +77,10 @@ export default function ProfilePage(props: {
     joinDate: "",
   });
   const [editData, setEditData] = React.useState(userData);
-  const [errors, setErrors] = React.useState({
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [passwordError, setPasswordError] = React.useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
+  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState("");
 
   React.useEffect(() => {
     const token = localStorage.getItem("authToken");
@@ -95,7 +96,6 @@ export default function ProfilePage(props: {
         setUserData({
           ...userData,
           username: data.user.username,
-          // TODO: replace with actual join date
           joinDate: `Joined ${new Date(data.user.lastLogin).toLocaleDateString()}`,
         });
         setEditData({
@@ -106,66 +106,53 @@ export default function ProfilePage(props: {
       .catch(() => {
         void navigate("/signin");
       });
-  }, [editData, navigate, userData]);
+  }, [navigate]);
 
-  const validateForm = () => {
-    const username = document.getElementById("username") as HTMLInputElement;
-    const password = document.getElementById("password") as HTMLInputElement;
-    const confirmPassword = document.getElementById(
-      "confirmPassword"
-    ) as HTMLInputElement;
-    const newErrors = { username: "", password: "", confirmPassword: "" };
-    let isValid = true;
-
-    if (!username.value || username.value.length < 3) {
-      newErrors.username = "Username must be at least 3 characters long.";
-      isValid = false;
+  const validatePassword = (value: string): boolean => {
+    if (!value || value.length < 6) {
+      setPasswordError(true);
+      setPasswordErrorMessage("Password must be at least 6 characters long.");
+      return false;
     }
-
-    if (password.value && password.value.length < 6) {
-      newErrors.password = "Password must be at least 6 characters long.";
-      isValid = false;
-    }
-
-    if (confirmPassword.value !== password.value) {
-      newErrors.confirmPassword = "Passwords must match";
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
+    setPasswordError(false);
+    setPasswordErrorMessage("");
+    return true;
   };
 
-  const handleSave = async () => {
-    if (!validateForm()) return;
+  const validateConfirmPassword = (password: string, confirmPassword: string): boolean => {
+    if (confirmPassword !== password) {
+      setConfirmPasswordError(true);
+      setConfirmPasswordErrorMessage("Passwords must be the same");
+      return false;
+    }
+    setConfirmPasswordError(false);
+    setConfirmPasswordErrorMessage("");
+    return true;
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    
+    if (!validatePassword(editData.password) || 
+        !validatePassword(editData.newPassword) || 
+        !validateConfirmPassword(editData.newPassword, editData.confirmPassword)) {
+      return;
+    }
 
     try {
-      // We need to update the API service to include this endpoint
-      // For now, we'll use our base API instance
       await AuthAPI.changePassword(
-        editData.username,
+        userData.username,
         editData.password,
         editData.newPassword
       );
-
-      setUserData({
-        ...userData,
-        username: editData.username,
-      });
       setIsEditing(false);
     } catch (err) {
       if (err instanceof AxiosError && err.response) {
-        const status = err.response.status;
-        if (status === 409) {
-          setErrors((prev) => ({
-            ...prev,
-            username: "Username already taken",
-          }));
-        } else if (status === 401) {
-          setErrors((prev) => ({
-            ...prev,
-            password: "Current password is incorrect",
-          }));
+        if (err.response.status === 401) {
+          setPasswordError(true);
+          setPasswordErrorMessage("Current password is incorrect");
+        } else {
+          alert("An error occurred while changing password");
         }
       }
     }
@@ -209,43 +196,121 @@ export default function ProfilePage(props: {
           {isEditing ? (
             <Box
               component="form"
-              sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+              onSubmit={(e) => {
+                void handleSubmit(e);
+              }}
+              sx={{ display: "flex", flexDirection: "column", gap: 0.1 }}
             >
-              <TextField
-                id="password"
-                label="Current Password"                                  //todo: fix current password
-                type="password"
-                value={editData.password}
-                onChange={(e) =>
-                  setEditData({ ...editData, password: e.target.value })
-                }
-                error={!!errors.password}
-                helperText={errors.password}
-              />
-              <TextField
-                id="newPassword"
-                label="New Password"
-                type="password"
-                value={editData.newPassword}
-                onChange={(e) =>
-                  setEditData({ ...editData, newPassword: e.target.value })
-                }
-              />
-              <TextField
-                id="confirmPassword"
-                label="Confirm New Password"
-                type="password"
-                value={editData.confirmPassword}
-                onChange={(e) =>
-                  setEditData({ ...editData, confirmPassword: e.target.value })
-                }
-                error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword}
-              />
-              <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
-                <Button onClick={() => setIsEditing(false)}>Cancel</Button>
-                <Button variant="contained" onClick={() => void handleSave()}>
+              <FormControl sx={{ height: "90px", mb: 1 }}>
+                <FormLabel htmlFor="current-password">Current Password</FormLabel>
+                <TextField
+                  error={passwordError}
+                  helperText={passwordErrorMessage}
+                  name="password"
+                  placeholder="••••••"
+                  type="password"
+                  id="current-password"
+                  autoComplete="current-password"
+                  required
+                  fullWidth
+                  variant="outlined"
+                  value={editData.password}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEditData({ ...editData, password: value });
+                    validatePassword(value);
+                  }}
+                  color={passwordError ? "error" : "primary"}
+                  sx={{
+                    "& .MuiFormHelperText-root": {
+                      minHeight: "20px",
+                      margin: "3px 14px 0",
+                    },
+                  }}
+                />
+              </FormControl>
+              <FormControl sx={{ height: "90px", mb: 1 }}>
+                <FormLabel htmlFor="new-password">New Password</FormLabel>
+                <TextField
+                  error={passwordError}
+                  helperText={passwordErrorMessage}
+                  name="newPassword"
+                  placeholder="••••••"
+                  type="password"
+                  id="new-password"
+                  autoComplete="new-password"
+                  required
+                  fullWidth
+                  variant="outlined"
+                  value={editData.newPassword}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEditData({ ...editData, newPassword: value });
+                    validatePassword(value);
+                    if (editData.confirmPassword) {
+                      validateConfirmPassword(value, editData.confirmPassword);
+                    }
+                  }}
+                  color={passwordError ? "error" : "primary"}
+                  sx={{
+                    "& .MuiFormHelperText-root": {
+                      minHeight: "20px",
+                      margin: "3px 14px 0",
+                    },
+                  }}
+                />
+              </FormControl>
+              <FormControl sx={{ height: "90px", mb: 1 }}>
+                <FormLabel htmlFor="confirm-password">Confirm New Password</FormLabel>
+                <TextField
+                  error={confirmPasswordError}
+                  helperText={confirmPasswordErrorMessage}
+                  name="confirmPassword"
+                  placeholder="••••••"
+                  type="password"
+                  id="confirm-password"
+                  autoComplete="new-password"
+                  required
+                  fullWidth
+                  variant="outlined"
+                  value={editData.confirmPassword}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setEditData({ ...editData, confirmPassword: value });
+                    validateConfirmPassword(editData.newPassword, value);
+                  }}
+                  color={confirmPasswordError ? "error" : "primary"}
+                  sx={{
+                    "& .MuiFormHelperText-root": {
+                      minHeight: "20px",
+                      margin: "3px 14px 0",
+                    },
+                  }}
+                />
+              </FormControl>
+
+              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                <Button 
+                  type="submit" 
+                  fullWidth 
+                  variant="contained"
+                  color="primary"
+                >
                   Save Changes
+                </Button>
+                <Button 
+                  fullWidth 
+                  variant="outlined"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditData(userData);
+                    setPasswordError(false);
+                    setPasswordErrorMessage("");
+                    setConfirmPasswordError(false);
+                    setConfirmPasswordErrorMessage("");
+                  }}
+                >
+                  Cancel
                 </Button>
               </Box>
             </Box>
