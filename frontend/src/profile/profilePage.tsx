@@ -35,7 +35,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   flexDirection: "column",
   alignSelf: "center",
   width: "100%",
-  padding: theme.spacing(4),
+  padding: theme.spacing(2),
   gap: theme.spacing(1),
   margin: "auto",
   boxShadow: theme.shadows[1],
@@ -167,7 +167,7 @@ export default function ProfilePage(props: {
           <ProfileHeader>
             <Avatar
               src={userData.avatarUrl}
-              sx={{ width: 150, height: 150 }}
+              sx={{ width: 125, height: 125 }}
               alt={userData.username}
             />
             <Box sx={{ flex: 1 }}>
