@@ -9,34 +9,11 @@ import {
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
-import { Button, styled, Typography } from "@mui/material";
 import { CardComponent } from "../utils/CardComponent";
 import { GameRules } from "../components/GameRules";
+import { GameButton } from "../components/GameButton";
 import { LeaderboardAPI } from "../../utils/api";
-
-const UndoButton = styled(Button)(() => ({
-  backgroundColor: "rgba(20, 20, 20, 0.8)",
-  borderRadius: "5px",
-  cursor: "pointer",
-  fontSize: "16px",
-  transition: "all 0.2s ease",
-  textAlign: "center",
-  fontWeight: "bold",
-  boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.2)",
-  "&:hover": {
-    backgroundColor: "rgba(20, 20, 20, 0.6)",
-    transform: "translateY(-2px)",
-    boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-  },
-  "&:active": {
-    transform: "translateY(0)",
-    boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.2)",
-  },
-  "&.Mui-disabled": {
-    backgroundColor: "rgba(20, 20, 20, 0.4)",
-    color: "rgba(255, 255, 255, 0.5)",
-  },
-}));
+import { Typography } from "@mui/material";
 
 export const SolitairePage: React.FC = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
@@ -402,22 +379,22 @@ export const SolitairePage: React.FC = () => {
             </div>
 
             <div className="controls-area">
-              <UndoButton
+              <GameButton
                 className="undo-button"
                 onClick={handleUndo}
                 disabled={!canUndo}
                 aria-label="Undo last move"
               >
                 Undo
-              </UndoButton>
+              </GameButton>
 
-              <UndoButton
+              <GameButton
                 className="new-game-button"
                 onClick={newGame}
                 aria-label="New game"
               >
                 New Game
-              </UndoButton>
+              </GameButton>
             </div>
           </div>
         </>

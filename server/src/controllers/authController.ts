@@ -59,11 +59,12 @@ async function checkPassword(username: string, password: string) {
 interface LoginRequestBody {
   username: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 // User login
 export function login(req: Request, res: Response) {
-  const { username, password } = req.body as LoginRequestBody;
+  const { username, password, rememberMe } = req.body as LoginRequestBody;
 
   try {
     checkPassword(username, password)
@@ -73,7 +74,7 @@ export function login(req: Request, res: Response) {
 
         // create a token with user id and secret key for following requests
         const token = jwt.sign({ id: user.playerid }, JWT_SECRET, {
-          expiresIn: "1h",
+          expiresIn: rememberMe ? "24h" : "1h",
         });
 
         // send success message
@@ -179,9 +180,11 @@ export function getProfile(req: Request, res: Response) {
 
     // send success message
     res.status(200).json({
-      username: user.username,
-      joinedAt: user.joinedAt,
-      profilePicture: user.profilePicture,
+      user: {
+        username: user.username,
+        createdAt: user.createdAt,
+        profilePicture: user.profilePicture,
+      },
     });
   } catch (error: unknown) {
     if (error instanceof AuthenticationError) {
