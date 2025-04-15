@@ -1,5 +1,9 @@
 import axios from "axios";
 
+// Define common server URL that can be used by both API and socket connections
+export const SERVER_URL =
+  (import.meta.env.VITE_BACKEND_URL as string) ?? "http://localhost:5000";
+
 // Define response types for API calls
 interface AuthResponse {
   token: string;
@@ -21,9 +25,6 @@ interface LeaderboardEntry {
   score: number;
   gameType: string;
 }
-
-// Define common server URL that can be used by both API and socket connections
-export const SERVER_URL = "http://localhost:5000";
 
 // Create an axios instance with default config
 const API = axios.create({
@@ -51,8 +52,12 @@ API.interceptors.request.use(
 
 // Auth-related API calls
 export const AuthAPI = {
-  login: (username: string, password: string) =>
-    API.post<AuthResponse>("/auth/login", { username, password }),
+  login: (username: string, password: string, rememberMe = false) =>
+    API.post<AuthResponse>("/auth/login", {
+      username,
+      password,
+      rememberMe,
+    }),
 
   register: (username: string, password: string) =>
     API.post<AuthResponse>("/auth/register", { username, password }),

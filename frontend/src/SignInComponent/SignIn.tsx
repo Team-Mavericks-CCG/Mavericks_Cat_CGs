@@ -67,6 +67,7 @@ export default function SignIn() {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [open, setOpen] = React.useState(false);
+  const [rememberMe, setRememberMe] = React.useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -90,7 +91,7 @@ export default function SignIn() {
     const password = data.get("password") as string;
 
     try {
-      const response = await AuthAPI.login(username, password);
+      const response = await AuthAPI.login(username, password, rememberMe);
 
       localStorage.setItem("authToken", response.data.token);
       localStorage.setItem("username", username);
@@ -217,6 +218,8 @@ export default function SignIn() {
             />
           </FormControl>
           <FormControlLabel
+            checked={rememberMe}
+            onChange={(_event, checked) => setRememberMe(checked)}
             control={<Checkbox value="remember" color="primary" />}
             label="Remember me"
           />
