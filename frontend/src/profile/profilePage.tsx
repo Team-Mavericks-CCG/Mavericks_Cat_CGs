@@ -22,14 +22,6 @@ import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { FormControl } from "@mui/material";
 
-interface UserResponse {
-  message: string;
-  user: {
-    username: string;
-    lastLogin: string;
-  };
-}
-
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
   flexDirection: "column",
@@ -80,11 +72,13 @@ export default function ProfilePage(props: {
   const [passwordError, setPasswordError] = React.useState(false);
   const [passwordErrorMessage, setPasswordErrorMessage] = React.useState("");
   const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
-  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] = React.useState("");
+  const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] =
+    React.useState("");
 
   React.useEffect(() => {
+    console.log(localStorage.getItem("authToken"));
     const token = localStorage.getItem("authToken");
-    if (!token) {
+    if (token === null) {
       void navigate("/signin");
       return;
     }
@@ -92,18 +86,19 @@ export default function ProfilePage(props: {
     // Verify token and get user data
     AuthAPI.getProfile()
       .then((response) => {
-        const data = response.data as UserResponse;
+        const data = response.data;
         setUserData({
           ...userData,
           username: data.user.username,
-          joinDate: `Joined ${new Date(data.user.lastLogin).toLocaleDateString()}`,
+          joinDate: `Joined ${new Date(data.user.createdAt).toLocaleDateString()}`,
         });
         setEditData({
           ...editData,
           username: data.user.username,
         });
       })
-      .catch(() => {
+      .catch((e) => {
+        console.error("Error fetching user data", e);
         void navigate("/signin");
       });
   }, [navigate]);
@@ -119,7 +114,10 @@ export default function ProfilePage(props: {
     return true;
   };
 
-  const validateConfirmPassword = (password: string, confirmPassword: string): boolean => {
+  const validateConfirmPassword = (
+    password: string,
+    confirmPassword: string
+  ): boolean => {
     if (confirmPassword !== password) {
       setConfirmPasswordError(true);
       setConfirmPasswordErrorMessage("Passwords must be the same");
@@ -132,10 +130,12 @@ export default function ProfilePage(props: {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    
-    if (!validatePassword(editData.password) || 
-        !validatePassword(editData.newPassword) || 
-        !validateConfirmPassword(editData.newPassword, editData.confirmPassword)) {
+
+    if (
+      !validatePassword(editData.password) ||
+      !validatePassword(editData.newPassword) ||
+      !validateConfirmPassword(editData.newPassword, editData.confirmPassword)
+    ) {
       return;
     }
 
@@ -202,7 +202,9 @@ export default function ProfilePage(props: {
               sx={{ display: "flex", flexDirection: "column", gap: 0.1 }}
             >
               <FormControl sx={{ height: "90px", mb: 1 }}>
-                <FormLabel htmlFor="current-password">Current Password</FormLabel>
+                <FormLabel htmlFor="current-password">
+                  Current Password
+                </FormLabel>
                 <TextField
                   error={passwordError}
                   helperText={passwordErrorMessage}
@@ -261,7 +263,9 @@ export default function ProfilePage(props: {
                 />
               </FormControl>
               <FormControl sx={{ height: "90px", mb: 1 }}>
-                <FormLabel htmlFor="confirm-password">Confirm New Password</FormLabel>
+                <FormLabel htmlFor="confirm-password">
+                  Confirm New Password
+                </FormLabel>
                 <TextField
                   error={confirmPasswordError}
                   helperText={confirmPasswordErrorMessage}
@@ -289,17 +293,17 @@ export default function ProfilePage(props: {
                 />
               </FormControl>
 
-              <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                <Button 
-                  type="submit" 
-                  fullWidth 
+              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Button
+                  type="submit"
+                  fullWidth
                   variant="contained"
                   color="primary"
                 >
                   Save Changes
                 </Button>
-                <Button 
-                  fullWidth 
+                <Button
+                  fullWidth
                   variant="outlined"
                   onClick={() => {
                     setIsEditing(false);
