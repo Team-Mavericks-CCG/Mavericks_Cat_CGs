@@ -6,7 +6,7 @@ import SignIn from "./SignInComponent/SignIn";
 import { SolitairePage } from "./games/solitaire/solitairePage";
 import HomePage from "./homePage";
 import Register from "./register/register";
-import BlackjackWrapper from "./games/blackjack/blackjackWrapper";
+import BlackjackPage from "./games/blackjack/blackjackFront";
 import MainLayout from "./foundation-components/MainLayout";
 import AuthLayout from "./foundation-components/AuthLayout";
 import AppTheme from "./shared-theme/AppTheme";
@@ -33,7 +33,7 @@ createRoot(document.getElementById("root")!).render(
             {/* Games routes */}
             <Route path="/games">
               <Route path="solitaire" element={<SolitairePage />} />
-              <Route path="blackjack" element={<BlackjackWrapper />} />
+              <Route path="blackjack" element={<BlackjackPage />} />
               <Route path="/games/:game/lobby/:inviteCode" element={<LobbyPage />} />
               {/* Add other game routes here */}
             </Route>

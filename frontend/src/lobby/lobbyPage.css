@@ -99,8 +99,8 @@ body {
   
   .player-cards {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: right;
+    align-items: right;
     gap: 2rem;
     margin-top: 2rem;
     flex-wrap: wrap;
@@ -188,4 +188,13 @@ body {
     align-items: flex-end;
     margin-top: 90px;
     margin-bottom: 10px;
+  }
+
+  .snake-box{
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    gap: 2rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
   }

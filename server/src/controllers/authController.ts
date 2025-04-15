@@ -180,9 +180,11 @@ export function getProfile(req: Request, res: Response) {
 
     // send success message
     res.status(200).json({
-      username: user.username,
-      joinedAt: user.joinedAt,
-      profilePicture: user.profilePicture,
+      user: {
+        username: user.username,
+        createdAt: user.createdAt,
+        profilePicture: user.profilePicture,
+      },
     });
   } catch (error: unknown) {
     if (error instanceof AuthenticationError) {

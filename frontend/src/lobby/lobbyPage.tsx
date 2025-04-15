@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./LobbyPage.css";
 import { useNavigate, useParams } from "react-router-dom";
+import { SnakeGame } from "./snake";
 
 // players that will be displayed in the lobby 
 // this should be replaced with the actual players from the game
@@ -20,6 +21,7 @@ const LobbyPage: React.FC = () => {
     const [isHost] = useState(true); // only host can start the game
     const navigate = useNavigate();
     const { game, inviteCode: inviteCodeFromURL } = useParams();
+    const [showSnake, setShowSnake] = useState(false);
     
     // useEffect to set the invite code from the URL or generate a new one
     // this will be used to join the game
@@ -45,6 +47,10 @@ const LobbyPage: React.FC = () => {
         if (isHost && game) {
             void navigate(`/games/${game}`);
         }
+    };
+
+    const startSnake = () => {
+      setShowSnake(true);
     };
 
   return (
@@ -100,6 +106,12 @@ const LobbyPage: React.FC = () => {
             <button className="leave-btn" onClick={handleLeave}>LEAVE</button>
         </div>
         </div>
+
+        <div className= "snake-box">
+        <button className="start-btn" onClick={startSnake}> Play Snake </button>
+        {showSnake && <SnakeGame />}
+        </div>
+
       </div>
   );
 };
