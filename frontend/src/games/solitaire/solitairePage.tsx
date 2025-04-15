@@ -9,17 +9,13 @@ import {
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
-import { Button, styled } from "@mui/material";
+import { Button, styled, Typography } from "@mui/material";
 import { CardComponent } from "../utils/CardComponent";
 import { GameRules } from "../components/GameRules";
 import { LeaderboardAPI } from "../../utils/api";
 
 const UndoButton = styled(Button)(() => ({
-  position: "absolute",
-  top: "20px",
-  right: "20px",
   backgroundColor: "rgba(20, 20, 20, 0.8)",
-  padding: "10px 20px",
   borderRadius: "5px",
   cursor: "pointer",
   fontSize: "16px",
@@ -244,6 +240,8 @@ export const SolitairePage: React.FC = () => {
       }
     }
 
+    saveGameState();
+
     if (localStorage.getItem("username") != null) {
       try {
         void LeaderboardAPI.saveGameStats("Solitaire", true, game.score);
@@ -269,7 +267,7 @@ export const SolitairePage: React.FC = () => {
           <CardComponent
             card={card}
             key={index}
-            isClickable={index === column.cards.length - 1}
+            isClickable={card.faceUp}
             onClick={() => handleCardClick(card, column, index)}
           />
         ))
@@ -383,36 +381,17 @@ export const SolitairePage: React.FC = () => {
           </h1>
 
           <div className="game-container">
-            <div className="top-row">
-              <div className="stock-area">
-                <div className="stock">{renderStock(game.stock)}</div>
-                <div className="waste">{renderWaste(game.stock)}</div>
-              </div>
-              <div className="foundation">
-                {game.foundation.map((pile, index) => (
-                  <div key={index} className="foundation-pile">
-                    {renderFoundation(pile)}
-                  </div>
-                ))}
-              </div>
-              <div className="controls-area">
-                <UndoButton
-                  className="undo-button"
-                  onClick={handleUndo}
-                  disabled={!canUndo}
-                  aria-label="Undo last move"
-                >
-                  Undo
-                </UndoButton>
-
-                <UndoButton
-                  onClick={newGame}
-                  style={{ top: "60px" }}
-                  aria-label="New game"
-                >
-                  New Game
-                </UndoButton>
-              </div>
+            <Typography className="score">Score: {game.score}</Typography>
+            <div className="stock-area">
+              <div className="stock">{renderStock(game.stock)}</div>
+              <div className="waste">{renderWaste(game.stock)}</div>
+            </div>
+            <div className="foundation">
+              {game.foundation.map((pile, index) => (
+                <div key={index} className="foundation-pile">
+                  {renderFoundation(pile)}
+                </div>
+              ))}
             </div>
             <div className="tableau">
               {game.tableau.map((pile, index) => (
@@ -421,8 +400,26 @@ export const SolitairePage: React.FC = () => {
                 </div>
               ))}
             </div>
+
+            <div className="controls-area">
+              <UndoButton
+                className="undo-button"
+                onClick={handleUndo}
+                disabled={!canUndo}
+                aria-label="Undo last move"
+              >
+                Undo
+              </UndoButton>
+
+              <UndoButton
+                className="new-game-button"
+                onClick={newGame}
+                aria-label="New game"
+              >
+                New Game
+              </UndoButton>
+            </div>
           </div>
-          <div>{game.score}</div>
         </>
       )}
     </div>

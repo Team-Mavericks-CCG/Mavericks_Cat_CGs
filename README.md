@@ -6,14 +6,14 @@ To run the docker containers:
 
 Prod:
 
-    ```bash
-    docker:build:prod
-    docker:prod
-    ```
+```bash
+docker:build:prod
+docker:prod
+```
 
 Dev:
 
-    ```bash
-    docker:build:dev
-    docker:dev
-    ```
+```bash
+docker:build:dev
+docker:dev
+```

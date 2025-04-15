@@ -31,10 +31,15 @@ h1 {
 }
 
 .foundation {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  width: 90px;
   display: flex;
   justify-content: center;
+  flex-direction: column;
   gap: 20px;
-  margin-bottom: 40px;
+  transform: translate(0, -50%);
 }
 
 .foundation-pile {
@@ -105,26 +110,21 @@ h1 {
   margin-top: 0; /* No overlap for the first card */
 }
 
-/* Make clickable cards more interactive */
-.stackable-pile .card.clickable {
+.card.clickable {
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: all 0.2s;
+  box-sizing: border-box;
+  border: 1px solid #333;
 }
 
-.stackable-pile .card.clickable:hover {
+.stackable-pile .card.clickable:hover,
+.stackable-pile .card.clickable:hover ~ .card.clickable {
   transform: translateY(-5px);
-  z-index: 100; /* Ensure hovered card is on top */
-}
-
-.stock .card {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: center center;
-}
-
-.stock .card:not(:last-child) {
-  pointer-events: none;
+  border: 2px solid #ffcc00; /* Gold border */
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.7); /* Subtle gold glow */
+  /* Adjust margins to compensate for larger border to keep cards centered */
+  margin-left: -1px;
+  margin-right: -1px;
 }
 
 .card {
@@ -139,6 +139,7 @@ h1 {
   position: relative;
   box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .card-text-fallback {
@@ -172,18 +173,12 @@ h1 {
   margin-top: -90px;
 }
 
-.card.clickable {
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
 .card.clickable:hover {
   transform: translateY(-5px);
-}
-
-.card.selected {
-  border: 3px solid #ffcc00;
-  box-shadow: 0 0 30px #ffcc00;
+  border: 2px solid #ffcc00;
+  box-shadow: 0 0 8px rgba(255, 204, 0, 0.7);
+  margin-left: -1px;
+  margin-right: -1px;
 }
 
 .card-blank-clickable {
@@ -207,12 +202,13 @@ h1 {
 
 .controls-area {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  bottom: 80px;
+  left: 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 10px;
+  padding: 15px;
+  border-radius: 8px;
 }
 
 /* Game Rules Dialog Styles */
@@ -223,4 +219,23 @@ h1 {
 .MuiDialogContent-root .MuiTypography-body1 {
   text-align: left;
   padding-left: 20px;
+}
+
+.score {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #ffcc00;
+  font-size: 1.4rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  min-width: 80px;
+  text-align: center;
+  font-family: "Arial", sans-serif;
+  letter-spacing: 1px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 100;
 }
