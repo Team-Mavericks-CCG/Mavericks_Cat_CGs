@@ -9,7 +9,7 @@ import {
 import { Card, Suit } from "../utils/card";
 import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
-import { CardComponent } from "../utils/CardComponent";
+import { CardComponent } from "../components/CardComponent";
 import { GameRules } from "../components/GameRules";
 import { GameButton } from "../components/GameButton";
 import { LeaderboardAPI } from "../../utils/api";

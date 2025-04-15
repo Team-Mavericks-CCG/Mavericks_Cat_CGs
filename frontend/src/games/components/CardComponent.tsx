@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Card } from "./card";
-import { getCardImage, getCardBackImage } from "./CardImage";
+import { Card } from "../utils/card";
+import { getCardImage, getCardBackImage } from "../utils/CardImage";
 
 // Card component with fallback handling
 export const CardComponent: React.FC<{
