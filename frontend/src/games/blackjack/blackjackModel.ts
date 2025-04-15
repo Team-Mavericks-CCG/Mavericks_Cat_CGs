@@ -1,162 +1,183 @@
-// Blackjack game model
+// blackjack model
+import { Card, Rank } from "../utils/card";
+import { Deck } from "../utils/deck";
 
-import { Card } from "../utils/card";
-
-export interface Card {
-  suit: "hearts" | "diamonds" | "clubs" | "spades";
-  rank: string; 
-  color: "red" | "black"; 
-  faceUp: boolean;
+export interface BlackjackPlayer {
+  hand: Card[];
+  isStanding: boolean;
+  isBusted: boolean;
+  hasBlackjack: boolean;
 }
-  
-  export interface Hand {
-    cards: Card[];
-    total: number;
+
+export interface BlackjackDealer {
+  hand: Card[];
+  hiddenCard: Card | null;
+}
+
+export interface BlackjackState {
+  player: BlackjackPlayer;
+  dealer: BlackjackDealer;
+  deck: Card[];
+  score: number; // total player winnings
+}
+
+export interface SerializableBlackjackState {
+  player: {
+    hand: Record<string, string | boolean>[];
+    isStanding: boolean;
     isBusted: boolean;
-  }
+    hasBlackjack: boolean;
+  };
+  dealer: {
+    hand: Record<string, string | boolean>[];
+    hiddenCard: Record<string, string | boolean> | null;
+  };
+  deck: Record<string, string | boolean>[];
+  score: number;
+  history: SerializableBlackjackState[];
+}
+
+export class BlackjackGame {
+  player: BlackjackPlayer = {
+    hand: [],
+    isStanding: false,
+    isBusted: false,
+    hasBlackjack: false,
+  };
   
-  export interface SerializableBlackjackState {
-    playerHand: Hand;
-    dealerHand: Hand;
-    gameOver: boolean;
-    result: "win" | "lose" | "draw" | "in-progress";
-  }
+  dealer: BlackjackDealer = {
+    hand: [],
+    hiddenCard: null,
+  };
   
-  export class BlackjackGame {
-    deck: Card[] = [];
-    playerHand: Hand = { cards: [], total: 0, isBusted: false };
-    dealerHand: Hand = { cards: [], total: 0, isBusted: false };
-    gameOver = false;
-    result: "win" | "lose" | "draw" | "in-progress" = "in-progress";
-  
-    constructor() {
-      this.initializeDeck();
-      this.shuffleDeck();
-    }
-  
-    // Initialize deck of 52 cards
-    private initializeDeck() {
-      const suits: Card["suit"][] = ["hearts", "diamonds", "clubs", "spades"];
-      const ranks = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"];
-  
-      for (const suit of suits) {
-        for (const rank of ranks) {
-          this.deck.push({ 
-            suit, 
-            rank, 
-            color: suit === "hearts" || suit === "diamonds" ? "red" : "black", 
-            faceUp: false 
-          });
-        }
-      }
-    }
-  
-    // Shuffle the deck using Fisher-Yates shuffle
-    private shuffleDeck() {
-      for (let i = this.deck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
-      }
-    }
-  
-    // Draw a card from the deck
-    private drawCard(): Card {
-      return this.deck.pop()!;
-    }
-  
-    // Calculate the total of a hand
-    private calculateHandTotal(hand: Hand): number {
-      let total = 0;
-      let aceCount = 0;
-  
-      for (const card of hand.cards) {
-        if (["J", "Q", "K"].includes(card.rank)) {
-          total += 10;
-        } else if (card.rank === "A") {
-          total += 11;
-          aceCount++;
-        } else {
-          total += parseInt(card.rank, 10);
-        }
-      }
-  
-      // Adjust for aces if necessary (if total exceeds 21, treat ace as 1)
-      while (total > 21 && aceCount > 0) {
-        total -= 10;
-        aceCount--;
-      }
-  
-      return total;
-    }
-  
-    // Deal initial cards
-    public deal() {
-      this.playerHand.cards = [this.drawCard(), this.drawCard()];
-      this.dealerHand.cards = [this.drawCard(), this.drawCard()];
-  
-      this.playerHand.total = this.calculateHandTotal(this.playerHand);
-      this.dealerHand.total = this.calculateHandTotal(this.dealerHand);
-  
-      this.gameOver = false;
-      this.result = "in-progress";
-    }
-  
-    // Player hits (draws another card)
-    public playerHit() {
-      if (this.gameOver) return;
-      this.playerHand.cards.push(this.drawCard());
-      this.playerHand.total = this.calculateHandTotal(this.playerHand);
-  
-      if (this.playerHand.total > 21) {
-        this.playerHand.isBusted = true;
-        this.gameOver = true;
-        this.result = "lose";
-      }
-    }
-  
-    // Player stands (ends their turn)
-    public playerStand() {
-      if (this.gameOver) return;
-      this.dealerPlay();
-    }
-  
-    // Dealer's turn to play
-    private dealerPlay() {
-      while (this.dealerHand.total < 17) {
-        this.dealerHand.cards.push(this.drawCard());
-        this.dealerHand.total = this.calculateHandTotal(this.dealerHand);
-      }
-  
-      if (this.dealerHand.total > 21) {
-        this.dealerHand.isBusted = true;
-        this.result = "win";
-      } else if (this.dealerHand.total > this.playerHand.total) {
-        this.result = "lose";
-      } else if (this.dealerHand.total < this.playerHand.total) {
-        this.result = "win";
-      } else {
-        this.result = "draw";
-      }
-  
-      this.gameOver = true;
-    }
-  
-    // Serialize game state to save
-    public getSerializableState(): SerializableBlackjackState {
-      return {
-        playerHand: this.playerHand,
-        dealerHand: this.dealerHand,
-        gameOver: this.gameOver,
-        result: this.result,
+  deck: Card[] = [];
+  score = 0;
+  history: BlackjackState[] = [];
+
+  constructor(state?: BlackjackState) {
+    if (state) {
+      this.setGame(state);
+    } else {
+      this.deck = Deck.createShuffled({ cardOptions: { faceCardUniqueValues: true } }).cards;
+      this.player = {
+        hand: [],
+        isStanding: false,
+        isBusted: false,
+        hasBlackjack: false,
       };
-    }
-  
-    // Load a saved game state
-    public loadState(state: SerializableBlackjackState) {
-      this.playerHand = state.playerHand;
-      this.dealerHand = state.dealerHand;
-      this.gameOver = state.gameOver;
-      this.result = state.result;
+      this.dealer = {
+        hand: [],
+        hiddenCard: null,
+      };
+      this.score = 0;
+      this.initializeGame();
     }
   }
-  
+
+  initializeGame() {
+    this.player.hand = [this.drawCard(), this.drawCard()];
+    this.dealer.hand = [this.drawCard()];
+    this.dealer.hiddenCard = this.drawCard();
+
+    this.player.hasBlackjack = this.getHandValue(this.player.hand) === 21;
+  }
+
+  drawCard(): Card {
+    const card = this.deck.pop();
+    if (!card) throw new Error("Deck is empty");
+    return card;
+  }
+
+  hitPlayer() {
+    if (this.player.isStanding || this.player.isBusted) return;
+
+    this.player.hand.push(this.drawCard());
+    const total = this.getHandValue(this.player.hand);
+
+    if (total > 21) {
+      this.player.isBusted = true;
+    } else if (total === 21) {
+      this.player.isStanding = true;
+    }
+  }
+
+  standPlayer() {
+    this.player.isStanding = true;
+    this.revealDealerHand();
+    this.playDealer();
+    this.resolveGame();
+  }
+
+  revealDealerHand() {
+    if (this.dealer.hiddenCard) {
+      this.dealer.hand.push(this.dealer.hiddenCard);
+      this.dealer.hiddenCard = null;
+    }
+  }
+
+  playDealer() {
+    while (this.getHandValue(this.dealer.hand) < 17) {
+      this.dealer.hand.push(this.drawCard());
+    }
+  }
+
+  resolveGame() {
+    const playerValue = this.getHandValue(this.player.hand);
+    const dealerValue = this.getHandValue(this.dealer.hand);
+
+    if (this.player.isBusted) {
+      this.score -= 1; // Player loses
+    } else if (dealerValue > 21 || playerValue > dealerValue) {
+      this.score += 1; // Player wins
+    } else if (playerValue < dealerValue) {
+      this.score -= 1; // Player loses
+    }
+    // else: tie, no score change
+  }
+
+  getHandValue(hand: Card[]): number {
+    let value = 0;
+    let aceCount = 0;
+    for (const card of hand) {
+      if (card.rank === Rank.ACE) {
+        aceCount++;
+        value += 11;
+      } else if ([Rank.JACK, Rank.QUEEN, Rank.KING].includes(card.rank)) {
+        value += 10;
+      } else {
+        value += parseInt(card.rank, 10);
+      }
+    }
+    while (value > 21 && aceCount > 0) {
+      value -= 10;
+      aceCount--;
+    }
+    return value;
+  }
+
+  getState(): BlackjackState {
+    return {
+      player: { ...this.player },
+      dealer: {
+        hand: [...this.dealer.hand],
+        hiddenCard: this.dealer.hiddenCard,
+      },
+      deck: [...this.deck],
+      score: this.score,
+    };
+  }
+
+  setGame(state: BlackjackState) {
+    this.player = { ...state.player };
+    this.dealer = {
+      hand: [...state.dealer.hand],
+      hiddenCard: state.dealer.hiddenCard,
+    };
+    this.deck = [...state.deck];
+    this.score = state.score;
+  }
+
+  saveState(): void {
+    this.history.push(this.getState());
+  }
+}
