@@ -49,9 +49,6 @@ const LobbyPage: React.FC = () => {
         }
     };
 
-    const startSnake = () => {
-      setShowSnake(true);
-    };
 
   return (
     <div className="lobby-container">
@@ -108,8 +105,7 @@ const LobbyPage: React.FC = () => {
         </div>
 
         <div className= "snake-box">
-        <button className="start-btn" onClick={startSnake}> Play Snake </button>
-        {showSnake && <SnakeGame />}
+         <SnakeGame />
         </div>
 
       </div>
