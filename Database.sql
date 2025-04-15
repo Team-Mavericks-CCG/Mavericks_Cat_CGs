@@ -7,7 +7,6 @@ CREATE TABLE players (
    firstName VARCHAR(255),
    lastName VARCHAR(255),
    "profilePicture" int DEFAULT 0,
-   "joinedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
    "createdAt" TIMESTAMP WITH TIME ZONE,
    "updatedAt" TIMESTAMP WITH TIME ZONE,
    "lastLogin" TIMESTAMP WITH TIME ZONE

@@ -181,7 +181,7 @@ export function getProfile(req: Request, res: Response) {
     // send success message
     res.status(200).json({
       username: user.username,
-      joinedAt: user.joinedAt,
+      createdAt: user.createdAt,
       profilePicture: user.profilePicture,
     });
   } catch (error: unknown) {
