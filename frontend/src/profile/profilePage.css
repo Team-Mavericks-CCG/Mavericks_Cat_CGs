@@ -1,8 +1,8 @@
 
 .profile-header {
     display: flex;
-    gap: 24px;
-    margin-bottom: 32px;
+    gap: 10px;
+    margin-bottom: 10px;
   }
   
   .profile-info {
@@ -24,7 +24,7 @@
     border-bottom: none;
   }
   
-  @media (max-width: 600px) {
+  @media (max-width: 500px) {
     .profile-header {
       flex-direction: column;
       align-items: center;

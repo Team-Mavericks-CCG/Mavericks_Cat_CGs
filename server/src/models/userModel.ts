@@ -7,7 +7,6 @@ class Player extends Model {
   declare username: string;
   declare password: string;
   declare lastLogin: Date | null;
-  declare joinedAt: Date;
   declare profilePicture: number;
 
   // Timestamps
@@ -35,11 +34,6 @@ Player.init(
     lastLogin: {
       type: DataTypes.DATE,
       allowNull: true,
-    },
-    joinedAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
     },
     profilePicture: {
       type: DataTypes.INTEGER,

@@ -20,6 +20,10 @@ services:
       - /usr/src/app/node_modules
     depends_on:
       - backend-dev
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+      - VITE_BACKEND_URL=http://localhost:5001
     profiles: ["dev"]
 
   backend:
@@ -47,7 +51,7 @@ services:
       context: ./server
       dockerfile: Dockerfile-backend.dev
     ports:
-      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ./server:/usr/src/app
       - /usr/src/app/node_modules
@@ -57,9 +61,12 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres_password
       - DB_HOST=db
+      - DB_PORT=5432
       - JWT_SECRET=supersecurejwtsecret
       - NODE_ENV=development
-      - PORT=5000
+      - PORT=5001
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
     depends_on:
       db:
         condition: service_healthy
@@ -73,7 +80,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres_password
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./Database.sql:/docker-entrypoint-initdb.d/Database.sql
