@@ -31,7 +31,7 @@ services:
       context: ./server
       dockerfile: Dockerfile-backend
     ports:
-      - "5001:5000"
+      - "5000:5000"
     #set PASSWORD and JWT_SeCRET
     environment:
       - DB_NAME=mavericks_db
@@ -51,7 +51,7 @@ services:
       context: ./server
       dockerfile: Dockerfile-backend.dev
     ports:
-      - "5000:5000"
+      - "5001:5001"
     volumes:
       - ./server:/usr/src/app
       - /usr/src/app/node_modules
@@ -61,7 +61,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres_password
       - DB_HOST=db
-      - DB_PORT=5433
+      - DB_PORT=5432
       - JWT_SECRET=supersecurejwtsecret
       - NODE_ENV=development
       - PORT=5001
