@@ -55,16 +55,21 @@ export const GameRules: React.FC<GameRulesProps> = ({ gameType }) => {
           <>
             <Typography variant="h6" gutterBottom>Blackjack Rules:</Typography>
             <Typography variant="body1">
-              1. Goal: Beat dealer's hand without going over 21.<br/>
-              2. Card values:<br/>
-              &nbsp;&nbsp;- Number cards: Face value<br/>
-              &nbsp;&nbsp;- Face cards: 10<br/>
-              &nbsp;&nbsp;- Ace: 1 or 11<br/>
+              1. Setup:<br/>
+              &nbsp;&nbsp;- Each player gets 2 cards, face up<br/>
+              &nbsp;&nbsp;- Dealer gets 1 card face down, 1 card face up<br/>
+              2. Goal:<br/>
+              &nbsp;&nbsp;- The goal is to get as close to 21 without going over<br/>
+              &nbsp;&nbsp;-  Everyone is playing against the dealer, dealer wins in ties<br/>
               3. Actions:<br/>
-              &nbsp;&nbsp;- Hit: Take another card<br/>
-              &nbsp;&nbsp;- Stand: Keep current hand<br/>
-              &nbsp;&nbsp;- Double Down: Double bet, take one card<br/>
-              4. Dealer must hit on 16 and below, stand on 17 and above.
+              &nbsp;&nbsp;- Hit: get another card, only when less than 21<br/>
+              &nbsp;&nbsp;- Stand: end turn, no more cards<br/>
+              &nbsp;&nbsp;- Split: if both cards are same value, split them into 2 hands and play each<br/>
+              &nbsp;&nbsp;-  Dealer doesn't split, hits until &gt;= 17<br/>
+              4. Cards:<br/>
+              &nbsp;&nbsp;- Ace: 1 or 11<br/>
+              &nbsp;&nbsp;- Face Cards: 10<br/>
+              &nbsp;&nbsp;- Number cards: face value<br/>
             </Typography>
           </>
         );

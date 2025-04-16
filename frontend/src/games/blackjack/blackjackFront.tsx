@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { getCardImage, getCardBackImage } from "../utils/CardImage";
+import { getCardBackImage } from "../utils/CardImage";
 import "./blackjackStyle.css";
 import { Typography, Box } from "@mui/material";
 import { BlackjackGame } from "./blackjackModel";
@@ -7,6 +7,7 @@ import { Card } from "../utils/card";
 import { GameRules } from "../components/GameRules";
 import { LeaderboardAPI } from "../../utils/api";
 import { GameButton } from '../components/GameButton'
+import { CardComponent } from '../components/CardComponent';
 
 const BlackjackPage: React.FC = () => {
   const gameRef = useRef<BlackjackGame>(new BlackjackGame());
@@ -76,16 +77,13 @@ const BlackjackPage: React.FC = () => {
   const renderHand = (hand: Card[], hideFirst = false) => (
     <Box display="flex" gap={1}>
       {hand.map((card, idx) => {
-        const imgSrc =
-          hideFirst && idx === 0 && !revealDealer
-            ? getCardBackImage()
-            : getCardImage(card);
         return (
-          <img
+          <CardComponent
             key={idx}
-            src={imgSrc}
-            alt={`${card.rank} of ${card.suit}`}
-            style={{ width: 80, height: 120 }}
+            card={card}
+            isClickable={false}
+            faceUp={!(hideFirst && idx === 0 && !revealDealer)}
+            onClick={() => console.log(`Card clicked: ${card.rank} of ${card.suit}`)}
           />
         );
       })}
