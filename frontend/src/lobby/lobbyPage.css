@@ -4,7 +4,7 @@
     color: #f4a340;
     margin-top: 30px;
     margin-bottom: 10px;
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'Arial Rounded MT Bold', sans-serif;
     letter-spacing: 2px;
   }
 
@@ -24,6 +24,7 @@ body {
     padding: 2rem;
     color: white;
     position: relative;
+    bottom: 20px;
     font-family: 'Arial Rounded MT Bold', sans-serif;
   }
   
@@ -57,20 +58,20 @@ body {
     cursor: not-allowed;
   }
 
-  .ready-check {
-    font-size: 1.3rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-    margin-top: 20px;
-    margin-bottom: 40px;
-    text-align: center;
-    transition: transform 0.2s ease;
-  }
   
-  .ready-check:hover {
+  .ready-btn:hover {
     transform: scale(1.1);
+  }
+
+  .ready-btn {
+    padding: 0.8rem 1.5rem;
+    background-color: rgb(252, 170, 62);
+    border: none;
+    border-radius: 15px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: rgb(252, 248, 248);
+    cursor: pointer;
   }
 
   .leave-btn {
@@ -87,24 +88,31 @@ body {
   .lobby-title-svg {
     width: 100%;
     height: 150px;
-    margin-top: 80px;
+    fill: none;
   }
+  
   
   .lobby-arc-text {
     font-weight: bold;
     letter-spacing: 0.5rem;
     text-shadow: 0 0 10px #f4a340;
     fill: #f4a340;
+    justify-content: right;
+    align-items: right;
+    flex-direction: column;
+    margin-bottom: -200px;
+    font-size: larger;
   }
   
   .player-cards {
     display: flex;
-    justify-content: right;
-    align-items: right;
-    gap: 2rem;
-    margin-top: 2rem;
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
   }
+
   
   .player-card {
     width: 120px;
@@ -114,6 +122,9 @@ body {
     text-align: center;
     color: white;
     font-weight: bold;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     border: 5px solid white;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     transform-origin: bottom center;
@@ -138,6 +149,14 @@ body {
   
   .player-card.purple {
     background: #6a0f49;
+  }
+
+  .lobby-and-cards-container{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: right;
+    align-items: right;
+    margin-top: 2rem;
   }
   
   .bottom-panel {
@@ -170,7 +189,17 @@ body {
   }
   
   .bottom-left {
-    width: 100px; /* Placeholder, can be empty */
+    width: 200px; /* Placeholder, can be empty */
+    font-size: large;
+    font-family: 'Arial Rounded MT Bold', sans-serif;
+    color: #ffb53e;
+    letter-spacing: 2px;
+  }
+  .column-right{
+    width: 50px;
+  }
+  .spacer{
+    width: 50px;
   }
   
   .bottom-center {
@@ -187,14 +216,22 @@ body {
     justify-content: flex-end;
     align-items: flex-end;
     margin-top: 90px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
   }
 
   .snake-box{
-    display: flex;
-    justify-content: left;
-    align-items: left;
-    gap: 2rem;
-    margin-top: 2rem;
-    flex-wrap: wrap;
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 2rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    
   }
+  .lobby-title-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: -500px;
+  }
+  

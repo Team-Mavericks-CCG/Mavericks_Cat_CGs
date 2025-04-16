@@ -21,7 +21,6 @@ const LobbyPage: React.FC = () => {
     const [isHost] = useState(true); // only host can start the game
     const navigate = useNavigate();
     const { game, inviteCode: inviteCodeFromURL } = useParams();
-    const [showSnake, setShowSnake] = useState(false);
     
     // useEffect to set the invite code from the URL or generate a new one
     // this will be used to join the game
@@ -52,61 +51,54 @@ const LobbyPage: React.FC = () => {
 
   return (
     <div className="lobby-container">
-        <h1 className="lobby-header">{game ? game.toUpperCase() : "Loading..."}</h1>
+        <h1 className="lobby-header">{game ? game.toUpperCase() : "Game Lobby "}</h1>
         <button className="invite-btn">INVITE</button>
-        <svg viewBox="0 0 400 150" className="lobby-title-svg">
-            <defs>
-                <path
-                id="arcPath"
-                d="M 50 150 A 150 150 0 0 1 340 150"
-                fill="none" />
-            </defs>
-            <text fontSize="40" fill="#f4a340" textAnchor="middle">
-                <textPath
-                    href="#arcPath"
-                    startOffset="53%"
-                    textLength="300"
-                    className="lobby-arc-text" >
-                    LOBBY
-                </textPath>
-        </text>
-        </svg>
 
-
-      <div className="player-cards">
-        {players.map((player, index) => (
-          <div
-            key={index}
-            className={`player-card ${player.color}`}
-            style={{ transform: `rotate(${(index - 1.5) * 10}deg)` }}
-          >
-            <div className="player-icon">{player.image}</div>
-            <div className="player-name">{player.name}</div>
-            <div className="player-rank">{player.rank}</div>
+        <div className= "snake-box">
+         <SnakeGame />
           </div>
-        ))}
-      </div>
+
+        <div className = "lobby-title-wrapper">
+          </div>
+
+
+          <div className= "lobby-and-cards-container">
+            <div className="player-cards">
+            {players.map((player, index) => (
+              <div
+                key={index}
+                className={`player-card ${player.color}`}
+                style={{ transform: `rotate(${(index - 1.5) * 10}deg)` }}
+              >
+                <div className="player-icon">{player.image}</div>
+                <div className="player-name">{player.name}</div>
+                <div className="player-rank">{player.rank}</div>
+              </div>
+            ))}
+          
+        <div className = "column-right"></div>
+        </div>
+        </div>
 
       <div className="invite-code">INVITE CODE: {inviteCode}</div>
 
         <div className="bottom-panel">
-        <div className="bottom-left"></div>
+        <div className="bottom-left">Play snake while you wait!</div>
 
         <div className="bottom-center">
-            <div className="ready-check" onClick={toggleReady}>
-                {isReady ? "☑ Ready!" : "☐ Ready?"}
-            </div>
-            <button className="start-btn" onClick={handleStart} disabled={!isHost} title={!isHost ? "Only the host can start the game" : ""} > START </button>
         </div>
+
+       
 
         <div className="bottom-right">
-            <button className="leave-btn" onClick={handleLeave}>LEAVE</button>
-        </div>
-        </div>
+              <button className="ready-btn" onClick={toggleReady}> {isReady ? "☑ Ready!" : "☐ Ready?"}</button>
+              <button className="start-btn" onClick={handleStart} disabled={!isHost} title={!isHost ? "Only the host can start the game" : ""} > START </button>
+              <button className="leave-btn" onClick={handleLeave}>LEAVE</button>
+          </div>
 
-        <div className= "snake-box">
-         <SnakeGame />
-        </div>
+
+        </div> 
+
 
       </div>
   );
