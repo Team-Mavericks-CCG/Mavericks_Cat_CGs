@@ -241,7 +241,7 @@ class SocketManager {
     });
   }
 
-  startGame(gameID: string): Promise<void> {
+  startGame(): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -265,11 +265,11 @@ class SocketManager {
       this.socket.once("error", handleError);
 
       // Start the game
-      this.socket.emit("start-game", { gameID });
+      this.socket.emit("start-game", { gameID: this.gameID! });
     });
   }
 
-  gameAction(gameID: string, action: string): Promise<void> {
+  gameAction(action: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -293,7 +293,7 @@ class SocketManager {
       this.socket.once("error", handleError);
 
       // Emit the game action
-      this.socket.emit("game-action", { gameID, action });
+      this.socket.emit("game-action", { gameID: this.gameID!, action });
     });
   }
 
