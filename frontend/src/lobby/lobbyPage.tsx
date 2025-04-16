@@ -91,7 +91,7 @@ const LobbyPage: React.FC = () => {
        
 
         <div className="bottom-right">
-              <button className="ready-btn" onClick={toggleReady}> {isReady ? "☑ Ready!" : "☐ Ready?"}</button>
+          {!isHost &&(<button className="ready-btn" onClick={toggleReady}> {isReady ? "☑ Ready!" : "☐ Ready?"}</button>)}
               <button className="start-btn" onClick={handleStart} disabled={!isHost} title={!isHost ? "Only the host can start the game" : ""} > START </button>
               <button className="leave-btn" onClick={handleLeave}>LEAVE</button>
           </div>
