@@ -3,21 +3,34 @@ import { SERVER_URL } from "../../utils/api";
 
 // Socket event types
 interface ServerToClientEvents {
-  error: (data: unknown) => void;
+  // Common events
+  error: (message: string) => void;
+  "game-started": (state: unknown) => void;
   "game-state": (state: unknown) => void;
-  "game-created": (data: { gameId: string }) => void;
-  "join-success": (data: { gameId: string }) => void;
-  "blackjack-round-over": (winner: string | null) => void;
-  "blackjack-game-over": (winner: string | null) => void;
+  "lobby-created": (data: { gameID: string }) => void;
+  "join-success": (data: { gameID: string }) => void;
+  "lobby-update": (
+    data: {
+      gameID: string;
+      type: string;
+      playerCount: number;
+      joinable: boolean;
+    }[]
+  ) => void;
+  "game-over": (winner: string | null) => void;
 }
 
 interface ClientToServerEvents {
-  "create-blackjack": (data: { playerName: string }) => void;
-  "join-blackjack": (data: { gameId: string; playerName: string }) => void;
-  "start-blackjack": (data: { gameId: string }) => void;
-  "blackjack-hit": (data: { gameId: string }) => void;
-  "blackjack-stand": (data: { gameId: string }) => void;
-  "blackjack-new-round": (data: { gameId: string }) => void;
+  "create-lobby": (data: { playerName: string; gameType: string }) => void;
+  "join-lobby": (data: { gameID: string; playerName: string }) => void;
+  "get-active-games": () => void;
+  "start-game": (data: { gameID: string }) => void;
+  "new-round": (data: { gameID: string }) => void;
+  "leave-game": (data: { gameID: string }) => void;
+  // generic action event for all games and actions, individual games can handle their own actions
+  "game-action": (data: { gameID: string; action: string }) => void;
+
+  // Authentication (now optional)
   authenticate: (
     token: string,
     callback: (
@@ -33,8 +46,6 @@ interface EventHandlerMap {
   error: (data: unknown) => void;
   "join-success": (data: unknown) => void;
   "game-created": (data: unknown) => void;
-  "blackjack-round-over": (data: unknown) => void;
-  "blackjack-game-over": (data: unknown) => void;
   [key: string]: ((data: unknown) => void) | undefined;
 }
 
@@ -158,88 +169,127 @@ class SocketManager {
     }
   }
 
-  // Create a new blackjack game
-  createBlackjackGame(playerName: string): Promise<{ gameId: string }> {
+  // TODO implement enum for gametype on front end
+  createLobby(
+    playerName: string,
+    gameType: string
+  ): Promise<{ gameID: string }> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
         return;
       }
 
-      // Set up a one-time event handler for game created
-      this.socket.once("game-created", (data) => {
+      const handleError = (message: string) => {
+        this.socket?.off("lobby-created", handleSuccess);
+        reject(new Error(message));
+      };
+
+      const handleSuccess = (data: { gameID: string }) => {
+        this.socket?.off("error", handleError);
         resolve(data);
+      };
+
+      // Set up a one-time event handler for game action
+      this.socket.once("lobby-created", (data) => {
+        handleSuccess(data);
       });
 
       // Set up a one-time error handler
-      this.socket.once("error", (message) => {
-        reject(new Error(message as string));
-      });
+      this.socket.once("error", handleError);
 
-      // Create the game
-      this.socket.emit("create-blackjack", { playerName });
+      // Create the lobby
+      this.socket.emit("create-lobby", {
+        playerName: playerName,
+        gameType: gameType,
+      });
     });
   }
 
-  // Join an existing blackjack game
-  joinBlackjackGame(gameId: string, playerName: string): Promise<void> {
+  joinLobby(playerName: string, gameID: string): Promise<{ gameID: string }> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
         return;
       }
 
-      // Set up a one-time event handler for successful join
-      this.socket.once("join-success", () => {
-        resolve();
+      const handleError = (message: string) => {
+        this.socket?.off("join-success", handleSuccess);
+        reject(new Error(message));
+      };
+
+      const handleSuccess = (data: { gameID: string }) => {
+        this.socket?.off("error", handleError);
+        resolve(data);
+      };
+
+      // Set up a one-time event handler for game action
+      this.socket.once("join-success", (data) => {
+        handleSuccess(data);
       });
 
       // Set up a one-time error handler
-      this.socket.once("error", (message) => {
-        reject(new Error(message as string));
-      });
+      this.socket.once("error", handleError);
 
-      // Join the game
-      this.socket.emit("join-blackjack", { gameId, playerName });
+      // Join the lobby
+      this.socket.emit("join-lobby", { playerName, gameID });
     });
   }
 
-  // Start a blackjack game
-  startBlackjackGame(gameId: string): void {
-    if (!this.socket || !this._isConnected) {
-      console.error("Socket not connected");
-      return;
-    }
+  startGame(gameID: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this._isConnected) {
+        reject(new Error("Socket not connected"));
+        return;
+      }
 
-    this.socket.emit("start-blackjack", { gameId });
+      const handleError = (message: string) => {
+        this.socket?.off("game-started", handleSuccess);
+        reject(new Error(message));
+      };
+
+      const handleSuccess = () => {
+        this.socket?.off("error", handleError);
+        resolve();
+      };
+
+      // Set up a one-time event handler for game action
+      this.socket.once("game-started", handleSuccess);
+
+      // Set up a one-time error handler
+      this.socket.once("error", handleError);
+
+      // Start the game
+      this.socket.emit("start-game", { gameID });
+    });
   }
 
-  // Blackjack actions
-  blackjackHit(gameId: string): void {
-    if (!this.socket || !this._isConnected) {
-      console.error("Socket not connected");
-      return;
-    }
+  gameAction(gameID: string, action: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this._isConnected) {
+        reject(new Error("Socket not connected"));
+        return;
+      }
 
-    this.socket.emit("blackjack-hit", { gameId });
-  }
+      const handleError = (message: string) => {
+        this.socket?.off("game-state", handleSuccess);
+        reject(new Error(message));
+      };
 
-  blackjackStand(gameId: string): void {
-    if (!this.socket || !this._isConnected) {
-      console.error("Socket not connected");
-      return;
-    }
+      const handleSuccess = () => {
+        this.socket?.off("error", handleError);
+        resolve();
+      };
 
-    this.socket.emit("blackjack-stand", { gameId });
-  }
+      // Set up a one-time event handler for game action
+      this.socket.once("game-state", handleSuccess);
 
-  blackjackNewRound(gameId: string): void {
-    if (!this.socket || !this._isConnected) {
-      console.error("Socket not connected");
-      return;
-    }
+      // Set up a one-time error handler
+      this.socket.once("error", handleError);
 
-    this.socket.emit("blackjack-new-round", { gameId });
+      // Emit the game action
+      this.socket.emit("game-action", { gameID, action });
+    });
   }
 
   // Register event handlers for game events

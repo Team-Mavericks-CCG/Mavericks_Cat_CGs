@@ -8,6 +8,7 @@ import { Game, GameStatus } from "../games/game.js";
 interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
+  "game-started": (state: unknown) => void;
   "game-state": (state: unknown) => void;
   "lobby-created": (data: { gameID: string }) => void;
   "join-success": (data: { gameID: string }) => void;
@@ -19,9 +20,6 @@ interface ServerToClientEvents {
       joinable: boolean;
     }[]
   ) => void;
-
-  // Blackjack specific events
-  "round-over": (winner: string | null) => void;
   "game-over": (winner: string | null) => void;
 }
 
@@ -294,7 +292,7 @@ export function setupSocketServer(
         game.deal();
 
         // Update all clients with new game state
-        io.to(gameID).emit("game-state", game.getClientGameState());
+        io.to(gameID).emit("game-started", game.getClientGameState());
       } catch (error) {
         console.error("Error starting game:", error);
         socket.emit("error", "Failed to start game.");
