@@ -7,9 +7,10 @@ interface ServerToClientEvents {
   error: (message: string) => void;
   "game-started": (state: unknown) => void;
   "game-state": (state: unknown) => void;
-  "lobby-created": (data: { gameID: string }) => void;
+  "lobby-created": (data: { gameID: string; inviteCode: string }) => void;
   "join-success": (data: { gameID: string }) => void;
-  "lobby-update": (
+  "lobby-update": (data: { players: string[] }) => void;
+  "lobby-list": (
     data: {
       gameID: string;
       type: string;
@@ -22,7 +23,7 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
   "create-lobby": (data: { playerName: string; gameType: string }) => void;
-  "join-lobby": (data: { gameID: string; playerName: string }) => void;
+  "join-lobby": (data: { inviteCode: string; playerName: string }) => void;
   "get-active-games": () => void;
   "start-game": (data: { gameID: string }) => void;
   "new-round": (data: { gameID: string }) => void;
@@ -62,6 +63,7 @@ class SocketManager {
   private _isAuthenticated = false;
   private _userId: number | null = null;
   private _username: string | null = null;
+  private gameID: string | null = null;
 
   // Getters
   get isConnected(): boolean {
@@ -166,6 +168,7 @@ class SocketManager {
       this._isAuthenticated = false;
       this._userId = null;
       this._username = null;
+      this.gameID = null;
     }
   }
 
@@ -173,7 +176,7 @@ class SocketManager {
   createLobby(
     playerName: string,
     gameType: string
-  ): Promise<{ gameID: string }> {
+  ): Promise<{ inviteCode: string }> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -185,9 +188,10 @@ class SocketManager {
         reject(new Error(message));
       };
 
-      const handleSuccess = (data: { gameID: string }) => {
+      const handleSuccess = (data: { gameID: string; inviteCode: string }) => {
+        this.gameID = data.gameID;
         this.socket?.off("error", handleError);
-        resolve(data);
+        resolve({ inviteCode: data.inviteCode });
       };
 
       // Set up a one-time event handler for game action
@@ -206,7 +210,7 @@ class SocketManager {
     });
   }
 
-  joinLobby(playerName: string, gameID: string): Promise<{ gameID: string }> {
+  joinLobby(playerName: string, inviteCode: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -219,8 +223,9 @@ class SocketManager {
       };
 
       const handleSuccess = (data: { gameID: string }) => {
+        this.gameID = data.gameID;
         this.socket?.off("error", handleError);
-        resolve(data);
+        resolve();
       };
 
       // Set up a one-time event handler for game action
@@ -232,7 +237,7 @@ class SocketManager {
       this.socket.once("error", handleError);
 
       // Join the lobby
-      this.socket.emit("join-lobby", { playerName, gameID });
+      this.socket.emit("join-lobby", { playerName, inviteCode });
     });
   }
 

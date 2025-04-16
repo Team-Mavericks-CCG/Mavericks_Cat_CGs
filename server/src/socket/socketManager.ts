@@ -4,15 +4,17 @@ import { Blackjack } from "../games/blackjack.js";
 import jwt from "jsonwebtoken";
 import Player from "../models/userModel.js";
 import { Game, GameStatus } from "../games/game.js";
+import crypto from "crypto";
 
 interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
   "game-started": (state: unknown) => void;
   "game-state": (state: unknown) => void;
-  "lobby-created": (data: { gameID: string }) => void;
+  "lobby-created": (data: { gameID: string; inviteCode: string }) => void;
   "join-success": (data: { gameID: string }) => void;
-  "lobby-update": (
+  "lobby-update": (data: { players: string[] }) => void;
+  "lobby-list": (
     data: {
       gameID: string;
       type: string;
@@ -25,7 +27,7 @@ interface ServerToClientEvents {
 
 interface ClientToServerEvents {
   "create-lobby": (data: { playerName: string; gameType: string }) => void;
-  "join-lobby": (data: { gameID: string; playerName: string }) => void;
+  "join-lobby": (data: { inviteCode: string; playerName: string }) => void;
   "get-active-games": () => void;
   "start-game": (data: { gameID: string }) => void;
   "new-round": (data: { gameID: string }) => void;
@@ -66,6 +68,33 @@ const playerSocketMap = new Map<
     SocketData
   >
 >();
+
+// Invite code to game ID mapping
+const inviteCodeMap = new Map<string, string>();
+
+function generateInviteCode(): string {
+  // Get current timestamp + random number
+  const now = Date.now();
+  const randomBytes = crypto.randomBytes(4).toString("hex");
+
+  // Create a hash from timestamp + random data
+  const combined = `${now.toString()}-${randomBytes}-${Math.random().toString()}`;
+  const hash = crypto.createHash("sha256").update(combined).digest("hex");
+
+  // Extract 6 characters from the hash (uppercase alphanumeric only)
+  let code = "";
+  const allowedChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Omitting confusing chars
+
+  // Pick characters from different parts of the hash for better distribution
+  for (let i = 0; i < 6; i++) {
+    const hexPair = hash.substring(i * 2, i * 2 + 2);
+    const value = parseInt(hexPair, 16);
+    const index = value % allowedChars.length;
+    code += allowedChars.charAt(index);
+  }
+
+  return code;
+}
 
 export function setupSocketServer(
   io: Server<
@@ -114,7 +143,7 @@ export function setupSocketServer(
               : true, // Blackjack allows up to 4 players
         }));
 
-        socket.emit("lobby-update", activeGames);
+        socket.emit("lobby-list", activeGames);
       } catch (error) {
         console.error("Error fetching active games:", error);
         socket.emit("error", "Failed to fetch active games");
@@ -191,6 +220,11 @@ export function setupSocketServer(
         }
 
         socket.data.currentGameId = gameID;
+        let inviteCode = generateInviteCode();
+        while (inviteCodeMap.has(inviteCode)) {
+          inviteCode = generateInviteCode(); // Regenerate if already exists
+        }
+        inviteCodeMap.set(inviteCode, gameID);
 
         // Add the player to the game
         game.addPlayer(socket.id, data.playerName);
@@ -201,10 +235,7 @@ export function setupSocketServer(
         void socket.join(gameID);
 
         // Notify client of successful game creation
-        socket.emit("lobby-created", { gameID });
-
-        // Send initial game state
-        socket.emit("game-state", game.getClientGameState());
+        socket.emit("lobby-created", { gameID, inviteCode });
       } catch (error) {
         console.error("Error creating game:", error);
         socket.emit("error", "Failed to create game. Please try again.");
@@ -214,7 +245,14 @@ export function setupSocketServer(
     // TODO: handle join game
     socket.on("join-lobby", (data) => {
       try {
-        const { gameID, playerName } = data;
+        console.log("Join lobby data:", data);
+        const { inviteCode, playerName } = data;
+
+        const gameID = inviteCodeMap.get(inviteCode);
+        if (!gameID) {
+          socket.emit("error", "Invalid invite code. Please check the code.");
+          return;
+        }
 
         // Check if game exists
         const gameInfo = gameStore.getGameWithType(gameID);
@@ -239,7 +277,7 @@ export function setupSocketServer(
         socket.data.playerName = playerName;
         socket.data.currentGameId = gameID;
 
-        // Add the player to the Blackjack game
+        // Add the player to the game
         try {
           game.addPlayer(socket.id, playerName);
         } catch {
@@ -252,11 +290,24 @@ export function setupSocketServer(
         // Join socket to the game room
         void socket.join(gameID);
 
+        console.log(
+          `Player ${playerName} joined game ${gameID} with socket ID ${socket.id}`
+        );
+
+        // print all the sockets in the room
+        const socketsInRoom = io.sockets.adapter.rooms.get(gameID);
+        console.log(
+          `Sockets in room ${gameID}: ${Array.from(socketsInRoom ?? []).join(", ")}`
+        );
+
         // Notify of successful join
         socket.emit("join-success", { gameID });
 
         // Send current game state to the new player
         socket.emit("game-state", game.getClientGameState());
+        socket.emit("lobby-update", {
+          players: Array.from(game.players.keys()),
+        });
 
         // Update all other players
         socket.to(gameID).emit("game-state", game.getClientGameState());

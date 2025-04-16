@@ -1,12 +1,12 @@
 .lobby-header {
-    text-align: center;
-    font-size: 2.5rem;
-    color: #f4a340;
-    margin-top: 30px;
-    margin-bottom: 10px;
-    font-family: 'Arial Rounded MT Bold', sans-serif;
-    letter-spacing: 2px;
-  }
+  text-align: center;
+  font-size: 2.5rem;
+  color: #f4a340;
+  margin-top: 30px;
+  margin-bottom: 10px;
+  font-family: "Arial Rounded MT Bold", sans-serif;
+  letter-spacing: 2px;
+}
 
 html,
 body {
@@ -19,219 +19,213 @@ body {
 }
 
 .lobby-container {
-    background-color: #256029;
-    min-height: 100vh;
-    padding: 2rem;
-    color: white;
-    position: relative;
-    bottom: 20px;
-    font-family: 'Arial Rounded MT Bold', sans-serif;
-  }
-  
-  .invite-btn {
-    position: absolute;
-    top: 20px;
-    left: 30px;
-    padding: 0.8rem 1.5rem;
-    background-color: #f4a340;
-    border: none;
-    border-radius: 15px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-  }
+  background-color: #256029;
+  height: 100vh;
+  padding: 20px;
+  color: white;
+  position: relative;
+  font-family: "Arial Rounded MT Bold", sans-serif;
+}
 
-  .start-btn {
-    padding: 0.8rem 1.5rem;
-    background-color: green;
-    border: none;
-    border-radius: 15px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-  }
+.invite-btn {
+  position: absolute;
+  top: 20px;
+  left: 30px;
+  padding: 0.8rem 1.5rem;
+  background-color: #f4a340;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
 
-  .start-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+.start-btn {
+  padding: 0.8rem 1.5rem;
+  background-color: green;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
 
-  
-  .ready-btn:hover {
-    transform: scale(1.1);
-  }
+.start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
-  .ready-btn {
-    padding: 0.8rem 1.5rem;
-    background-color: rgb(252, 170, 62);
-    border: none;
-    border-radius: 15px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: rgb(252, 248, 248);
-    cursor: pointer;
-  }
+.ready-btn:hover {
+  transform: scale(1.1);
+}
 
-  .leave-btn {
-    padding: 0.8rem 1.5rem;
-    background-color: red;
-    border: none;
-    border-radius: 15px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .lobby-title-svg {
-    width: 100%;
-    height: 150px;
-    fill: none;
-  }
-  
-  
-  .lobby-arc-text {
-    font-weight: bold;
-    letter-spacing: 0.5rem;
-    text-shadow: 0 0 10px #f4a340;
-    fill: #f4a340;
-    justify-content: right;
-    align-items: right;
-    flex-direction: column;
-    margin-bottom: -200px;
-    font-size: larger;
-  }
-  
-  .player-cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
+.ready-btn {
+  padding: 0.8rem 1.5rem;
+  background-color: rgb(252, 170, 62);
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: rgb(252, 248, 248);
+  cursor: pointer;
+}
 
-  
-  .player-card {
-    width: 120px;
-    height: 180px;
-    border-radius: 10px;
-    padding: 1rem;
-    text-align: center;
-    color: white;
-    font-weight: bold;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border: 5px solid white;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transform-origin: bottom center;
-  }
-  
-  .player-card .player-icon {
-    font-size: 2rem;
-    margin-bottom: 10px;
-  }
-  
-  .player-card.blue {
-    background: #57a3d2;
-  }
-  
-  .player-card.green {
-    background: #3fbf60;
-  }
-  
-  .player-card.pink {
-    background: #e070b1;
-  }
-  
-  .player-card.purple {
-    background: #6a0f49;
-  }
+.leave-btn {
+  padding: 0.8rem 1.5rem;
+  background-color: red;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
 
-  .lobby-and-cards-container{
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: right;
-    align-items: right;
-    margin-top: 2rem;
-  }
-  
-  .bottom-panel {
-    position: absolute;
-    bottom: 30px;
-    left: 30px;
-    right: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .invite-code {
-    position: absolute;
-    top: 20px;
-    right: 30px;
-    font-size: 1.3rem;
-    color: #f4a340;
-    font-weight: bold;
-  }
-  
-  .bottom-panel {
-    position: absolute;
-    bottom: 30px;
-    left: 30px;
-    right: 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .bottom-left {
-    width: 200px; /* Placeholder, can be empty */
-    font-size: large;
-    font-family: 'Arial Rounded MT Bold', sans-serif;
-    color: #ffb53e;
-    letter-spacing: 2px;
-  }
-  .column-right{
-    width: 50px;
-  }
-  .spacer{
-    width: 50px;
-  }
-  
-  .bottom-center {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 20px;
-    margin-bottom: 40px;
-  }
-  
-  .bottom-right {
-    display: flex;
-    justify-content: flex-end;
-    align-items: flex-end;
-    margin-top: 90px;
-    margin-bottom: 20px;
-  }
+.lobby-title-svg {
+  width: 100%;
+  height: 150px;
+  fill: none;
+}
 
-  .snake-box{
-      display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
-      gap: 2rem;
-      margin-bottom: 2rem;
-      flex-wrap: wrap;
-    
-  }
-  .lobby-title-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: -500px;
-  }
-  
+.lobby-arc-text {
+  font-weight: bold;
+  letter-spacing: 0.5rem;
+  text-shadow: 0 0 10px #f4a340;
+  fill: #f4a340;
+  justify-content: right;
+  align-items: right;
+  flex-direction: column;
+  margin-bottom: -200px;
+  font-size: larger;
+}
+
+.player-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.player-card {
+  width: 120px;
+  height: 180px;
+  border-radius: 10px;
+  padding: 1rem;
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 5px solid white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transform-origin: bottom center;
+}
+
+.player-card .player-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.player-card.blue {
+  background: #57a3d2;
+}
+
+.player-card.green {
+  background: #3fbf60;
+}
+
+.player-card.pink {
+  background: #e070b1;
+}
+
+.player-card.purple {
+  background: #6a0f49;
+}
+
+.lobby-and-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: right;
+  align-items: right;
+  margin-top: 2rem;
+}
+
+.bottom-panel {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invite-code {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  font-size: 1.3rem;
+  color: #f4a340;
+  font-weight: bold;
+}
+
+.bottom-panel {
+  position: absolute;
+  bottom: 30px;
+  left: 30px;
+  right: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bottom-left {
+  width: 200px; /* Placeholder, can be empty */
+  font-size: large;
+  font-family: "Arial Rounded MT Bold", sans-serif;
+  color: #ffb53e;
+  letter-spacing: 2px;
+}
+.column-right {
+  width: 50px;
+}
+.spacer {
+  width: 50px;
+}
+
+.bottom-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 20px;
+  margin-bottom: 40px;
+}
+
+.bottom-right {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  margin-top: 90px;
+  margin-bottom: 20px;
+}
+
+.snake-box {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.lobby-title-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: -500px;
+}
