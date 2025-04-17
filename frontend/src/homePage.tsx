@@ -81,7 +81,6 @@ const GameDialog: React.FC<GameDialogProps> = ({
           onChange={(_, newValue: number) => setSelectedTab(newValue)}
           centered
           scrollButtons="auto"
-          variant="scrollable"
         >
           {tabs.map((tab, index) => (
             <Tab key={index} label={tab.label} />
@@ -93,7 +92,7 @@ const GameDialog: React.FC<GameDialogProps> = ({
           key={index}
           style={{ display: selectedTab === index ? "block" : "none" }}
         >
-          <DialogContentText>{tab.content}</DialogContentText>
+          <DialogContentText component="div">{tab.content}</DialogContentText>
           <DialogActions>
             <Button
               onClick={() => {
@@ -112,8 +111,7 @@ const GameDialog: React.FC<GameDialogProps> = ({
 
 function HomePage() {
   useEffect(() => {
-    console.log("Home page loaded or navigated to");
-
+    // disconnect from any games/lobbies if connected
     socketManager.disconnect();
 
     // Cleanup function if needed
@@ -261,6 +259,7 @@ function HomePage() {
                 .then((data) => {
                   void navigate("/lobby", {
                     state: {
+                      playerName: localStorage.getItem("username") ?? "Player",
                       gameType: "Blackjack",
                       isCreating: true,
                       inviteCode: data,
@@ -361,20 +360,18 @@ function HomePage() {
               />
               <span className="game-label">Poker</span>
             </button>
-            <div className="aboutUs">
-            <p>
+            <section className="aboutUs">
               <h2>About Us</h2>
-              <br />
-              We are a team of passionate developers who love card games and cats. 
-              <br />
-              <br />
-              Our goal is to create a fun and engaging platform for players of all skill levels.
-              <br />
-            </p>
-            <footer>
-              © 2025 Team Mavericks. All rights reserved.
-              </footer>
-          </div>
+              <p>
+                We are a team of passionate developers who love card games and
+                cats.
+              </p>
+              <p>
+                Our goal is to create a fun and engaging platform for players of
+                all skill levels.
+              </p>
+              <footer>© 2025 Team Mavericks. All rights reserved.</footer>
+            </section>
           </div>
           <div className="button-row"></div>
         </div>

@@ -2,12 +2,11 @@ import React, { useRef, useState } from "react";
 import { getCardBackImage } from "../utils/CardImage";
 import "./blackjackStyle.css";
 import { Typography, Box } from "@mui/material";
-import { BlackjackGame } from "./blackjackModel";
 import { Card } from "../utils/card";
 import { GameRules } from "../components/GameRules";
 import { LeaderboardAPI } from "../../utils/api";
-import { GameButton } from '../components/GameButton'
-import { CardComponent } from '../components/CardComponent';
+import { GameButton } from "../components/GameButton";
+import { CardComponent } from "../components/CardComponent";
 //import "./lobby/endOfGamePage.css";
 
 const BlackjackPage: React.FC = () => {
@@ -19,7 +18,6 @@ const BlackjackPage: React.FC = () => {
   const [revealDealer, setRevealDealer] = useState(false);
   const [dealerValue, setDealerValue] = useState<number | null>(null);
   const [playerValue, setPlayerValue] = useState<number>(0);
-
 
   const game = gameRef.current;
 
@@ -72,7 +70,11 @@ const BlackjackPage: React.FC = () => {
 
     const username = localStorage.getItem("username");
     if (username) {
-      void LeaderboardAPI.saveGameStats("Blackjack", result === "You win!", playerTotal);
+      void LeaderboardAPI.saveGameStats(
+        "Blackjack",
+        result === "You win!",
+        playerTotal
+      );
     }
   };
 
@@ -85,7 +87,9 @@ const BlackjackPage: React.FC = () => {
             card={card}
             isClickable={false}
             faceUp={!(hideFirst && idx === 0 && !revealDealer)}
-            onClick={() => console.log(`Card clicked: ${card.rank} of ${card.suit}`)}
+            onClick={() =>
+              console.log(`Card clicked: ${card.rank} of ${card.suit}`)
+            }
           />
         );
       })}
@@ -99,14 +103,15 @@ const BlackjackPage: React.FC = () => {
       </Typography>
 
       <Box display="flex" justifyContent="right" gap={2}>
-        <GameButton className="start-btn"
-            variant="contained"
-            onClick={startGame}
-            disabled={!isGameOver && playerHand.length > 0}
-          >
-            Start New Game
-          </GameButton>
-        </Box>
+        <GameButton
+          className="start-btn"
+          variant="contained"
+          onClick={startGame}
+          disabled={!isGameOver && playerHand.length > 0}
+        >
+          Start New Game
+        </GameButton>
+      </Box>
 
       {/* Deck Display */}
       <Box display="flex" alignItems="center" justifyContent="center" mb={2}>
@@ -141,14 +146,16 @@ const BlackjackPage: React.FC = () => {
       </Typography>
 
       <Box display="flex" justifyContent="right" gap={2}>
-        <GameButton className="hit-btn"
+        <GameButton
+          className="hit-btn"
           variant="contained"
           onClick={hit}
           disabled={isGameOver}
         >
           Hit
         </GameButton>
-        <GameButton className="stand-btn"
+        <GameButton
+          className="stand-btn"
           variant="contained"
           onClick={stand}
           disabled={isGameOver}
@@ -156,14 +163,18 @@ const BlackjackPage: React.FC = () => {
           Stand
         </GameButton>
       </Box>
-      {(gameResult === "You lose!" || gameResult === "It's a draw!" || gameResult === "You win!")&& (
-      <GameButton className="leaderboard"
+      {(gameResult === "You lose!" ||
+        gameResult === "It's a draw!" ||
+        gameResult === "You win!") && (
+        <GameButton
+          className="leaderboard"
           variant="contained"
           onClick={() => navigate("/endOfGamePage")}
           disabled={!isGameOver}
         >
           See Leaderboard
-        </GameButton>)}
+        </GameButton>
+      )}
     </Box>
   );
 };

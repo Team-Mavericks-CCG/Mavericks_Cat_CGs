@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
-import './snake.css';
+import { useEffect, useRef } from "react";
+import "./snake.css";
 
 //const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
@@ -9,206 +9,345 @@ import './snake.css';
 //const ctx: CanvasRenderingContext2D = <CanvasRenderingContext2D>canvas.getContext('2d');
 //const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-const Direction = {
-    Right: 0,
-    Left: 1,
-    Down: 2,
-    Up: 3
+enum Direction {
+  Right = 0,
+  Left = 1,
+  Down = 2,
+  Up = 3,
+}
+
+enum CellType {
+  Empty = 0,
+  Snake = 1,
+  Food = 2,
+}
+
+interface Coordinates {
+  x: number;
+  y: number;
+}
+
+interface Cell {
+  type: CellType;
+  age?: number;
 }
 
 // export const SnakeGame: React.FC = () => {
 // const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 // const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-export const SnakeGame: React.FC  = () =>  {
+class Snake {
+  private cellSize: number;
+  private board: Cell[][] = [];
+  private rows = 50;
+  private cols = 50;
+  private ctx: CanvasRenderingContext2D;
+  private canvas: HTMLCanvasElement;
+  private directionQueue: Direction[] = [];
+  private food: Coordinates = { x: 0, y: 0 };
+  private snake: Coordinates[] = [];
+  private head: Coordinates = { x: 0, y: 0 };
+  private direction: Direction = Direction.Right;
+  private score = 0;
+  public gameOver = false;
+  private willEat = false;
+  private animationFrameId?: number;
+  private gameLoop?: ReturnType<typeof setTimeout>;
 
+  constructor(canvas: HTMLCanvasElement) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d")!;
+    this.cellSize = Math.min(
+      canvas.width / this.cols,
+      canvas.height / this.rows
+    );
+
+    this.init();
+  }
+
+  initBoard(): void {
+    this.board = Array.from({ length: this.rows }, () =>
+      Array.from({ length: this.cols }, () => ({ type: CellType.Empty }))
+    );
+  }
+
+  init(): void {
+    this.ctx.font = "25px Times New Roman";
+    this.ctx.textBaseline = "middle";
+    this.ctx.textAlign = "center";
+
+    this.initBoard();
+
+    this.snake = [
+      { x: 0, y: 0 },
+      { x: 1, y: 0 },
+      { x: 2, y: 0 },
+      { x: 3, y: 0 },
+      { x: 4, y: 0 },
+    ];
+
+    this.updateSnake();
+
+    this.direction = Direction.Right;
+    this.score = 0;
+    this.gameOver = false;
+    this.willEat = false;
+  }
+
+  private updateSnake(): void {
+    // Clear previous snake positions
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        if (this.board[y][x].type === CellType.Snake) {
+          this.board[y][x].type = CellType.Empty;
+        }
+      }
+    }
+
+    // Add new snake positions
+    this.snake.forEach((segment, index) => {
+      if (
+        segment.x >= 0 &&
+        segment.x < this.cols &&
+        segment.y >= 0 &&
+        segment.y < this.rows
+      ) {
+        // Last segment is the head
+        if (index === this.snake.length - 1) {
+          this.head = { x: segment.x, y: segment.y };
+        }
+        this.board[segment.y][segment.x].type = CellType.Snake;
+        this.board[segment.y][segment.x].age = index;
+      }
+    });
+  }
+
+  startGame(): void {
+    this.init();
+    this.move();
+    this.foodGenerator();
+  }
+
+  stopGame(): void {
+    if (this.gameLoop) {
+      clearTimeout(this.gameLoop);
+    }
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+  }
+
+  setDirection(direction: Direction): void {
+    // Get the direction to check against (last in queue or current direction)
+    const checkAgainst =
+      this.directionQueue.length > 0
+        ? this.directionQueue[this.directionQueue.length - 1]
+        : this.direction;
+
+    // Prevent the snake from reversing direction
+    if (checkAgainst === Direction.Right && direction === Direction.Left)
+      return;
+    if (checkAgainst === Direction.Left && direction === Direction.Right)
+      return;
+    if (checkAgainst === Direction.Up && direction === Direction.Down) return;
+    if (checkAgainst === Direction.Down && direction === Direction.Up) return;
+
+    if (this.directionQueue.length < 3) {
+      this.directionQueue.push(direction);
+    }
+  }
+
+  draw(): void {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // draw score
+    this.ctx.fillStyle = "#fff";
+    this.ctx.globalAlpha = 0.5;
+    this.ctx.fillText("Score : " + this.score, 70, 30);
+    this.ctx.globalAlpha = 1;
+
+    // Render the board
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        const cell = this.board[y][x];
+        if (cell.type === CellType.Snake) {
+          this.ctx.fillStyle = cell.age! % 2 === 1 ? "#A1CCA5" : "#415D43";
+          this.ctx.fillRect(
+            x * this.cellSize,
+            y * this.cellSize,
+            this.cellSize,
+            this.cellSize
+          );
+        } else if (cell.type === CellType.Food) {
+          this.ctx.fillStyle = "#4B8D48";
+          this.ctx.fillRect(
+            x * this.cellSize,
+            y * this.cellSize,
+            this.cellSize,
+            this.cellSize
+          );
+        }
+      }
+    }
+
+    this.isDead();
+
+    this.eatFood();
+  }
+
+  move(): void {
+    this.direction = this.directionQueue.shift() ?? this.direction;
+    const newHead = { ...this.snake[this.snake.length - 1] };
+
+    switch (this.direction) {
+      case Direction.Right:
+        newHead.x = (this.head.x + 1) % this.cols;
+        break;
+      case Direction.Left:
+        newHead.x = (this.head.x - 1 + this.cols) % this.cols;
+        break;
+      case Direction.Down:
+        newHead.y = (this.head.y + 1) % this.rows;
+        break;
+      case Direction.Up:
+        newHead.y = (this.head.y - 1 + this.rows) % this.rows;
+        break;
+    }
+
+    if (!this.willEat) {
+      const coords = this.snake.shift();
+      this.board[coords!.y][coords!.x].type = CellType.Empty;
+    } else {
+      this.willEat = false;
+    }
+
+    this.head = newHead;
+    this.snake.push(newHead);
+    for (const segment of this.snake) {
+      this.board[segment.y][segment.x] = {
+        type: CellType.Snake,
+        age: this.snake.length - this.snake.indexOf(segment),
+      };
+    }
+
+    this.draw();
+
+    this.gameLoop = setTimeout(
+      () => {
+        if (!this.gameOver) {
+          this.animationFrameId = window.requestAnimationFrame(() =>
+            this.move()
+          );
+        } else {
+          this.ctx.fillStyle = "#fff";
+          this.ctx.globalAlpha = 1;
+          this.ctx.fillText(
+            "Game Over",
+            this.canvas.width / 2,
+            this.canvas.height / 2
+          );
+          this.ctx.fillText(
+            "Press Enter to Restart",
+            this.canvas.width / 2,
+            this.canvas.height / 2 + 30
+          );
+        }
+      },
+      3000 / (30 + this.score * 4)
+    );
+  }
+
+  isDead(): void {
+    const head = this.snake[this.snake.length - 1];
+
+    // Check collision with body (all segments except the head)
+    for (let i = 0; i < this.snake.length - 1; i++) {
+      const segment = this.snake[i];
+      if (head.x === segment.x && head.y === segment.y) {
+        this.gameOver = true;
+        return;
+      }
+    }
+  }
+
+  foodGenerator(): void {
+    const emptyCells: Coordinates[] = [];
+    for (let y = 0; y < this.rows; y++) {
+      for (let x = 0; x < this.cols; x++) {
+        if (this.board[y][x].type === CellType.Empty) {
+          emptyCells.push({ x, y });
+        }
+      }
+    }
+
+    if (emptyCells.length === 0) {
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * emptyCells.length);
+    this.food = emptyCells[randomIndex];
+    this.board[this.food.y][this.food.x].type = CellType.Food;
+  }
+
+  eatFood(): void {
+    if (this.head.x === this.food.x && this.head.y === this.food.y) {
+      this.willEat = true;
+      this.score += 1;
+      this.foodGenerator();
+    }
+  }
+
+  resetGame(): void {
+    if (this.gameOver) {
+      this.startGame();
+    }
+  }
+}
+
+export const SnakeGame: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const gameRef = useRef<Snake | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current!;
-    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
     canvas.width = 500;
     canvas.height = 500;
 
+    gameRef.current = new Snake(canvas);
+    gameRef.current?.startGame();
 
-  function Snake() {
-    this.speed = 10
-    this.food = {};
-
-    this.init = function() {
-      ctx.font = "25px Times New Roman";
-      ctx.textBaseline = 'middle';
-      ctx.textAlign = 'center';
-      this.tail = [{x: 0, y: 0}, {x: 10, y: 0}, {x: 20, y: 0}, {x: 30, y: 0}, {x: 40, y: 0}]
-      this.direction =  Direction.Right;
-      this.score = 0;
-      this.gameOver = false;
-      this.willEat = false;
-    }
-
-    this.startGame = () => {
-      this.init();
-      this.move();
-      this.foodGenerator();
-    }
-
-    this.setDirection = (direction) => {
-      this.direction = direction;
-    }
-
-    this.draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // draw score
-      ctx.fillStyle = '#fff'
-      ctx.globalAlpha = 0.5;
-      ctx.fillText('Score : ' + this.score, 70, 30);
-
-      ctx.globalAlpha = 1;
-      // draw food
-      ctx.fillStyle = '#4B8D48'
-      ctx.beginPath();
-      ctx.rect(this.food.x, this.food.y, 10, 10);
-      ctx.fill();
-
-      // draw snake
-      this.tail.forEach((item, index) => {
-        if(index%2 === 0) {
-          ctx.fillStyle = '#A1CCA5'
-        } else {
-          ctx.fillStyle = '#415D43'
-        }
-        ctx.beginPath();
-        ctx.rect(item.x, item.y, 10, 10);
-        ctx.fill();
-      })
-
-      
-      this.isDead();
-
-      this.eatFood();
-    }
-
-    this.move = () => {
-      const head = {...this.tail[this.tail.length - 1]};
-      const newHead = head;
-      switch(this.direction) {
-        case Direction.Right :
-          newHead.x = (head.x + 10 === canvas.width) ? 0 : head.x + this.speed;
+    const handleKeyPress = (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowRight":
+          gameRef.current?.setDirection(Direction.Right);
           break;
-        case Direction.Left : 
-          newHead.x = (head.x === 0) ? (canvas.width - 10) : head.x - this.speed;
+        case "ArrowLeft":
+          gameRef.current?.setDirection(Direction.Left);
           break;
-        case Direction.Down : 
-          newHead.y = (head.y + 10 === canvas.height) ? 0 : head.y + this.speed;
+        case "ArrowDown":
+          gameRef.current?.setDirection(Direction.Down);
           break;
-        case Direction.Up : 
-          newHead.y = (head.y === 0) ? (canvas.height - 10) : head.y - this.speed;
+        case "ArrowUp":
+          gameRef.current?.setDirection(Direction.Up);
+          break;
+        case "Enter":
+          if (gameRef.current?.gameOver) {
+            gameRef.current?.startGame();
+          }
           break;
       }
-      if(!this.willEat){
-        this.tail.shift();
-      } else {
-        this.willEat = !this.willEat;
-      }
-      
-      this.tail.push(newHead)
-      this.draw();
-      
+    };
+    window.addEventListener("keyup", handleKeyPress);
 
-      setTimeout(() => {
-        if(!this.gameOver) {
-          window.requestAnimationFrame(this.move);
-        } else {
-          ctx.fillStyle = '#fff'
-          ctx.globalAlpha = 1;
-          ctx.fillText('Game Over', canvas.width/2, canvas.height/2);
-          ctx.fillText('Press Enter to Restart', canvas.width/2, canvas.height/2 + 30);
-        }
-          
-      }, 1000/(30 + this.score/2));
-    }
-
-    this.isDead = () => {
-      const head = {...this.tail[this.tail.length - 1]};
-      this.tail.forEach((item, index) => {
-        if( index === this.tail.length - 1) {
-          return
-        } else if((head.x === item.x && head.y === item.y)) {
-          this.gameOver = true;
-        }
-      })
-    }
-
-    this.foodGenerator = () => {
-      const foodX = Math.floor(Math.random() * (canvas.width / 10)) * 10;
-      const foodY = Math.floor(Math.random() * (canvas.height / 10)) * 10;
-
-      let foodInside = false;
-      for (let item of this.tail) {
-        if (item.x === foodX && item.y === foodY) {
-          foodInside = true;
-          break;
-        }
-      }
-      if(foodInside) {
-        this.foodGenerator();
-        return;
-      }
-
-      this.food['x'] = foodX;
-      this.food['y'] = foodY;
-    }
-
-    this.eatFood = () => {
-      const head = {...this.tail[this.tail.length - 1]};
-      if(head.x === this.food.x && head.y === this.food.y) {
-        this.willEat = true;
-        this.score += 1;
-        this.foodGenerator();
-      }
-    }
-    
-  };
-
-  let snake = new Snake();
-  snake.startGame();
-
-
-  window.addEventListener('keyup', (event) => {
-    switch(event.keyCode) {
-      case 39:
-        if(snake.direction !== Direction.Left) {
-          snake.setDirection(Direction.Right)
-        }
-        break;
-      case 37:
-        if(snake.direction !== Direction.Right) {
-          snake.setDirection(Direction.Left)
-        }
-        break;
-      case 40:
-        if(snake.direction !== Direction.Up) {
-          snake.setDirection(Direction.Down)
-        }
-        break;
-      case 38:
-        if(snake.direction !== Direction.Down) {
-          snake.setDirection(Direction.Up)
-        }
-        break;
-      case 13:
-        if(snake.gameOver) {
-          snake.startGame();
-        }
-        break;
-    }
-  })
-}, []);   // use effect
+    return () => {
+      window.removeEventListener("keyup", handleKeyPress);
+      gameRef.current?.stopGame();
+      gameRef.current = null;
+    };
+  }, []); // use effect
 
   //return <canvas ref={canvasRef} className="snake-canvas" />;
   return <canvas ref={canvasRef} className="snake-canvas" />;
   // return <canvas ref={canvasRef} />;
-
 };

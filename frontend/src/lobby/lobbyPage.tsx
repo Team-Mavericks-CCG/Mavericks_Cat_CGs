@@ -8,30 +8,65 @@ const LobbyPage: React.FC = () => {
   const location = useLocation();
   // Define the expected type for location.state
   interface LobbyState {
-    gameType: string;
+    playerName: string;
+    gameTypeFromState: string;
     isCreating: boolean;
     inviteCode: string;
   }
 
-  const {
-    gameType,
-    isCreating,
-    inviteCode: inviteCodeFromState,
-  } = (location.state as LobbyState) ?? {};
-
   const [players, setPlayers] = useState<Player[]>([]);
 
   // state for the invite code and ready state
-  const [inviteCode] = useState(inviteCodeFromState);
+  const [inviteCode, setInviteCode] = useState("");
   const [isReady, setIsReady] = useState(false);
-  const [isHost] = useState(isCreating); // only host can start the game
+  const [isHost, setIsHost] = useState(false); // only host can start the game
+  const [gameType, setGameType] = useState(""); // default game type is solitaire
   // const [playerName] = useState(localStorage.getItem("username") ?? "Player");
   const navigate = useNavigate();
   // const [showSnake, setShowSnake] = useState(false);
 
   useEffect(() => {
+    // location state is only available when page is intially loaded
+    // reloading gets rid of it
+    if (!location.state) {
+      const {
+        playerName,
+        gameTypeFromState,
+        isCreating,
+        inviteCode: inviteCodeFromState,
+      } = JSON.parse(
+        localStorage.getItem(socketManager.socketID!)!
+      ) as LobbyState;
+
+      setGameType(gameTypeFromState);
+      setIsHost(isCreating);
+      setInviteCode(inviteCodeFromState);
+
+      void socketManager.connect(
+        playerName,
+        gameTypeFromState,
+        inviteCodeFromState
+      );
+    } else {
+      const {
+        gameTypeFromState,
+        isCreating,
+        inviteCode: inviteCodeFromState,
+      } = location.state as LobbyState;
+
+      setGameType(gameTypeFromState);
+      setIsHost(isCreating);
+      setInviteCode(inviteCodeFromState);
+
+      localStorage.setItem(
+        socketManager.socketID!,
+        JSON.stringify(location.state as LobbyState)
+      );
+    }
+
     // Subscribe to player updates
     const unsubscribe = socketManager.onPlayersUpdate(setPlayers);
+    setPlayers(socketManager.players);
 
     socketManager.on("game-started", (state) => {
       console.log("Game started, navigating to game page", state);
@@ -43,7 +78,7 @@ const LobbyPage: React.FC = () => {
       unsubscribe();
       socketManager.off("game-started");
     };
-  }, [gameType, navigate]);
+  }, [gameType, location.state, navigate]);
 
   // ready state for the start
   const toggleReady = () => setIsReady((prev) => !prev);

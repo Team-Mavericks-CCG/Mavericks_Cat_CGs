@@ -88,6 +88,10 @@ class SocketManager {
     return [...this._players];
   }
 
+  get socketID(): string | null {
+    return this.socket?.id ?? null;
+  }
+
   onPlayersUpdate(callback: (players: Player[]) => void): () => void {
     this.playerUpdateCallbacks.push(callback);
 
@@ -121,7 +125,7 @@ class SocketManager {
     gameType: string,
     inviteCode?: string
   ): Promise<string | null> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
         this._isConnected = true;
         resolve(this.inviteCode);
@@ -147,11 +151,11 @@ class SocketManager {
           .then(() => {
             resolve(this.inviteCode);
           })
-          .catch((error) => {
+          .catch((error: Error) => {
             console.error("Error handling lobby connection:", error);
             this._isConnected = false;
             this._isAuthenticated = false;
-            resolve(null);
+            reject(error);
           });
       });
 
@@ -307,34 +311,6 @@ class SocketManager {
 
       // Join the lobby
       this.socket.emit("join-lobby", { playerName, inviteCode });
-    });
-  }
-
-  private leave(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      if (!this.socket || !this._isConnected) {
-        reject(new Error("Socket not connected"));
-        return;
-      }
-
-      const handleError = (message: string) => {
-        this.socket?.off("game-over", handleSuccess);
-        reject(new Error(message));
-      };
-
-      const handleSuccess = () => {
-        this.socket?.off("error", handleError);
-        resolve();
-      };
-
-      // Set up a one-time event handler for game action
-      this.socket.once("game-over", handleSuccess);
-
-      // Set up a one-time error handler
-      this.socket.once("error", handleError);
-
-      // Leave the lobby
-      this.socket.emit("leave-game", { gameID: this.gameID! });
     });
   }
 

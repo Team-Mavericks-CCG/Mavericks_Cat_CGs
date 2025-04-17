@@ -14,6 +14,7 @@ import { CssBaseline } from "@mui/material";
 import Profile from "./profile/profilePage";
 import LobbyPage from "./lobby/lobbyPage";
 import Leaderboard from "./leaderboard/leaderboardpage";
+import EndOfGamePage from "./leaderboard/endOfGamePage";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -30,19 +31,21 @@ createRoot(document.getElementById("root")!).render(
           {/* Main routes with TopBar */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
-
             {/* Games routes */}
             <Route path="/games">
               <Route path="solitaire" element={<SolitairePage />} />
               <Route path="blackjack" element={<BlackjackPage />} />
-              <Route path="/games/:game/lobby/:inviteCode" element={<LobbyPage />} />
+              <Route
+                path="/games/:game/lobby/:inviteCode"
+                element={<LobbyPage />}
+              />
               {/* Add other game routes here */}
             </Route>
             <Route path="/profile" element={<Profile />} />
             {/* Add other routes that should have the TopBar */}\
             <Route path="/lobby" element={<LobbyPage />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/endOfGamePage" element={<endOfGamePage />} />
+            <Route path="/endOfGamePage" element={<EndOfGamePage />} />
           </Route>
         </Routes>
       </BrowserRouter>

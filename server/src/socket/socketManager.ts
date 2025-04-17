@@ -102,7 +102,7 @@ function generateInviteCode(): string {
 // function for getting players in a game
 function getPlayersInGame(game: Game): { players: { name: string }[] } {
   return {
-    players: Array.from(game.players.keys()).map((playerName) => ({
+    players: Array.from(game.players.values()).map((playerName) => ({
       name: playerName,
     })),
   };
