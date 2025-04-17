@@ -186,12 +186,13 @@ class SocketManager {
         console.error("Socket connection error:", error);
         this._isConnected = false;
         this._isAuthenticated = false;
-        resolve(null);
+        reject(error);
       });
 
       // Listen for errors
       this.socket.on("error", (message) => {
         console.error("Socket error:", message);
+        reject(Error(message));
       });
     });
   }

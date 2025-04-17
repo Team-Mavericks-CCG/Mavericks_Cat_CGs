@@ -293,6 +293,10 @@ function HomePage() {
                       inviteCode: inviteCode,
                     },
                   });
+                })
+                .catch((error) => {
+                  console.error(error);
+                  socketManager.disconnect();
                 });
             }}
           >
