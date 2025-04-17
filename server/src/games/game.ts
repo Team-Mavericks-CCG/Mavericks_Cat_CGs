@@ -15,12 +15,15 @@ export abstract class Game {
   // null if it's not a turn-based game or no turn is active
   activePlayer: string | null = null;
   protected gameId: string;
+  protected hostID: string;
   protected status: GameStatus = GameStatus.READY;
 
-  constructor(gameId: string) {
+  constructor(gameId: string, hostID: string, playerName: string) {
+    this.hostID = hostID;
     this.lastActivityTime = Date.now();
     this.gameId = gameId;
     this.players = new Map<string, string>();
+    this.addPlayer(hostID, playerName);
   }
 
   // Common implementation for all games
@@ -36,6 +39,10 @@ export abstract class Game {
     this.gameId = gameId;
   }
 
+  getHost(): string {
+    return this.hostID;
+  }
+
   getPlayerCount(): number {
     return this.players.size;
   }
@@ -44,8 +51,10 @@ export abstract class Game {
     if (!this.players.has(playerId)) {
       throw new Error("Player not found in the game.");
     }
-
     this.players.delete(playerId);
+    if (playerId === this.hostID) {
+      this.hostID = Array.from(this.players.keys())[0]; // Set a new host if the current host leaves
+    }
   }
 
   addPlayer(playerId: string, playerName: string): void {

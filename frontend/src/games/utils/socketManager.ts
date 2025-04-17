@@ -1,15 +1,27 @@
 import { io, Socket } from "socket.io-client";
 import { SERVER_URL } from "../../utils/api";
 
+export interface Player {
+  name: string;
+  rank?: string;
+  color?: string;
+  image?: string;
+  isReady?: boolean;
+}
+
 // Socket event types
 interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
   "game-started": (state: unknown) => void;
   "game-state": (state: unknown) => void;
-  "lobby-created": (data: { gameID: string; inviteCode: string }) => void;
+  "lobby-created": (data: {
+    gameID: string;
+    inviteCode: string;
+    players: { name: string }[];
+  }) => void;
   "join-success": (data: { gameID: string }) => void;
-  "lobby-update": (data: { players: string[] }) => void;
+  "lobby-update": (data: { players: Player[] }) => void;
   "lobby-list": (
     data: {
       gameID: string;
@@ -41,29 +53,19 @@ interface ClientToServerEvents {
   ) => void;
 }
 
-// For event handler mapping
-interface EventHandlerMap {
-  "game-state": (data: unknown) => void;
-  error: (data: unknown) => void;
-  "join-success": (data: unknown) => void;
-  "game-created": (data: unknown) => void;
-  [key: string]: ((data: unknown) => void) | undefined;
-}
-
 // Socket manager class for frontend usage
 class SocketManager {
   socket: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
-  private gameEventHandlers: Map<
-    string,
-    EventHandlerMap[keyof EventHandlerMap]
-  > = new Map<string, EventHandlerMap[keyof EventHandlerMap]>();
 
   // Connection status
   private _isConnected = false;
   private _isAuthenticated = false;
   private _userId: number | null = null;
   private _username: string | null = null;
+  private _players: Player[] = [];
+  private playerUpdateCallbacks: ((players: Player[]) => void)[] = [];
   private gameID: string | null = null;
+  private inviteCode: string | null = null;
 
   // Getters
   get isConnected(): boolean {
@@ -82,12 +84,47 @@ class SocketManager {
     return this._username;
   }
 
-  // Connect to the socket server
-  connect(): Promise<boolean> {
+  get players(): Player[] {
+    return [...this._players];
+  }
+
+  onPlayersUpdate(callback: (players: Player[]) => void): () => void {
+    this.playerUpdateCallbacks.push(callback);
+
+    // Call immediately with current data
+    callback([...this._players]);
+
+    // Return an unsubscribe function
+    return () => {
+      this.playerUpdateCallbacks = this.playerUpdateCallbacks.filter(
+        (cb) => cb !== callback
+      );
+    };
+  }
+
+  handleLobbyConnection(
+    playerName: string,
+    gameType: string,
+    inviteCode?: string
+  ): Promise<boolean> {
+    if (inviteCode) {
+      console.log("Joining lobby with invite code:", inviteCode);
+      return this.joinLobby(playerName, inviteCode).then(() => true);
+    }
+    console.log("Creating lobby");
+    return this.createLobby(playerName, gameType).then(() => true);
+  }
+
+  // TODO handle failed connections better
+  connect(
+    playerName: string,
+    gameType: string,
+    inviteCode?: string
+  ): Promise<string | null> {
     return new Promise((resolve) => {
       if (this.socket?.connected) {
         this._isConnected = true;
-        resolve(true);
+        resolve(this.inviteCode);
         return;
       }
 
@@ -106,34 +143,51 @@ class SocketManager {
       this.socket.on("connect", () => {
         console.log("Socket connected");
         this._isConnected = true;
-        resolve(true);
+        this.handleLobbyConnection(playerName, gameType, inviteCode)
+          .then(() => {
+            resolve(this.inviteCode);
+          })
+          .catch((error) => {
+            console.error("Error handling lobby connection:", error);
+            this._isConnected = false;
+            this._isAuthenticated = false;
+            resolve(null);
+          });
+      });
+
+      this.socket.on("lobby-update", (data) => {
+        console.log("Received lobby update:", data);
+        this._players = data.players.map((player) => ({
+          name: player.name,
+          rank: player.rank ?? `RANK #${Math.floor(Math.random() * 1000)}`,
+          color: player.color ?? "blue",
+          image: player.image ?? "🐱",
+          isReady: player.isReady ?? false,
+        }));
+
+        this.playerUpdateCallbacks.forEach((callback) =>
+          callback([...this._players])
+        );
       });
 
       this.socket.on("disconnect", () => {
         console.log("Socket disconnected");
         this._isConnected = false;
         this._isAuthenticated = false;
+        this.inviteCode = null;
+        this.gameID = null;
       });
 
       this.socket.on("connect_error", (error) => {
         console.error("Socket connection error:", error);
         this._isConnected = false;
         this._isAuthenticated = false;
-        resolve(false);
-      });
-
-      // Listen for game state updates
-      this.socket.on("game-state", (gameState) => {
-        this.handleGameState(gameState);
+        resolve(null);
       });
 
       // Listen for errors
       this.socket.on("error", (message) => {
         console.error("Socket error:", message);
-        const handler = this.gameEventHandlers.get("error");
-        if (handler) {
-          handler(message);
-        }
       });
     });
   }
@@ -169,14 +223,13 @@ class SocketManager {
       this._userId = null;
       this._username = null;
       this.gameID = null;
+      this.inviteCode = null;
+      this._players = [];
     }
   }
 
   // TODO implement enum for gametype on front end
-  createLobby(
-    playerName: string,
-    gameType: string
-  ): Promise<{ inviteCode: string }> {
+  private createLobby(playerName: string, gameType: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -188,10 +241,24 @@ class SocketManager {
         reject(new Error(message));
       };
 
-      const handleSuccess = (data: { gameID: string; inviteCode: string }) => {
+      const handleSuccess = (data: {
+        gameID: string;
+        inviteCode: string;
+        players: { name: string }[];
+      }) => {
+        console.log("Lobby created:", data);
         this.gameID = data.gameID;
+        this.inviteCode = data.inviteCode;
+        this._players = data.players.map((player) => ({
+          name: player.name,
+          rank: `RANK #${Math.floor(Math.random() * 1000)}`,
+          color: "pink",
+          image: "🐱",
+          isReady: false,
+        }));
+
         this.socket?.off("error", handleError);
-        resolve({ inviteCode: data.inviteCode });
+        resolve();
       };
 
       // Set up a one-time event handler for game action
@@ -210,7 +277,7 @@ class SocketManager {
     });
   }
 
-  joinLobby(playerName: string, inviteCode: string): Promise<void> {
+  private joinLobby(playerName: string, inviteCode: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -223,7 +290,9 @@ class SocketManager {
       };
 
       const handleSuccess = (data: { gameID: string }) => {
+        console.log("Joined lobby:", data);
         this.gameID = data.gameID;
+        this.inviteCode = inviteCode;
         this.socket?.off("error", handleError);
         resolve();
       };
@@ -238,6 +307,34 @@ class SocketManager {
 
       // Join the lobby
       this.socket.emit("join-lobby", { playerName, inviteCode });
+    });
+  }
+
+  private leave(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this._isConnected) {
+        reject(new Error("Socket not connected"));
+        return;
+      }
+
+      const handleError = (message: string) => {
+        this.socket?.off("game-over", handleSuccess);
+        reject(new Error(message));
+      };
+
+      const handleSuccess = () => {
+        this.socket?.off("error", handleError);
+        resolve();
+      };
+
+      // Set up a one-time event handler for game action
+      this.socket.once("game-over", handleSuccess);
+
+      // Set up a one-time error handler
+      this.socket.once("error", handleError);
+
+      // Leave the lobby
+      this.socket.emit("leave-game", { gameID: this.gameID! });
     });
   }
 
@@ -297,58 +394,20 @@ class SocketManager {
     });
   }
 
-  // Register event handlers for game events
-  on<K extends keyof EventHandlerMap>(
+  // Simplify by using Socket.io's built-in event system directly
+  on<K extends keyof ServerToClientEvents>(
     event: K,
-    handler: EventHandlerMap[K]
+    handler: ServerToClientEvents[K]
   ): void {
-    this.gameEventHandlers.set(event as string, handler);
-
-    // If the event is one of the predefined socket.io events, add a listener
-    if (
-      this.socket &&
-      [
-        "game-state",
-        "error",
-        "join-success",
-        "game-created",
-        "blackjack-round-over",
-        "blackjack-game-over",
-      ].includes(event as string)
-    ) {
-      // Need to cast here because TypeScript can't infer the correct overload
-      if (handler) {
-        this.socket.on(event as keyof ServerToClientEvents, handler);
-      }
+    if (this.socket) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      this.socket.on(event, handler as any);
     }
   }
 
-  // Remove event handler
-  off(event: string): void {
-    this.gameEventHandlers.delete(event);
-
-    // If the event is one of the predefined socket.io events, remove the listener
-    if (
-      this.socket &&
-      [
-        "game-state",
-        "error",
-        "join-success",
-        "game-created",
-        "blackjack-round-over",
-        "blackjack-game-over",
-      ].includes(event)
-    ) {
-      this.socket.off(event as keyof ServerToClientEvents);
-    }
-  }
-
-  // Handle game state updates and dispatch to specific handlers
-  private handleGameState(gameState: unknown): void {
-    // Call the general game state handler if registered
-    const gameStateHandler = this.gameEventHandlers.get("game-state");
-    if (gameStateHandler) {
-      gameStateHandler(gameState);
+  off<K extends keyof ServerToClientEvents>(event: K): void {
+    if (this.socket) {
+      this.socket.off(event);
     }
   }
 }

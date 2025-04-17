@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./homePage.css";
 import {
@@ -17,6 +17,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import AppTheme from "./shared-theme/AppTheme";
+import { socketManager } from "./games/utils/socketManager";
 
 const HomePageContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
@@ -110,6 +111,17 @@ const GameDialog: React.FC<GameDialogProps> = ({
 };
 
 function HomePage() {
+  useEffect(() => {
+    console.log("Home page loaded or navigated to");
+
+    socketManager.disconnect();
+
+    // Cleanup function if needed
+    return () => {
+      // Cleanup code
+    };
+  }, []);
+
   const navigate = useNavigate();
   const [openSolitaire, setOpenSolitaire] = useState(false);
   const [openWar, setOpenWar] = useState(false);
@@ -244,9 +256,17 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              void navigate("/lobby", {
-                state: { gameType: "Blackjack", isCreating: true },
-              });
+              void socketManager
+                .connect("default", "Blackjack")
+                .then((data) => {
+                  void navigate("/lobby", {
+                    state: {
+                      gameType: "Blackjack",
+                      isCreating: true,
+                      inviteCode: data,
+                    },
+                  });
+                });
             }}
           >
             Create Lobby
@@ -264,14 +284,17 @@ function HomePage() {
                 alert("Please enter a valid 5 digit invite code.");
                 return;
               }
-              // Navigate to the lobby with the invite code
-              void navigate("/lobby", {
-                state: {
-                  gameType: "Poker",
-                  isCreating: false,
-                  inviteCode: inviteCode,
-                },
-              });
+              void socketManager
+                .connect("default", "Blackjack", inviteCode)
+                .then(() => {
+                  void navigate("/lobby", {
+                    state: {
+                      gameType: "Blackjack",
+                      isCreating: false,
+                      inviteCode: inviteCode,
+                    },
+                  });
+                });
             }}
           >
             Join Lobby

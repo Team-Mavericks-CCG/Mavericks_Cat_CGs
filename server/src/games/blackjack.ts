@@ -47,14 +47,15 @@ export interface BlackjackClientGameState {
 
 export class Blackjack extends Game {
   private deck: Deck;
-  private hands: Map<string, Hand[]>;
-  private dealerHand: Card[];
+  private hands = new Map<string, Hand[]>();
+  private dealerHand: Card[] = [];
 
-  constructor(gameId: string) {
-    super(gameId);
-    this.hands = new Map();
-    this.dealerHand = [];
+  constructor(gameId: string, hostID: string, playerName: string) {
+    super(gameId, hostID, playerName);
+
     this.deck = Deck.createShuffled({}, 6);
+
+    this.initializeHand(hostID);
   }
 
   startGame(): void {
@@ -291,7 +292,14 @@ export class Blackjack extends Game {
   // Add a player to the game
   public addPlayer(playerID: string, playerName: string): void {
     super.addPlayer(playerID, playerName);
+    this.initializeHand(playerID);
+  }
 
+  public initializeHand(playerID: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!this.hands) {
+      return;
+    }
     if (this.hands.size >= Blackjack.MAX_PLAYERS) {
       throw new Error("Game is full");
     }

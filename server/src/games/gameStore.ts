@@ -39,8 +39,12 @@ export const gameStore = {
   },
 
   // Factory methods for specific game types
-  createBlackjackGame(gameID: string): Blackjack {
-    return new Blackjack(gameID);
+  createBlackjackGame(
+    gameID: string,
+    hostID: string,
+    playerName: string
+  ): Blackjack {
+    return new Blackjack(gameID, hostID, playerName);
   },
 
   // Add similar methods for other game types
