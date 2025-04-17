@@ -292,10 +292,12 @@ function HomePage() {
   return (
     <AppTheme>
       <HomePageContainer direction="column" justifyContent="space-between">
-        <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
+        <Typography component="h1" variant="h2" sx={{ width: "100%" }}>
           Welcome to Mavericks Cat Card Games!
         </Typography>
-        <p>Choose a game to play:</p>
+        <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
+          Choose a game to play:
+        </Typography>
         <div className="button-container">
           <div className="button-row1">
             <button
@@ -336,6 +338,20 @@ function HomePage() {
               />
               <span className="game-label">Poker</span>
             </button>
+            <div className="aboutUs">
+            <p>
+              <h2>About Us</h2>
+              <br />
+              We are a team of passionate developers who love card games and cats. 
+              <br />
+              <br />
+              Our goal is to create a fun and engaging platform for players of all skill levels.
+              <br />
+            </p>
+            <footer>
+              © 2025 Team Mavericks. All rights reserved.
+              </footer>
+          </div>
           </div>
           <div className="button-row"></div>
         </div>

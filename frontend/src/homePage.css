@@ -5,11 +5,33 @@ body {
   padding: 0;
 }
 
-p{
+
+.aboutUs {
+  margin-top: 50px;
+  margin-bottom: 10px;
+}
+
+.aboutUs p{
+  font-size: 18px;
   margin: 0;
   padding: 0;
   text-align: center;
-  font-size: 16px;
+}
+
+.aboutUs h2{
+  font-size: 30px;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+footer {
+  font-size: 14px;
+  text-align: center;
+  padding: 10px;
+  position: relative;
+  bottom: -180px; 
+  width: 100%;
 }
 
 body {
@@ -22,12 +44,12 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; /* Align content to the top */
+  justify-content: flex-start; 
   align-items: center;
   text-align: center;
   box-sizing: border-box;
-  padding-top: 10px; /* Reduced padding-top to move buttons higher */
-  padding-bottom: 3rem; /* Space for footer */
+  padding-top: 10px; 
+  padding-bottom: 3rem; 
 }
 
 .button-row1 {
@@ -49,8 +71,6 @@ body {
 }
 
 button {
-  background-color: #3f51b5;
-  color: white;
   padding: 16px 32px;
   margin: 10px;
   border: none;
@@ -61,15 +81,10 @@ button {
   transition: background-color 0.3s ease;
 }
 
-button:hover {
-  background-color: #303f9f;
-}
-
 .game-button {
   width: 300px; 
   height: 200px; 
   border-radius: 16px;
-  background-color: white;
   position: relative; /* Position the text over the image */
   display: flex;
   flex-direction: column;
@@ -82,7 +97,6 @@ button:hover {
 }
 
 .game-button:hover {
-  background-color: #f0f0f0;
   transform: scale(1.08);
 }
 
@@ -96,7 +110,7 @@ button:hover {
   position: relative; /* Place the text above the image */
   z-index: 1; /* Ensure text is on top */
   font-size: 14px;
-  color: black; /* Make the text stand out against the image */
+   /* Make the text stand out against the image */
   padding: 2px 0; /* Adjust padding to position the text at the bottom */
   text-align: center;
   width: 100%; /* Ensure text spans the entire width */
