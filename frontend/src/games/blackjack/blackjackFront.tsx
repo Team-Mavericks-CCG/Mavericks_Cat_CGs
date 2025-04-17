@@ -8,6 +8,7 @@ import { GameRules } from "../components/GameRules";
 import { LeaderboardAPI } from "../../utils/api";
 import { GameButton } from '../components/GameButton'
 import { CardComponent } from '../components/CardComponent';
+//import "./lobby/endOfGamePage.css";
 
 const BlackjackPage: React.FC = () => {
   const gameRef = useRef<BlackjackGame>(new BlackjackGame());
@@ -18,6 +19,7 @@ const BlackjackPage: React.FC = () => {
   const [revealDealer, setRevealDealer] = useState(false);
   const [dealerValue, setDealerValue] = useState<number | null>(null);
   const [playerValue, setPlayerValue] = useState<number>(0);
+
 
   const game = gameRef.current;
 
@@ -96,6 +98,16 @@ const BlackjackPage: React.FC = () => {
         Blackjack <GameRules gameType="blackjack" />
       </Typography>
 
+      <Box display="flex" justifyContent="right" gap={2}>
+        <GameButton className="start-btn"
+            variant="contained"
+            onClick={startGame}
+            disabled={!isGameOver && playerHand.length > 0}
+          >
+            Start New Game
+          </GameButton>
+        </Box>
+
       {/* Deck Display */}
       <Box display="flex" alignItems="center" justifyContent="center" mb={2}>
         <Box textAlign="center">
@@ -118,7 +130,7 @@ const BlackjackPage: React.FC = () => {
       </Box>
 
       {/* Player's Hand */}
-      <Box mb={2}>
+      <Box display="flex" justifyContent="right" gap={2} mb={2}>
         <Typography variant="h6">Your Hand</Typography>
         {renderHand(playerHand)}
         <Typography variant="body2">Total: {playerValue}</Typography>
@@ -128,14 +140,7 @@ const BlackjackPage: React.FC = () => {
         {gameResult}
       </Typography>
 
-      <Box display="flex" justifyContent="center" gap={2}>
-        <GameButton className="start-btn"
-          variant="contained"
-          onClick={startGame}
-          disabled={!isGameOver && playerHand.length > 0}
-        >
-          Start New Game
-        </GameButton>
+      <Box display="flex" justifyContent="right" gap={2}>
         <GameButton className="hit-btn"
           variant="contained"
           onClick={hit}
@@ -151,6 +156,14 @@ const BlackjackPage: React.FC = () => {
           Stand
         </GameButton>
       </Box>
+      {(gameResult === "You lose!" || gameResult === "It's a draw!" || gameResult === "You win!")&& (
+      <GameButton className="leaderboard"
+          variant="contained"
+          onClick={() => navigate("/endOfGamePage")}
+          disabled={!isGameOver}
+        >
+          See Leaderboard
+        </GameButton>)}
     </Box>
   );
 };

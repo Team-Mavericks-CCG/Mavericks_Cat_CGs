@@ -13,6 +13,7 @@ import AppTheme from "./shared-theme/AppTheme";
 import { CssBaseline } from "@mui/material";
 import Profile from "./profile/profilePage";
 import LobbyPage from "./lobby/lobbyPage";
+import Leaderboard from "./leaderboard/leaderboardpage";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -40,6 +41,8 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/profile" element={<Profile />} />
             {/* Add other routes that should have the TopBar */}\
             <Route path="/lobby" element={<LobbyPage />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/endOfGamePage" element={<endOfGamePage />} />
           </Route>
         </Routes>
       </BrowserRouter>

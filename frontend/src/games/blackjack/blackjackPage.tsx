@@ -223,7 +223,7 @@ const BlackjackPage: React.FC<BlackjackPageProps> = ({
 
           {(gameState.gameStatus === "roundOver" ||
             gameState.gameStatus === "gameOver") && (
-            <ActionButton onClick={handleNewRound}>New Round</ActionButton>
+            <ActionButton onClick={handleNewRound}>New Round</ActionButton> 
           )}
         </Box>
 

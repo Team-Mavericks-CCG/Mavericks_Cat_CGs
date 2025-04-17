@@ -33,3 +33,15 @@
     gap: 20px;
     padding: 10px 0;
   }
+
+  .start-button{
+    padding: 0.8rem 1.5rem;
+  background-color: green;
+  border: none;
+  border-radius: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+}
+  }
