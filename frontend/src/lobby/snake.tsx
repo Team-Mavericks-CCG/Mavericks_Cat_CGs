@@ -88,6 +88,7 @@ class Snake {
 
     this.updateSnake();
 
+    this.directionQueue = [];
     this.direction = Direction.Right;
     this.score = 0;
     this.gameOver = false;

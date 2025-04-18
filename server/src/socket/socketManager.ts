@@ -428,6 +428,7 @@ export function setupSocketServer(
 
             // Notify remaining players
             socket.to(gameID).emit("game-state", game.getClientGameState());
+            socket.to(gameID).emit("lobby-update", getPlayersInGame(game));
 
             // If the game is now empty, remove it
             if (game.getPlayerCount() === 0) {

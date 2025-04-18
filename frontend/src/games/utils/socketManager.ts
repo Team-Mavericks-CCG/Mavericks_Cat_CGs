@@ -221,6 +221,7 @@ class SocketManager {
   // Disconnect from the socket server
   disconnect(): void {
     if (this.socket) {
+      localStorage.removeItem(this.socketID!);
       this.socket.disconnect();
       this.socket = null;
       this._isConnected = false;

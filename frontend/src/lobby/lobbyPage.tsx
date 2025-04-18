@@ -9,7 +9,7 @@ const LobbyPage: React.FC = () => {
   // Define the expected type for location.state
   interface LobbyState {
     playerName: string;
-    gameTypeFromState: string;
+    gameType: string;
     isCreating: boolean;
     inviteCode: string;
   }
@@ -31,7 +31,7 @@ const LobbyPage: React.FC = () => {
     if (!location.state) {
       const {
         playerName,
-        gameTypeFromState,
+        gameType: gameTypeFromState,
         isCreating,
         inviteCode: inviteCodeFromState,
       } = JSON.parse(
@@ -49,10 +49,11 @@ const LobbyPage: React.FC = () => {
       );
     } else {
       const {
-        gameTypeFromState,
+        gameType: gameTypeFromState,
         isCreating,
         inviteCode: inviteCodeFromState,
       } = location.state as LobbyState;
+      console.log("Location state:", location.state);
 
       setGameType(gameTypeFromState);
       setIsHost(isCreating);
