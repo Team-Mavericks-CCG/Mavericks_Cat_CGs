@@ -17,7 +17,7 @@ router.get("/active", auth, (req, res): void => {
       ([gameId, gameInfo]) => ({
         gameId,
         type: gameInfo.type,
-        playerCount: gameStore.getPlayerCount(gameId),
+        playerCount: gameInfo.game.getPlayerCount(),
       })
     );
 
@@ -47,7 +47,7 @@ router.get("/:gameId", auth, (req, res): void => {
     res.status(200).json({
       gameId,
       type: gameInfo.type,
-      playerCount: gameStore.getPlayerCount(gameId),
+      playerCount: gameInfo.game.getPlayerCount(),
     });
   } catch (error) {
     console.error(`Error fetching game info for ${req.params.gameId}:`, error);

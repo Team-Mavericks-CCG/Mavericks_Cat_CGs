@@ -1,5 +1,10 @@
 import { Server, Socket } from "socket.io";
-import { gameStore, GameType, isValidGameType } from "../games/gameStore.js";
+import {
+  gameStore,
+  GameType,
+  isValidGameType,
+  inviteCodeMap,
+} from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
 import jwt from "jsonwebtoken";
 import Player from "../models/userModel.js";
@@ -35,7 +40,7 @@ interface ClientToServerEvents {
   "get-active-games": () => void;
   "start-game": (data: { gameID: string; socketID: string }) => void;
   "new-round": (data: { gameID: string }) => void;
-  "leave-game": (data: { gameID: string }) => void;
+  leave: () => void;
   // generic action event for all games and actions, individual games can handle their own actions
   "game-action": (data: { gameID: string; action: string }) => void;
 
@@ -72,9 +77,6 @@ const playerSocketMap = new Map<
     SocketData
   >
 >();
-
-// Invite code to game ID mapping
-const inviteCodeMap = new Map<string, string>();
 
 function generateInviteCode(): string {
   // Get current timestamp + random number
@@ -412,8 +414,8 @@ export function setupSocketServer(
       }
     });
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
+    // handle leave function
+    function handleLeave() {
       console.log(`Socket disconnected: ${socket.id}`);
 
       const playerID = socket.id;
@@ -442,6 +444,13 @@ export function setupSocketServer(
 
       // Remove from player-socket map
       playerSocketMap.delete(playerID);
+    }
+
+    socket.on("leave", handleLeave);
+
+    // Handle disconnection
+    socket.on("disconnect", () => {
+      handleLeave();
     });
   });
 }
