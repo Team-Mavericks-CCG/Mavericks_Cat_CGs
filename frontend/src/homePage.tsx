@@ -11,6 +11,7 @@ import {
   IconButton,
   Tabs,
   Tab,
+  TextField,
   Typography,
   Stack,
 } from "@mui/material";
@@ -18,6 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import AppTheme from "./shared-theme/AppTheme";
 import { socketManager } from "./games/utils/socketManager";
+import catPawprint from "/assets/images/catPawprint.png";
 
 const HomePageContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
@@ -131,6 +133,14 @@ function HomePage() {
   const [selectedPokerTab, setSelectedPokerTab] = useState(0);
   const [selectedBlackjackTab, setSelectedBlackjackTab] = useState(0);
 
+  const [openJoinWarLobby, setOpenJoinWarLobby] = useState(false);
+  const [openJoinPokerLobby, setOpenJoinPokerLobby] = useState(false);
+  const [openJoinBlackjackLobby, setOpenJoinBlackjackLobby] = useState(false);
+  const [inviteCode, setInviteCode] = useState("");
+  const [userName, setUserName] = useState("");
+
+
+
   const solitaireTabs = [
     {
       label: "Start",
@@ -140,7 +150,7 @@ function HomePage() {
     },
     {
       label: "Leaderboard",
-      content: "Here is the leaderboard for Solitaire:",
+      content: "Click the 'Leaderboard' button to view the Solitaire leaderboard.",
       buttonLabel: "Leaderboard",
       navigateTo: "/leaderboard",
     },
@@ -165,17 +175,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenWar(false);
-              // Prompt for invite code
-              const inviteCode = prompt("Enter the invite code:");
-              if (!inviteCode) {
-                alert("Please enter a valid invite code.");
-                return;
-              } else if (inviteCode.length !== 5) {
-                alert("Please enter a valid 5 digit invite code.");
-                return;
-              }
-              // Navigate to the lobby with the invite code
-              void navigate(`/games/war/lobby/${inviteCode}`);
+              setTimeout(() => setOpenJoinWarLobby(true), 300);
             }}
           >
             Join Lobby
@@ -187,7 +187,7 @@ function HomePage() {
     },
     {
       label: "Leaderboard",
-      content: "Here is the leaderboard for War:",
+      content: "Click the 'Leaderboard' button to view the War leaderboard.",
       buttonLabel: "Leaderboard",
       navigateTo: "/leaderboard",
     },
@@ -215,17 +215,7 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenPoker(false);
-              // Prompt for invite code
-              const inviteCode = prompt("Enter the invite code:");
-              if (!inviteCode) {
-                alert("Please enter a valid invite code.");
-                return;
-              } else if (inviteCode.length !== 5) {
-                alert("Please enter a valid 5 digit invite code.");
-                return;
-              }
-              // Navigate to the lobby with the invite code
-              void navigate(`/games/poker/lobby/${inviteCode}`);
+              setTimeout(() => setOpenJoinPokerLobby(true), 300);
             }}
           >
             Join Lobby
@@ -237,7 +227,7 @@ function HomePage() {
     },
     {
       label: "Leaderboard",
-      content: "Here is the leaderboard for Poker:",
+      content: "Click the 'Leaderboard' button to view the Poker leaderboard.",
       buttonLabel: "Leaderboard",
       navigateTo: "/leaderboard",
     },
@@ -274,15 +264,8 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              // Prompt for invite code
-              const inviteCode = prompt("Enter the invite code:");
-              if (!inviteCode) {
-                alert("Please enter a valid invite code.");
-                return;
-              } else if (inviteCode.length !== 6) {
-                alert("Please enter a valid 5 digit invite code.");
-                return;
-              }
+              setTimeout(() => setOpenJoinBlackjackLobby(true), 300);
+
               void socketManager
                 .connect("default", "Blackjack", inviteCode)
                 .then(() => {
@@ -309,7 +292,7 @@ function HomePage() {
     },
     {
       label: "Leaderboard",
-      content: "Here is the leaderboard for Blackjack:",
+      content: "Click the 'Leaderboard' button to view the Blackjack leaderboard.",
       buttonLabel: "Leaderboard",
       navigateTo: "/leaderboard",
     },
@@ -319,7 +302,7 @@ function HomePage() {
     <AppTheme>
       <HomePageContainer direction="column" justifyContent="space-between">
         <Typography component="h1" variant="h2" sx={{ width: "100%" }}>
-          Welcome to Mavericks Cat Card Games!
+          Welcome to Mavericks Cat-tastic Card Games!
         </Typography>
         <Typography component="h1" variant="h4" sx={{ width: "100%" }}>
           Choose a game to play:
@@ -378,8 +361,14 @@ function HomePage() {
             </section>
           </div>
           <div className="button-row"></div>
+          <img
+          src={catPawprint}
+          alt="Cat Pawprint"
+          className="cat-pawprint"
+        />
         </div>
-      </HomePageContainer>
+
+
 
       <GameDialog
         open={openSolitaire}
@@ -428,6 +417,134 @@ function HomePage() {
           void navigate(path);
         }}
       />
+
+
+    { /* Join War Lobby Dialog */}
+    <Dialog open={openJoinWarLobby} onClose={() => setOpenJoinWarLobby(false)}>
+        <DialogTitle>Join War Lobby</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+          <TextField
+            label="Invite Code"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            inputProps={{ maxLength: 5 }}
+            fullWidth
+          />
+          <TextField
+            label="Your Name"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenJoinWarLobby(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (inviteCode.length !== 5) {
+                alert("Invite code must be 5 characters.");
+                return;
+              }
+              if (!userName) {
+                alert("Please enter your name.");
+                return;
+              }
+              setOpenJoinWarLobby(false);
+              void navigate(`/games/war/lobby/${inviteCode}`);
+            }}
+           
+          >
+            Join
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      { /* Join Poker Lobby Dialog */}
+      <Dialog open={openJoinPokerLobby} onClose={() => setOpenJoinPokerLobby(false)}>
+        <DialogTitle>Join Poker Lobby</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+          <TextField
+            label="Invite Code"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            inputProps={{ maxLength: 5 }}
+            fullWidth
+          />
+          <TextField
+            label="Your Name"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenJoinPokerLobby(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (inviteCode.length !== 5) {
+                alert("Invite code must be 5 characters.");
+                return;
+              }
+              if (!userName) {
+                alert("Please enter your name.");
+                return;
+              }
+              setOpenJoinPokerLobby(false);
+              void navigate(`/games/poker/lobby/${inviteCode}`);
+            }}
+           
+          >
+            Join
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      { /* Join Blackjack Lobby Dialog */}
+      <Dialog open={openJoinBlackjackLobby} onClose={() => setOpenJoinBlackjackLobby(false)}>
+        <DialogTitle>Join Blackjack Lobby</DialogTitle>
+        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
+          <TextField
+            label="Invite Code"
+            value={inviteCode}
+            onChange={(e) => setInviteCode(e.target.value)}
+            inputProps={{ maxLength: 5 }}
+            fullWidth
+          />
+          <TextField
+            label="Your Name"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenJoinBlackjackLobby(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={() => {
+              if (inviteCode.length !== 5) {
+                alert("Invite code must be 5 characters.");
+                return;
+              }
+              if (!userName) {
+                alert("Please enter your name.");
+                return;
+              }
+              setOpenJoinBlackjackLobby(false);
+              void navigate(`/games/blackjack/lobby/${inviteCode}`);
+            }}
+           
+          >
+            Join
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+      </HomePageContainer>
+      
     </AppTheme>
   );
 }
