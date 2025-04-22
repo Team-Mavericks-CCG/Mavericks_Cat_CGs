@@ -19,15 +19,20 @@ export const CardComponent: React.FC<{
       onClick={() => onClick()}
     >
       {!imageError ? (
-        <img
-          src={imageSrc}
-          alt={altText}
-          className="card-image"
-          onError={() => setImageError(true)}
-        />
+         <img
+         src={imageSrc}
+         alt={altText}
+         className="card-image"
+         onError={() => setImageError(true)}
+       />
       ) : (
         <div className="card-text-fallback">{altText}</div>
       )}
     </div>
   );
 };
+
+
+
+
+    
