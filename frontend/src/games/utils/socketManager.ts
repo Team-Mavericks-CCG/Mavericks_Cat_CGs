@@ -436,6 +436,34 @@ class SocketManager {
     });
   }
 
+  newRound(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.socket || !this._isConnected) {
+        reject(new Error("Socket not connected"));
+        return;
+      }
+
+      const handleError = (message: string) => {
+        this.socket?.off("game-state", handleSuccess);
+        reject(new Error(message));
+      };
+
+      const handleSuccess = () => {
+        this.socket?.off("error", handleError);
+        resolve();
+      };
+
+      // Set up a one-time event handler for game action
+      this.socket.once("game-state", handleSuccess);
+
+      // Set up a one-time error handler
+      this.socket.once("error", handleError);
+
+      // Emit the game action
+      this.socket.emit("new-round", { gameID: this.gameID! });
+    });
+  }
+
   // Simplify by using Socket.io's built-in event system directly
   on<K extends keyof ServerToClientEvents>(
     event: K,

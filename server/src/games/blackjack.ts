@@ -120,6 +120,9 @@ export class Blackjack extends Game {
       throw new Error("Cannot deal now");
     }
 
+    // reset active player
+    this.activePlayer = null;
+
     // reset/initialize hands
     this.hands = new Map();
     for (const playerId of this.players.keys()) {
@@ -131,6 +134,9 @@ export class Blackjack extends Game {
         },
       ]);
     }
+
+    // reset dealer hand
+    this.dealerHand = [];
 
     // deal 1 card to each player
     for (const playerHands of this.hands.values()) {

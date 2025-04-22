@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { getCardBackImage } from "../utils/CardImage";
 import "./blackjackStyle.css";
 import { useNavigate } from "react-router-dom";
 import { Typography, Box } from "@mui/material";
-import { Card } from "../utils/card";
+import { Card, Rank, Suit } from "../utils/card";
 import { GameRules } from "../components/GameRules";
 import { GameButton } from "../components/GameButton";
 import { CardComponent } from "../components/CardComponent";
-import { BlackjackClientGameState, GameStatus, Hand } from "./blackjackType";
+import {
+  BlackjackClientGameState,
+  GameStatus,
+  Hand,
+  HandStatus,
+} from "./blackjackType";
 import { socketManager } from "../utils/socketManager";
 
 const BlackjackPage: React.FC = () => {
@@ -21,51 +25,71 @@ const BlackjackPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const updateState = (state: BlackjackClientGameState | null): void => {
-    if (!state) {
-      console.error("Game state is null or undefined");
-      return;
-    }
-
-    const tempDealerHand: Card[] = [];
-    state.dealerHand.cards.forEach((card) => {
-      tempDealerHand.push(new Card(card.rank, card.suit, {}, card.faceUp));
-    });
-    setDealerHand(tempDealerHand);
-    setDealerValue(state.dealerHand.value);
-
-    state.players.forEach((player) => {
-      const tempPlayerHands: Hand[] = [];
-      player.hands.forEach((hand) => {
-        const tempPlayerHand: Card[] = [];
-        hand.cards.forEach((card) => {
-          tempPlayerHand.push(new Card(card.rank, card.suit, {}, card.faceUp));
-        });
-        tempPlayerHands.push({
-          cards: tempPlayerHand,
-          status: hand.status,
-          value: hand.value,
-        });
-      });
-
-      setPlayerHand((prev) => {
-        const newHand = new Map(prev);
-        newHand.set(player.id, tempPlayerHands);
-        return newHand;
-      });
-    });
-    setActivePlayer(state.activePlayer ?? null);
-    if (state.gameStatus === GameStatus.FINISHED) {
-      setIsGameOver(true);
-    }
-  };
-
   useEffect(() => {
+    const updateState = (state: BlackjackClientGameState | null): void => {
+      if (!state) {
+        console.error("Game state is null or undefined");
+        return;
+      }
+
+      const tempDealerHand: Card[] = [];
+      state.dealerHand.cards.forEach((card) => {
+        tempDealerHand.push(new Card(card.rank, card.suit, {}, card.faceUp));
+      });
+      setDealerHand(tempDealerHand);
+      setDealerValue(state.dealerHand.value);
+
+      state.players.forEach((player) => {
+        const tempPlayerHands: Hand[] = [];
+        player.hands.forEach((hand) => {
+          const tempPlayerHand: Card[] = [];
+          hand.cards.forEach((card) => {
+            tempPlayerHand.push(
+              new Card(card.rank, card.suit, {}, card.faceUp)
+            );
+          });
+          tempPlayerHands.push({
+            cards: tempPlayerHand,
+            status: hand.status,
+            value: hand.value,
+          });
+        });
+
+        setPlayerHand((prev) => {
+          const newHand = new Map(prev);
+          newHand.set(player.id, tempPlayerHands);
+          return newHand;
+        });
+      });
+
+      setActivePlayer(state.activePlayer ?? null);
+      if (state.gameStatus === GameStatus.FINISHED) {
+        setIsGameOver(true);
+
+        resolveGame(state);
+      }
+    };
+
     const unsubscribe = socketManager.onGameStateUpdate(updateState);
     return () => {
       unsubscribe();
     };
   }, []);
+
+  // This function is called when the game is over to determine the result
+  const resolveGame = (state: BlackjackClientGameState) => {
+    const currentPlayer = state.players.find(
+      (player) => player.id === socketManager.playerID
+    );
+
+    // if any hand for this player is a win, set result to "You Win!"
+    // otherwise, set result to "You Lose!"
+    if (currentPlayer!.hands.some((hand) => hand.status === HandStatus.WIN)) {
+      setGameResult("You Win!");
+    } else {
+      setGameResult("You Lose!");
+    }
+  };
 
   const startGame = () => {
     if (isGameOver) {
@@ -76,6 +100,9 @@ const BlackjackPage: React.FC = () => {
       setRevealDealer(false);
       setActivePlayer(null);
       setDealerValue(null);
+
+      // restart the game
+      void socketManager.newRound();
     }
   };
 
@@ -135,15 +162,12 @@ const BlackjackPage: React.FC = () => {
         gap={4}
         mb={2}
       >
-        <Box textAlign="center">
-          <img
-            src={getCardBackImage()}
-            alt="Deck"
-            style={{ width: 80, height: 120 }}
-          />
-          <Typography variant="body2">Deck</Typography>
-        </Box>
-
+        <CardComponent
+          // fake card for deck display
+          card={new Card(Rank.ACE, Suit.SPADES, {}, false)}
+          isClickable={false}
+          onClick={() => console.log("Deck clicked")}
+        />
         {/* dealers cards  */}
         <Box mb={5}>
           <Typography variant="h6">Dealer's Hand</Typography>

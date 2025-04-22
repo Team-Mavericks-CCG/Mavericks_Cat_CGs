@@ -21,7 +21,7 @@ export enum GameStatus {
   FINISHED = "FINISHED",
 }
 
-enum HandStatus {
+export enum HandStatus {
   // hand is dealt, not current turn
   WAITING = "waiting",
   // hand is active, player can hit or stand
