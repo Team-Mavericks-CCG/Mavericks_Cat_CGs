@@ -5,12 +5,13 @@ import jwt from "jsonwebtoken";
 import Player from "../models/userModel.js";
 import { Game, GameStatus } from "../games/game.js";
 import crypto from "crypto";
+import { BlackjackClientGameState } from "../games/blackjack.js";
 
 interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
   "game-started": (state: unknown) => void;
-  "game-state": (state: unknown) => void;
+  "game-state": (state: BlackjackClientGameState) => void;
   "lobby-created": (data: {
     gameID: string;
     inviteCode: string;

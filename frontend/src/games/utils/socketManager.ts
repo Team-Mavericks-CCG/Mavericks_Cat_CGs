@@ -1,5 +1,6 @@
 import { io, Socket } from "socket.io-client";
 import { SERVER_URL } from "../../utils/api";
+import { BlackjackClientGameState } from "../blackjack/blackjackType";
 
 export interface Player {
   name: string;
@@ -14,7 +15,7 @@ interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
   "game-started": (state: unknown) => void;
-  "game-state": (state: unknown) => void;
+  "game-state": (state: BlackjackClientGameState) => void;
   "lobby-created": (data: {
     gameID: string;
     inviteCode: string;
@@ -66,6 +67,8 @@ class SocketManager {
   private playerUpdateCallbacks: ((players: Player[]) => void)[] = [];
   private gameID: string | null = null;
   private inviteCode: string | null = null;
+  private _gameState: BlackjackClientGameState | null = null;
+  private gameStateUpdateCallbacks: ((state: unknown) => void)[] = [];
 
   // Getters
   get isConnected(): boolean {
@@ -92,6 +95,10 @@ class SocketManager {
     return this.socket?.id ?? null;
   }
 
+  get gameState(): unknown {
+    return this._gameState;
+  }
+
   onPlayersUpdate(callback: (players: Player[]) => void): () => void {
     this.playerUpdateCallbacks.push(callback);
 
@@ -101,6 +108,20 @@ class SocketManager {
     // Return an unsubscribe function
     return () => {
       this.playerUpdateCallbacks = this.playerUpdateCallbacks.filter(
+        (cb) => cb !== callback
+      );
+    };
+  }
+
+  onGameStateUpdate(callback: (state: unknown) => void): () => void {
+    this.gameStateUpdateCallbacks.push(callback);
+
+    // Call immediately with current data
+    callback(this._gameState);
+
+    // Return an unsubscribe function
+    return () => {
+      this.gameStateUpdateCallbacks = this.gameStateUpdateCallbacks.filter(
         (cb) => cb !== callback
       );
     };
@@ -174,6 +195,17 @@ class SocketManager {
         );
       });
 
+      this.socket.on("game-state", (state: BlackjackClientGameState) => {
+        console.log("Received game state:", state);
+        this._gameState = state;
+
+        this.gameStateUpdateCallbacks.forEach((callback) => {
+          if (this._gameState) {
+            callback({ ...this._gameState });
+          }
+        });
+      });
+
       this.socket.on("disconnect", () => {
         console.log("Socket disconnected");
         this._isConnected = false;
@@ -230,6 +262,7 @@ class SocketManager {
       this.gameID = null;
       this.inviteCode = null;
       this._players = [];
+      this._gameState = null;
     }
   }
 
