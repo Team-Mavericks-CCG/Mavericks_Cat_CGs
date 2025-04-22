@@ -63,12 +63,15 @@ class SocketManager {
   private _isAuthenticated = false;
   private _userId: number | null = null;
   private _username: string | null = null;
+  private _gameType: string | null = null;
   private _players: Player[] = [];
   private playerUpdateCallbacks: ((players: Player[]) => void)[] = [];
   private gameID: string | null = null;
-  private inviteCode: string | null = null;
+  private _inviteCode: string | null = null;
   private _gameState: BlackjackClientGameState | null = null;
   private gameStateUpdateCallbacks: ((state: unknown) => void)[] = [];
+  private _playerName: string | null = null;
+  private _isHost = false;
 
   // Getters
   get isConnected(): boolean {
@@ -97,6 +100,22 @@ class SocketManager {
 
   get gameState(): unknown {
     return this._gameState;
+  }
+
+  get gameType(): string | null {
+    return this._gameType;
+  }
+
+  get inviteCode(): string | null {
+    return this._inviteCode;
+  }
+
+  get playerName(): string | null {
+    return this._playerName;
+  }
+
+  get isHost(): boolean {
+    return this._isHost;
   }
 
   onPlayersUpdate(callback: (players: Player[]) => void): () => void {
@@ -130,7 +149,7 @@ class SocketManager {
   handleLobbyConnection(
     playerName: string,
     gameType: string,
-    inviteCode?: string
+    inviteCode: string | null
   ): Promise<boolean> {
     if (inviteCode) {
       console.log("Joining lobby with invite code:", inviteCode);
@@ -144,7 +163,8 @@ class SocketManager {
   connect(
     playerName: string,
     gameType: string,
-    inviteCode?: string
+    inviteCode: string | null,
+    isHost = false
   ): Promise<string | null> {
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
@@ -163,6 +183,10 @@ class SocketManager {
         reconnection: true,
         transports: ["websocket", "polling"],
       });
+
+      this._playerName = playerName;
+      this._gameType = gameType;
+      this._isHost = isHost;
 
       // Set up event listeners
       this.socket.on("connect", () => {
@@ -210,7 +234,7 @@ class SocketManager {
         console.log("Socket disconnected");
         this._isConnected = false;
         this._isAuthenticated = false;
-        this.inviteCode = null;
+        this._inviteCode = null;
         this.gameID = null;
       });
 
@@ -260,7 +284,7 @@ class SocketManager {
       this._userId = null;
       this._username = null;
       this.gameID = null;
-      this.inviteCode = null;
+      this._inviteCode = null;
       this._players = [];
       this._gameState = null;
     }
@@ -286,7 +310,7 @@ class SocketManager {
       }) => {
         console.log("Lobby created:", data);
         this.gameID = data.gameID;
-        this.inviteCode = data.inviteCode;
+        this._inviteCode = data.inviteCode;
         this._players = data.players.map((player) => ({
           name: player.name,
           rank: `RANK #${Math.floor(Math.random() * 1000)}`,
@@ -330,7 +354,7 @@ class SocketManager {
       const handleSuccess = (data: { gameID: string }) => {
         console.log("Joined lobby:", data);
         this.gameID = data.gameID;
-        this.inviteCode = inviteCode;
+        this._inviteCode = inviteCode;
         this.socket?.off("error", handleError);
         resolve();
       };

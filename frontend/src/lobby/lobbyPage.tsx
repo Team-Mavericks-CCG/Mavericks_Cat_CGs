@@ -6,13 +6,6 @@ import { socketManager, Player } from "../games/utils/socketManager";
 
 const LobbyPage: React.FC = () => {
   const location = useLocation();
-  // Define the expected type for location.state
-  interface LobbyState {
-    playerName: string;
-    gameTypeFromState: string;
-    isCreating: boolean;
-    inviteCode: string;
-  }
 
   const [players, setPlayers] = useState<Player[]>([]);
 
@@ -26,47 +19,12 @@ const LobbyPage: React.FC = () => {
   // const [showSnake, setShowSnake] = useState(false);
 
   useEffect(() => {
-    // location state is only available when page is intially loaded
-    // reloading gets rid of it
-    if (!location.state) {
-      const {
-        playerName,
-        gameTypeFromState,
-        isCreating,
-        inviteCode: inviteCodeFromState,
-      } = JSON.parse(
-        localStorage.getItem(socketManager.socketID!)!
-      ) as LobbyState;
-
-      setGameType(gameTypeFromState);
-      setIsHost(isCreating);
-      setInviteCode(inviteCodeFromState);
-
-      void socketManager.connect(
-        playerName,
-        gameTypeFromState,
-        inviteCodeFromState
-      );
-    } else {
-      const {
-        gameTypeFromState,
-        isCreating,
-        inviteCode: inviteCodeFromState,
-      } = location.state as LobbyState;
-
-      setGameType(gameTypeFromState);
-      setIsHost(isCreating);
-      setInviteCode(inviteCodeFromState);
-
-      localStorage.setItem(
-        socketManager.socketID!,
-        JSON.stringify(location.state as LobbyState)
-      );
-    }
+    setInviteCode(socketManager.inviteCode ?? "");
+    setIsHost(socketManager.isHost);
+    setGameType(socketManager.gameType ?? "");
 
     // Subscribe to player updates
     const unsubscribe = socketManager.onPlayersUpdate(setPlayers);
-    setPlayers(socketManager.players);
 
     socketManager.on("game-started", (state) => {
       console.log("Game started, navigating to game page", state);
