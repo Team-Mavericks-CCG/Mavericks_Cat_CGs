@@ -19,7 +19,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { styled } from "@mui/material/styles";
 import AppTheme from "./shared-theme/AppTheme";
 import { socketManager } from "./games/utils/socketManager";
-import catPawprint from "/assets/images/catPawprint.png";
+import catPlaying from "/assets/images/catPlaying.webp";
 
 const HomePageContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
@@ -349,6 +349,11 @@ function HomePage() {
             </button>
             <section className="aboutUs">
               <h2>About Us</h2>
+              <img
+                src={catPlaying}
+                alt="Cat Pawprint"
+                className="cat-pawprint"
+              />
               <p>
                 We are a team of passionate developers who love card games and
                 cats.
@@ -361,11 +366,6 @@ function HomePage() {
             </section>
           </div>
           <div className="button-row"></div>
-          <img
-          src={catPawprint}
-          alt="Cat Pawprint"
-          className="cat-pawprint"
-        />
         </div>
 
 
