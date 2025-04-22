@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import { getCardBackImage } from "../utils/CardImage";
 import "./blackjackStyle.css";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +8,8 @@ import { GameButton } from "../components/GameButton";
 import { CardComponent } from "../components/CardComponent";
 import { BlackjackClientGameState } from "./blackjackType";
 import { socketManager } from "../utils/socketManager";
+import React, { useState, useEffect } from "react";
+
 
 const BlackjackPage: React.FC = () => {
   const [isGameOver, setIsGameOver] = useState(false);
@@ -21,23 +22,42 @@ const BlackjackPage: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const updateState = (state: BlackjackClientGameState): void => {
-    const tempDealerHand: Card[] = [];
-    state.dealerHand.cards.forEach((card) => {
-      tempDealerHand.push(new Card(card.rank, card.suit, {}, card.faceUp));
-    });
-    setDealerHand(tempDealerHand);
-  };
+ 
+    const updateState = (state: BlackjackClientGameState) => {
+      if (!state || !state.players || !Array.isArray(state.players)) {
+        console.warn("Invalid or missing game state", state);
+        return;
+      }
+      const currentPlayer = state.players.find(p => p.id === socketManager.playerID);
+      if (!currentPlayer) return;
+    
+      const hand = currentPlayer.hands[0];
+      setPlayerHand(hand.cards.map(card => new Card(card.rank, card.suit, {}, card.faceUp)));
+      setPlayerValue(hand.value);
+    
+      setDealerHand(state.dealerHand.cards.map(card => new Card(card.rank, card.suit, {}, card.faceUp)));
+      setDealerValue(state.dealerHand.value);
+    
+      setIsGameOver(state.gameStatus === "FINISHED");
+    }; 
+    
+     useEffect(() => {
+      socketManager.onGameStateUpdate(updateState);
+      return () => socketManager.removeGameStateListener?.();
+    }, []);
+    
 
   const startGame = () => {
-    const fakePlayerHand = [
-      { rank: "1", suit: "Clubs" },
-      { rank: "1", suit: "Spades" },
-    ];
     const fakeDealerHand = [
-      { rank: "1", suit: "Hearts" },
-      { rank: "1", suit: "Diamonds" },
+      new Card("1" as Rank, "Hearts" as Suit, {}, false), // hidden card
+      new Card("1" as Rank, "Diamonds" as Suit, {}, true), // visible
     ];
+    
+    const fakePlayerHand = [
+      new Card("1" as Rank, "Clubs" as Suit),
+      new Card("1" as Rank, "Spades" as Suit),
+    ];
+    
 
     setPlayerHand(fakePlayerHand);
     setDealerHand(fakeDealerHand);
@@ -48,14 +68,28 @@ const BlackjackPage: React.FC = () => {
     setRevealDealer(true);
   };
 
-  const hit = () => {
+  {/*const hit = () => {
     void socketManager.gameAction("hit");
+  };*/}
+  const hit = async () => {
+    try {
+      await socketManager.gameAction("hit");
+    } catch (err) {
+      console.error("Hit action failed:", err);
+      alert("Failed to hit. Make sure you're in a game and it's your turn.");
+    }
   };
+  
 
   const stand = () => {
+    const flipped = dealerHand.map((card, i) =>
+    i === 0 ? card.clone().flip() : card
+    );
+    setDealerHand(flipped);
+
     const dealerTotal = 19;
     setDealerValue(dealerTotal);
-    setRevealDealer(false);
+    setRevealDealer(true);
 
     let result = "";
     if (playerValue > dealerTotal) {
