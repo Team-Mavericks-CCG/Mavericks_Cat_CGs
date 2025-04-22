@@ -30,7 +30,6 @@ const BlackjackPage: React.FC = () => {
   };
 
   const startGame = () => {
-    // fake hands
     const fakePlayerHand = [
       { rank: "1", suit: "Clubs" },
       { rank: "1", suit: "Spades" },
@@ -46,7 +45,7 @@ const BlackjackPage: React.FC = () => {
     setDealerValue(null);
     setGameResult("");
     setIsGameOver(false);
-    setRevealDealer(false);
+    setRevealDealer(true);
   };
 
   const hit = () => {
@@ -56,7 +55,7 @@ const BlackjackPage: React.FC = () => {
   const stand = () => {
     const dealerTotal = 19;
     setDealerValue(dealerTotal);
-    setRevealDealer(true);
+    setRevealDealer(false);
 
     let result = "";
     if (playerValue > dealerTotal) {
@@ -71,7 +70,7 @@ const BlackjackPage: React.FC = () => {
     setIsGameOver(true);
   };
 
-  const renderHand = (hand: Card[], hideFirst = false) => (
+  const renderHand = (hand: Card[], hideFirst = true) => (
     <Box display="flex" gap={1}>
       {hand.map((card, idx) => (
         <CardComponent
@@ -114,7 +113,7 @@ const BlackjackPage: React.FC = () => {
       >
         <Box textAlign="center">
           <img
-            src={getCardBackImage()}
+            src={getCardBackImage() }
             alt="Deck"
             style={{ width: 80, height: 120 }}
           />
@@ -122,7 +121,7 @@ const BlackjackPage: React.FC = () => {
         </Box>
 
         {/* dealers cards  */}
-        <Box mb={2}>
+        <Box mb={5}>
           <Typography variant="h6">Dealer's Hand</Typography>
           {renderHand(dealerHand, true)}
           {revealDealer && dealerValue !== null && (
