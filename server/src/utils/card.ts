@@ -114,11 +114,12 @@ export class Card {
    * Creates a JSON representation of the card
    * @returns An object with suit, value, and color properties
    */
-  toJSON(): Record<string, string> {
+  toJSON(): Record<string, string | boolean> {
     return {
       suit: this.suit,
       rank: this.rank,
       color: this.color,
+      faceUp: this.faceUp,
     };
   }
 
