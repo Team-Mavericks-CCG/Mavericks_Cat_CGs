@@ -14,14 +14,15 @@ export interface Player {
 interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
-  "game-started": (state: unknown) => void;
+  "game-started": (state: BlackjackClientGameState) => void;
   "game-state": (state: BlackjackClientGameState) => void;
   "lobby-created": (data: {
     gameID: string;
     inviteCode: string;
     players: { name: string }[];
+    playerID: string;
   }) => void;
-  "join-success": (data: { gameID: string }) => void;
+  "join-success": (data: { gameID: string; playerID: string }) => void;
   "lobby-update": (data: { players: Player[] }) => void;
   "lobby-list": (
     data: {
@@ -61,7 +62,7 @@ class SocketManager {
   // Connection status
   private _isConnected = false;
   private _isAuthenticated = false;
-  private _userId: number | null = null;
+  private _playerID: string | null = null;
   private _username: string | null = null;
   private _gameType: string | null = null;
   private _players: Player[] = [];
@@ -69,7 +70,9 @@ class SocketManager {
   private gameID: string | null = null;
   private _inviteCode: string | null = null;
   private _gameState: BlackjackClientGameState | null = null;
-  private gameStateUpdateCallbacks: ((state: unknown) => void)[] = [];
+  private gameStateUpdateCallbacks: ((
+    state: BlackjackClientGameState | null
+  ) => void)[] = [];
   private _playerName: string | null = null;
   private _isHost = false;
 
@@ -82,8 +85,8 @@ class SocketManager {
     return this._isAuthenticated;
   }
 
-  get userId(): number | null {
-    return this._userId;
+  get playerID(): string | null {
+    return this._playerID;
   }
 
   get username(): string | null {
@@ -98,7 +101,7 @@ class SocketManager {
     return this.socket?.id ?? null;
   }
 
-  get gameState(): unknown {
+  get gameState(): BlackjackClientGameState | null {
     return this._gameState;
   }
 
@@ -132,7 +135,9 @@ class SocketManager {
     };
   }
 
-  onGameStateUpdate(callback: (state: unknown) => void): () => void {
+  onGameStateUpdate(
+    callback: (state: BlackjackClientGameState | null) => void
+  ): () => void {
     this.gameStateUpdateCallbacks.push(callback);
 
     // Call immediately with current data
@@ -265,7 +270,6 @@ class SocketManager {
         this._isAuthenticated = authenticated;
 
         if (authenticated && user) {
-          this._userId = user.id;
           this._username = user.username;
         }
 
@@ -281,7 +285,7 @@ class SocketManager {
       this.socket = null;
       this._isConnected = false;
       this._isAuthenticated = false;
-      this._userId = null;
+      this._playerID = null;
       this._username = null;
       this.gameID = null;
       this._inviteCode = null;
@@ -307,10 +311,12 @@ class SocketManager {
         gameID: string;
         inviteCode: string;
         players: { name: string }[];
+        playerID: string;
       }) => {
         console.log("Lobby created:", data);
         this.gameID = data.gameID;
         this._inviteCode = data.inviteCode;
+        this._playerID = data.playerID;
         this._players = data.players.map((player) => ({
           name: player.name,
           rank: `RANK #${Math.floor(Math.random() * 1000)}`,
@@ -351,10 +357,11 @@ class SocketManager {
         reject(new Error(message));
       };
 
-      const handleSuccess = (data: { gameID: string }) => {
+      const handleSuccess = (data: { gameID: string; playerID: string }) => {
         console.log("Joined lobby:", data);
         this.gameID = data.gameID;
         this._inviteCode = inviteCode;
+        this._playerID = data.playerID;
         this.socket?.off("error", handleError);
         resolve();
       };
@@ -384,7 +391,8 @@ class SocketManager {
         reject(new Error(message));
       };
 
-      const handleSuccess = () => {
+      const handleSuccess = (state: BlackjackClientGameState) => {
+        this._gameState = state;
         this.socket?.off("error", handleError);
         resolve();
       };

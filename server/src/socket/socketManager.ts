@@ -16,8 +16,9 @@ interface ServerToClientEvents {
     gameID: string;
     inviteCode: string;
     players: { name: string }[];
+    playerID: string;
   }) => void;
-  "join-success": (data: { gameID: string }) => void;
+  "join-success": (data: { gameID: string; playerID: string }) => void;
   "lobby-update": (data: { players: { name: string }[] }) => void;
   "lobby-list": (
     data: {
@@ -255,6 +256,7 @@ export function setupSocketServer(
           gameID,
           inviteCode,
           players: players.players,
+          playerID: socket.id,
         });
       } catch (error) {
         console.error("Error creating game:", error);
@@ -321,15 +323,13 @@ export function setupSocketServer(
         );
 
         // Notify of successful join
-        socket.emit("join-success", { gameID });
+        socket.emit("join-success", { gameID, playerID: socket.id });
 
-        // Send current game state to the new player
-        socket.emit("game-state", game.getClientGameState());
         console.log(`Sending lobby update to ${socket.id} for game ${gameID}`);
         io.to(gameID).emit("lobby-update", getPlayersInGame(game));
 
         // Update all other players
-        socket.to(gameID).emit("game-state", game.getClientGameState());
+        io.to(gameID).emit("game-state", game.getClientGameState());
       } catch (error) {
         console.error("Error joining game:", error);
         socket.emit("error", "Failed to join game. Please try again.");

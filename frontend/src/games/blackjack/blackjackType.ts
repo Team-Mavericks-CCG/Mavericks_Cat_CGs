@@ -34,7 +34,7 @@ enum HandStatus {
   LOSE = "lose",
 }
 
-interface Hand {
+export interface Hand {
   cards: Card[];
   status: HandStatus;
   value: number; // to avoid recalculating

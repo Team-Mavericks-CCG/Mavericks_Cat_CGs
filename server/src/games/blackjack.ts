@@ -175,7 +175,7 @@ export class Blackjack extends Game {
     }
     const hand = playerHands[index];
 
-    if (hand.status !== HandStatus.PLAYING) {
+    if (hand.status !== HandStatus.WAITING) {
       throw new Error("Cannot hit on this hand");
     }
 
@@ -205,7 +205,7 @@ export class Blackjack extends Game {
     }
     const hand = playerHands[index];
 
-    if (hand.status !== HandStatus.PLAYING) {
+    if (hand.status !== HandStatus.WAITING) {
       throw new Error("Cannot stand on this hand");
     }
 
@@ -228,6 +228,9 @@ export class Blackjack extends Game {
       this.resolveHands();
       return;
     }
+
+    // Reveal dealer's face-down card
+    this.dealerHand[0].flip(); // Dealer's first card is face up
 
     // Dealer hits until 17 or higher
     while (this.calculateHandValue(this.dealerHand) < 17) {
