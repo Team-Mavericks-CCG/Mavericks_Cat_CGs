@@ -364,13 +364,13 @@ function HomePage() {
                 <button className="dropdown-button" onClick={() => {
                   void socketManager
                     .connect(
-                      localStorage.getItem("username") ?? "Player", // playerName
-                      "Blackjack", // gameType
-                      null, // inviteCode
-                      true // isHost
+                      localStorage.getItem("username") ?? "Player",
+                      "Blackjack",
+                      null,
+                      true
                     )
                     .then((data) => {
-                      void navigate('/lobby', {
+                      void navigate("/lobby", {
                         state: {
                           playerName: localStorage.getItem("username") ?? "Player",
                           gameType: "Blackjack",
@@ -380,7 +380,8 @@ function HomePage() {
                       });
                     })
                     .catch((error) => {
-                      console.error("Error connecting to Blackjack lobby:", error);
+                      console.error("Error creating blackjack lobby:", error);
+                      alert("Failed to create lobby. Please try again.");
                     });
                 }}>
                   Create Lobby
@@ -415,19 +416,19 @@ function HomePage() {
             </div>
             <section className="aboutUs">
               <h2>About Us</h2>
-              <p>
-               We are a team of passionate developers <br/>
-               who love card games and cats! <br/>
-               Our goal is to create a fun <br/>
-               and engaging gaming experience for everyone. <br/>
-              </p> 
-   
               <img
                 src={catPlaying}
                 alt="Cat Pawprint"
                 className="cat-pawprint"
               />
-            
+              <p>
+                We are a team of passionate developers who love card games and
+                cats.
+              </p> 
+              <p>
+                Our goal is to create a fun and engaging platform for players of
+                all skill levels.
+              </p>
               <footer>© 2025 Team Mavericks. All rights reserved.</footer>
             </section>
           </div>
@@ -598,15 +599,23 @@ function HomePage() {
                 alert("Please enter your name.");
                 return;
               }
-              setOpenJoinBlackjackLobby(false);
-              void navigate("/lobby", {
-                state: {
-                  gameType: "blackjack",
-                  isCreating: false,
-                  inviteCode: inviteCode,
-                  playerName: userName
-                }
-              });
+              void socketManager
+                .connect(userName, "Blackjack", inviteCode)
+                .then(() => {
+                  setOpenJoinBlackjackLobby(false);
+                  void navigate("/lobby", {
+                    state: {
+                      playerName: userName,
+                      gameType: "Blackjack",
+                      isCreating: false,
+                      inviteCode: inviteCode,
+                    },
+                  });
+                })
+                .catch((error) => {
+                  console.error("Error joining blackjack lobby:", error);
+                  alert("Failed to join lobby. Please check your invite code and try again.");
+                });
             }}
 
           >
