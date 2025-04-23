@@ -7,30 +7,30 @@ body {
 
 
 .aboutUs {
-  margin-top: 50px;
+  text-align: center;
+  margin-top: -60px;
   margin-bottom: 10px;
 }
 
 .aboutUs p{
   font-size: 18px;
-  margin: 0;
-  padding: 0;
+  margin-top: 10px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
 .aboutUs h2{
   font-size: 30px;
-  margin: 0;
-  padding: 0;
   text-align: center;
+  margin-top: 30px;
 }
 
 footer {
   font-size: 14px;
-  text-align: center;
+  text-align:center;
   padding: 10px;
   position: relative;
-  bottom: -180px; 
+  bottom: -10px; 
   width: 100%;
 }
 
@@ -152,4 +152,11 @@ button {
   text-align: center;
   width: 100%; /* Ensure text spans the entire width */
   background: none;
+}
+
+.cat-pawprint {
+  width: 200px;
+  height: 200px;
+  margin-right: 5px;
+  vertical-align: middle;
 }

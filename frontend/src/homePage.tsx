@@ -415,19 +415,19 @@ function HomePage() {
             </div>
             <section className="aboutUs">
               <h2>About Us</h2>
+              <p>
+               We are a team of passionate developers <br/>
+               who love card games and cats! <br/>
+               Our goal is to create a fun <br/>
+               and engaging gaming experience for everyone. <br/>
+              </p> 
+   
               <img
                 src={catPlaying}
                 alt="Cat Pawprint"
                 className="cat-pawprint"
               />
-              <p>
-                We are a team of passionate developers who love card games and
-                cats.
-              </p> 
-              <p>
-                Our goal is to create a fun and engaging platform for players of
-                all skill levels.
-              </p>
+            
               <footer>© 2025 Team Mavericks. All rights reserved.</footer>
             </section>
           </div>
