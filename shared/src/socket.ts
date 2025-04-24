@@ -31,7 +31,7 @@ export interface ClientToServerEvents {
   "get-active-games": () => void;
   "start-game": (data: { gameID: string }) => void;
   "new-round": (data: { gameID: string }) => void;
-  "leave-game": (data: { gameID: string }) => void;
+  leave: (data: { gameID: string }) => void;
   // generic action event for all games and actions, individual games can handle their own actions
   "game-action": (data: { gameID: string; action: string }) => void;
 

@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "watch": "tsx --watch src/index.ts"
+    "watch": "tsc --watch --preserveWatchOutput"
   },
   "devDependencies": {
     "typescript": "^5.8.3"

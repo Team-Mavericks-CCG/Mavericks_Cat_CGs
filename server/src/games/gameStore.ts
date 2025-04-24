@@ -20,6 +20,9 @@ export const isValidGameType = (gameType: string): gameType is GameType => {
   return Object.values(GameType).includes(gameType as GameType);
 };
 
+// Invite code to game ID mapping
+export const inviteCodeMap = new Map<string, string>();
+
 // Store all active games with their IDs
 const activeGames = new Map<string, GameInfo>();
 
