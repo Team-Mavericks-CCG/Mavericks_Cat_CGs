@@ -1,4 +1,4 @@
-import { Card, Suit } from "./card";
+import { Card, Suit } from "shared";
 
 // Define available themes
 export enum CardTheme {

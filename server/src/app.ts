@@ -3,7 +3,6 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import authRoutes from "./routes/authRoutes.js";
-import gameRoutes from "./routes/gameRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import { setupSocketServer } from "./socket/socketManager.js";
 import dotenv from "dotenv";
@@ -43,7 +42,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Define routes
 app.use("/api/auth", authRoutes);
-app.use("/api/games", gameRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 
 // Health check endpoint

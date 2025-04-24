@@ -2,54 +2,15 @@ import { Server, Socket } from "socket.io";
 import { gameStore, GameType, isValidGameType } from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
 import jwt from "jsonwebtoken";
-import Player from "../models/userModel.js";
-import { Game, GameStatus } from "../games/game.js";
+import PlayerModel from "../models/userModel.js";
+import { Game } from "../games/game.js";
 import crypto from "crypto";
-import { BlackjackClientGameState } from "../games/blackjack.js";
-
-interface ServerToClientEvents {
-  // Common events
-  error: (message: string) => void;
-  "game-started": (state: unknown) => void;
-  "game-state": (state: BlackjackClientGameState) => void;
-  "lobby-created": (data: {
-    gameID: string;
-    inviteCode: string;
-    players: { name: string }[];
-    playerID: string;
-  }) => void;
-  "join-success": (data: { gameID: string; playerID: string }) => void;
-  "lobby-update": (data: { players: { name: string }[] }) => void;
-  "lobby-list": (
-    data: {
-      gameID: string;
-      type: string;
-      playerCount: number;
-      joinable: boolean;
-    }[]
-  ) => void;
-  "game-over": (winner: string | null) => void;
-}
-
-interface ClientToServerEvents {
-  "create-lobby": (data: { playerName: string; gameType: string }) => void;
-  "join-lobby": (data: { inviteCode: string; playerName: string }) => void;
-  "get-active-games": () => void;
-  "start-game": (data: { gameID: string; socketID: string }) => void;
-  "new-round": (data: { gameID: string }) => void;
-  "leave-game": (data: { gameID: string }) => void;
-  // generic action event for all games and actions, individual games can handle their own actions
-  "game-action": (data: { gameID: string; action: string }) => void;
-
-  // Authentication (now optional)
-  authenticate: (
-    token: string,
-    callback: (
-      authenticated: boolean,
-      user?: { id: number; username: string }
-    ) => void
-  ) => void;
-}
+import {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  Player,
+  GameStatus,
+} from "shared";
 
 interface InterServerEvents {
   ping: () => void;
@@ -102,7 +63,7 @@ function generateInviteCode(): string {
   return code;
 }
 // function for getting players in a game
-function getPlayersInGame(game: Game): { players: { name: string }[] } {
+function getPlayersInGame(game: Game): { players: Player[] } {
   return {
     players: Array.from(game.players.values()).map((playerName) => ({
       name: playerName,
@@ -174,7 +135,7 @@ export function setupSocketServer(
         const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
           id: number;
         };
-        const user = await Player.findByPk(decoded.id);
+        const user = await PlayerModel.findByPk(decoded.id);
 
         if (!user) {
           callback(false);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card } from "../utils/card";
+import { Card } from "shared";
 import { getCardImage, getCardBackImage } from "../utils/CardImage";
 
 // Card component with fallback handling
@@ -19,20 +19,15 @@ export const CardComponent: React.FC<{
       onClick={() => onClick()}
     >
       {!imageError ? (
-         <img
-         src={imageSrc}
-         alt={altText}
-         className="card-image"
-         onError={() => setImageError(true)}
-       />
+        <img
+          src={imageSrc}
+          alt={altText}
+          className="card-image"
+          onError={() => setImageError(true)}
+        />
       ) : (
         <div className="card-text-fallback">{altText}</div>
       )}
     </div>
   );
 };
-
-
-
-
-    

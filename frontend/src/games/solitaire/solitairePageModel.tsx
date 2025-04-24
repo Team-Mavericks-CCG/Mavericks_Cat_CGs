@@ -1,6 +1,6 @@
 // start solitaire game
-import { Card, Rank, Suit } from "../utils/card";
-import { Deck } from "../utils/deck";
+import { Card, Rank, Suit } from "shared";
+import { Deck } from "shared";
 
 // Update GameState interface to use serializable cards
 export interface GameState {
