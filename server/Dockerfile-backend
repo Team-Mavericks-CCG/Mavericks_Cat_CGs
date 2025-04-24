@@ -3,9 +3,10 @@ FROM node:23-slim AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-COPY server/package.json ./server/
-COPY shared/package.json ./shared/
+
+COPY package*.json ./
+COPY server/package*.json ./server/
+COPY shared/package*.json ./shared/
 
 RUN npm install
 
@@ -22,16 +23,19 @@ FROM node:23-slim
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-COPY server/package.json ./server/
-COPY shared/package.json ./shared/
-
-RUN npm install --production
+COPY server/package*.json ./server/
+COPY shared/package*.json ./shared/
 
 COPY --from=builder /app/server/dist ./server/dist
 COPY --from=builder /app/shared/dist ./shared/dist
 
+WORKDIR /app/shared
+
+RUN npm install --production
+
 WORKDIR /app/server
+
+RUN npm install --production
 
 EXPOSE 5000
 
