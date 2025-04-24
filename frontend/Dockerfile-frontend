@@ -11,6 +11,8 @@ RUN npm install
 
 COPY . .
 
+COPY frontend/.env.production ./frontend/.env.production
+
 RUN npm run build --workspace=shared
 
 RUN npm run build --workspace=frontend
