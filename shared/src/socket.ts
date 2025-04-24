@@ -4,7 +4,7 @@ import { ClientGameState } from "./index.js";
 export interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
-  "game-started": (state: ClientGameState) => void;
+  "game-started": () => void;
   "game-state": (state: ClientGameState) => void;
   "lobby-created": (data: {
     gameID: string;

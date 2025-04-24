@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./blackjackStyle.css";
 import { Typography, Box } from "@mui/material";
-import { Card, ClientGameState, Rank, Suit } from "shared";
 import { GameRules } from "../components/GameRules";
 import { GameButton } from "../components/GameButton";
 import { CardComponent } from "../components/CardComponent";
@@ -10,6 +9,10 @@ import {
   GameStatus,
   Hand,
   BlackjackHandStatus,
+  Card,
+  ClientGameState,
+  Rank,
+  Suit,
 } from "shared";
 import { socketManager } from "../utils/socketManager";
 
@@ -64,6 +67,12 @@ const BlackjackPage: React.FC = () => {
         setIsGameOver(true);
 
         resolveGame(state);
+      }
+
+      if (state.gameStatus === GameStatus.IN_PROGRESS) {
+        setIsGameOver(false);
+        setGameResult("");
+        setRevealDealer(false);
       }
     };
 

@@ -334,13 +334,12 @@ class SocketManager {
         return;
       }
 
-      const handleError = (message: string) => {
+      const handleError = () => {
         this.socket?.off("game-started", handleSuccess);
-        reject(new Error(message));
+        reject(new Error("Failed to start game"));
       };
 
-      const handleSuccess = (state: ClientGameState) => {
-        this._gameState = state;
+      const handleSuccess = () => {
         this.socket?.off("error", handleError);
         resolve();
       };

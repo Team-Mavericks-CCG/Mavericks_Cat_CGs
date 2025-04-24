@@ -322,7 +322,8 @@ export function setupSocketServer(
         game.startGame();
 
         // Update all clients with new game state
-        io.to(gameID).emit("game-started", game.getClientGameState());
+        io.to(gameID).emit("game-started");
+        io.to(gameID).emit("game-state", game.getClientGameState());
       } catch (error) {
         console.error("Error starting game:", error);
         socket.emit("error", "Failed to start game.");
