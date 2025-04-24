@@ -27,9 +27,8 @@ const LobbyPage: React.FC = () => {
     // Subscribe to player updates
     const unsubscribe = socketManager.onPlayersUpdate(setPlayers);
 
-    socketManager.on("game-started", (state) => {
-      console.log("Game started, navigating to game page", state);
-      void navigate(`/games/${gameType}`, { state: state });
+    socketManager.on("game-started", () => {
+      void navigate(`/games/${gameType}`);
     });
 
     // Clean up on unmount

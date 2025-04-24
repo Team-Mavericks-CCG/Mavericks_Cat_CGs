@@ -213,9 +213,9 @@ const BlackjackPage: React.FC = () => {
             {renderHand(hands[0]?.cards ?? [])}
             <Typography variant="body2">
               Total: {hands[0]?.value}
-              {hands[0]?.status === HandStatus.BUSTED && " (Busted)"}
-              {hands[0]?.status === HandStatus.WIN && " (Winner!)"}
-              {hands[0]?.status === HandStatus.LOSE && " (Lost)"}
+              {hands[0]?.status === BlackjackHandStatus.BUSTED && " (Busted)"}
+              {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
+              {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
             </Typography>
           </Box>
         ))}
