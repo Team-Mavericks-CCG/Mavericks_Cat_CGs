@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./blackjackStyle.css";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { Typography, Box } from "@mui/material";
 import { Card, Rank, Suit } from "../utils/card";
 import { GameRules } from "../components/GameRules";
@@ -23,7 +23,7 @@ const BlackjackPage: React.FC = () => {
   const [activePlayer, setActivePlayer] = useState<string | null>(null);
   const [dealerValue, setDealerValue] = useState<number | null>(null);
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
   useEffect(() => {
     const updateState = (state: BlackjackClientGameState | null): void => {
@@ -178,13 +178,33 @@ const BlackjackPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* players cards */}
-      <Box display="flex" justifyContent="right" gap={2} mb={2}>
-        <Typography variant="h6">Your Hand</Typography>
-        {renderHand(playerHand.get(socketManager.playerID!)?.[0]?.cards ?? [])}
-        <Typography variant="body2">
-          Total: {playerHand.get(socketManager.playerID!)?.[0]?.value}
-        </Typography>
+      {/* All players' cards */}
+      <Box display="flex" flexDirection="column" gap={2} mb={2}>
+        {Array.from(playerHand.entries()).map(([id, hands]) => (
+          <Box 
+            key={id} 
+            display = ""  
+            justifyContent={id === socketManager.playerID ? "right" : "left"} 
+            gap={2}
+            sx={{
+              opacity: activePlayer === id ? 1 : 0.7,
+              border: activePlayer === id ? '2px solid gold' : 'none',
+              padding: '10px',
+              borderRadius: '5px'
+            }}
+          >
+            <Typography variant="h6">
+              {id === socketManager.playerID ? "Your Hand" : `Player ${Array.from(playerHand.keys()).indexOf(id) + 1}'s Hand`}
+            </Typography>
+            {renderHand(hands[0]?.cards ?? [])}
+            <Typography variant="body2">
+              Total: {hands[0]?.value}
+              {hands[0]?.status === HandStatus.BUSTED && " (Busted)"}
+              {hands[0]?.status === HandStatus.WIN && " (Winner!)"}
+              {hands[0]?.status === HandStatus.LOSE && " (Lost)"}
+            </Typography>
+          </Box>
+        ))} 
       </Box>
       <Typography variant="h6" align="center" gutterBottom>
         {gameResult}
