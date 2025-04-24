@@ -31,14 +31,6 @@
   justify-content: center;
   gap: 20px;
   padding: 10px 0;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  width: 100%;
-  max-width: 800px;
-}
-
-.card {
-  flex-shrink: 0;
 }
 
 .start-button {

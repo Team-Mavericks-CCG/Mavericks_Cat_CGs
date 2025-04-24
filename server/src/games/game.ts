@@ -1,8 +1,4 @@
-export enum GameStatus {
-  READY = "READY",
-  IN_PROGRESS = "IN_PROGRESS",
-  FINISHED = "FINISHED",
-}
+import { ClientGameState, GameStatus } from "shared";
 
 export abstract class Game {
   // default max players for all games, can be overridden in subclasses
@@ -83,7 +79,7 @@ export abstract class Game {
   }
 
   // Abstract methods that must be implemented by subclasses
-  abstract getClientGameState(): unknown;
+  abstract getClientGameState(): ClientGameState;
   abstract handleAction(playerId: string, action: string): unknown;
   abstract startGame(): void;
   abstract newGame(): void;

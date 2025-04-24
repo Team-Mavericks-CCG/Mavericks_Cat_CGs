@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import "./LobbyPage.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SnakeGame } from "./snake";
-import { socketManager, Player } from "../games/utils/socketManager";
+import { socketManager } from "../games/utils/socketManager";
+import { Player } from "shared";
 
 const LobbyPage: React.FC = () => {
   const location = useLocation();

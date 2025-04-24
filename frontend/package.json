@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently --names \"VITE,SHARED\" -c \"bgBlue.bold,bgMagenta.bold\" \"vite --host 0.0.0.0\" \"tsc --watch --preserveWatchOutput --project ../shared/tsconfig.json\"",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
@@ -21,7 +21,8 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.4.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "shared": "file:../shared"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",

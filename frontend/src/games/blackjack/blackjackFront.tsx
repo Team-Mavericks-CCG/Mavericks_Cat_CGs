@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./blackjackStyle.css";
-//import { useNavigate } from "react-router-dom";
 import { Typography, Box } from "@mui/material";
-import { Card, Rank, Suit } from "../utils/card";
 import { GameRules } from "../components/GameRules";
 import { GameButton } from "../components/GameButton";
 import { CardComponent } from "../components/CardComponent";
@@ -10,8 +8,12 @@ import {
   BlackjackClientGameState,
   GameStatus,
   Hand,
-  HandStatus,
-} from "./blackjackType";
+  BlackjackHandStatus,
+  Card,
+  ClientGameState,
+  Rank,
+  Suit,
+} from "shared";
 import { socketManager } from "../utils/socketManager";
 
 const BlackjackPage: React.FC = () => {
@@ -23,12 +25,10 @@ const BlackjackPage: React.FC = () => {
   const [activePlayer, setActivePlayer] = useState<string | null>(null);
   const [dealerValue, setDealerValue] = useState<number | null>(null);
 
-  //const navigate = useNavigate();
-
   useEffect(() => {
-    const updateState = (state: BlackjackClientGameState | null): void => {
-      if (!state) {
-        console.error("Game state is null or undefined");
+    const updateState = (state: ClientGameState | null): void => {
+      if (!state || state.gameType !== "Blackjack") {
+        console.error("Game state is not a valid Blackjack game state.");
         return;
       }
 
@@ -68,6 +68,12 @@ const BlackjackPage: React.FC = () => {
 
         resolveGame(state);
       }
+
+      if (state.gameStatus === GameStatus.IN_PROGRESS) {
+        setIsGameOver(false);
+        setGameResult("");
+        setRevealDealer(false);
+      }
     };
 
     const unsubscribe = socketManager.onGameStateUpdate(updateState);
@@ -84,7 +90,11 @@ const BlackjackPage: React.FC = () => {
 
     // if any hand for this player is a win, set result to "You Win!"
     // otherwise, set result to "You Lose!"
-    if (currentPlayer!.hands.some((hand) => hand.status === HandStatus.WIN)) {
+    if (
+      currentPlayer!.hands.some(
+        (hand) => hand.status === BlackjackHandStatus.WIN
+      )
+    ) {
       setGameResult("You Win!");
     } else {
       setGameResult("You Lose!");
@@ -181,20 +191,24 @@ const BlackjackPage: React.FC = () => {
       {/* All players' cards */}
       <Box display="flex" flexDirection="column" gap={2} mb={2}>
         {Array.from(playerHand.entries()).map(([id, hands]) => (
-          <Box 
-            key={id} 
-            display = ""  
-            justifyContent={id === socketManager.playerID ? "right" : "left"} 
+          <Box
+            key={id}
+            display=""
+            justifyContent={id === socketManager.playerID ? "right" : "left"}
             gap={2}
             sx={{
               opacity: activePlayer === id ? 1 : 0.7,
-              border: activePlayer === id ? '2px solid gold' : 'none',
-              padding: '10px',
-              borderRadius: '5px'
+              border: activePlayer === id ? "2px solid gold" : "none",
+              padding: "10px",
+              borderRadius: "5px",
             }}
           >
             <Typography variant="h6">
-              {id === socketManager.playerID ? "Your Hand" : `Player ${Array.from(playerHand.keys()).indexOf(id) + 1}'s Hand`}
+              {id === socketManager.playerID
+                ? "Your Hand"
+                : `Player ${
+                    Array.from(playerHand.keys()).indexOf(id) + 1
+                  }'s Hand`}
             </Typography>
             {renderHand(hands[0]?.cards ?? [])}
             <Typography variant="body2">
@@ -204,7 +218,7 @@ const BlackjackPage: React.FC = () => {
               {hands[0]?.status === HandStatus.LOSE && " (Lost)"}
             </Typography>
           </Box>
-        ))} 
+        ))}
       </Box>
       <Typography variant="h6" align="center" gutterBottom>
         {gameResult}
