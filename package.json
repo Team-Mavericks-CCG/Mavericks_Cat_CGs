@@ -1,11 +1,20 @@
 {
+  "workspaces": [
+    "frontend",
+    "server",
+    "shared"
+  ],
   "scripts": {
     "docker:dev": "docker compose --profile dev up",
     "docker:prod": "docker compose --profile prod up",
     "docker:build:dev": "docker compose --profile dev build",
-    "docker:build:prod": "docker compose --profile prod build"
+    "docker:build:prod": "docker compose --profile prod build",
+    "dev:shared": "npm run watch --workspace=shared",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:server": "npm run dev --workspace=server",
+    "dev": "concurrently \"npm:dev:frontend\" \"npm:dev:server\""
   },
   "devDependencies": {
-    "esbuild": "^0.25.2"
+    "concurrently": "^9.1.2"
   }
 }

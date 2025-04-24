@@ -1,8 +1,8 @@
 services:
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile-frontend
+      context: .
+      dockerfile: frontend/Dockerfile-frontend
     ports:
       - "8080:80"
     depends_on:
@@ -11,13 +11,16 @@ services:
 
   frontend-dev:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile-frontend.dev
+      context: .
+      dockerfile: frontend/Dockerfile-frontend.dev
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./frontend:/app/frontend
+      - ./shared:/app/shared
+      - /app/node_modules
+      - /app/frontend/node_modules
+      - /app/shared/node_modules
     depends_on:
       - backend-dev
     environment:
@@ -28,10 +31,10 @@ services:
 
   backend:
     build:
-      context: ./server
-      dockerfile: Dockerfile-backend
+      context: .
+      dockerfile: server/Dockerfile-backend
     ports:
-      - "5000:5000"
+      - "5001:5001"
     #set PASSWORD and JWT_SeCRET
     environment:
       - DB_NAME=mavericks_db
@@ -40,7 +43,8 @@ services:
       - DB_HOST=db
       - JWT_SECRET=supersecurejwtsecret
       - NODE_ENV=production
-      - PORT=5000
+      - PORT=5001
+      - CORS_ORIGIN=https://catsgamesrus.com
     depends_on:
       db:
         condition: service_healthy
@@ -48,13 +52,16 @@ services:
 
   backend-dev:
     build:
-      context: ./server
-      dockerfile: Dockerfile-backend.dev
+      context: .
+      dockerfile: server/Dockerfile-backend.dev
     ports:
       - "5001:5001"
     volumes:
-      - ./server:/usr/src/app
-      - /usr/src/app/node_modules
+      - ./server/src:/app/server/src
+      - ./shared/src:/app/shared/src
+      - /app/node_modules
+      - /app/server/node_modules
+      - /app/shared/node_modules
     #set PASSWORD and JWT_SeCRET
     environment:
       - DB_NAME=mavericks_db

@@ -6,7 +6,7 @@ import {
   Stock,
   SerializableGameState,
 } from "./solitairePageModel";
-import { Card, Suit } from "../utils/card";
+import { Card, Suit } from "shared";
 import "../solitaire/solitairePage.css";
 import { getAllCardImages } from "../utils/CardImage";
 import { CardComponent } from "../components/CardComponent";

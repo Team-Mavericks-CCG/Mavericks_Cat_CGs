@@ -1,11 +1,21 @@
 FROM node:23-slim
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package*.json ./
+# COPY package*.json ./
+COPY frontend/package*.json ./frontend/
+COPY shared/package*.json ./shared/
+COPY shared/tsconfig.json ./shared/
+COPY shared/src ./shared/src
+
+WORKDIR /app/shared
+
+RUN npm install
+
+WORKDIR /app/frontend
 
 RUN npm install
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+CMD ["npm", "run", "dev"]

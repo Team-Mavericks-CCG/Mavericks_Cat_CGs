@@ -139,8 +139,6 @@ function HomePage() {
   const [inviteCode, setInviteCode] = useState("");
   const [userName, setUserName] = useState("");
 
-
-
   const solitaireTabs = [
     {
       label: "Start",
@@ -150,7 +148,8 @@ function HomePage() {
     },
     {
       label: "Leaderboard",
-      content: "Click the 'Leaderboard' button to view the Solitaire leaderboard.",
+      content:
+        "Click the 'Leaderboard' button to view the Solitaire leaderboard.",
       buttonLabel: "Leaderboard",
       navigateTo: "/leaderboard",
     },
@@ -245,9 +244,9 @@ function HomePage() {
             onClick={() => {
               setOpenBlackjack(false);
               void socketManager
-              .connect("default", "Blackjack", null, true)
-              .then(() => {
-                void navigate("/lobby");
+                .connect("default", "Blackjack", null, true)
+                .then(() => {
+                  void navigate("/lobby");
                 });
             }}
           >
@@ -279,7 +278,8 @@ function HomePage() {
     },
     {
       label: "Leaderboard",
-      content: "Click the 'Leaderboard' button to view the Blackjack leaderboard.",
+      content:
+        "Click the 'Leaderboard' button to view the Blackjack leaderboard.",
       buttonLabel: "Leaderboard",
       navigateTo: "/leaderboard",
     },
@@ -306,10 +306,20 @@ function HomePage() {
                 <span className="game-label">Solitaire</span>
               </div>
               <div className="dropdown-menu">
-                <button className="dropdown-button" onClick={() => { void navigate('/games/solitaire'); }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/games/solitaire");
+                  }}
+                >
                   Start Game
                 </button>
-                <button className="dropdown-button" onClick={() => { void navigate('/leaderboard'); }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/leaderboard");
+                  }}
+                >
                   Leaderboard
                 </button>
               </div>
@@ -325,19 +335,30 @@ function HomePage() {
                 <span className="game-label">War</span>
               </div>
               <div className="dropdown-menu">
-                <button className="dropdown-button" onClick={() => { void navigate('/games/war'); }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/games/war");
+                  }}
+                >
                   Start Game
                 </button>
-                <button className="dropdown-button" onClick={() => {
-                  setOpenJoinWarLobby(true);
-                }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    setOpenJoinWarLobby(true);
+                  }}
+                >
                   Join Lobby
                 </button>
-                <button className="dropdown-button" onClick={() => {
-                  void navigate('/lobby', {
-                    state: { gameType: 'War', isCreating: true }
-                  });
-                }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/lobby", {
+                      state: { gameType: "War", isCreating: true },
+                    });
+                  }}
+                >
                   Create Lobby
                 </button>
               </div>
@@ -353,36 +374,49 @@ function HomePage() {
                 <span className="game-label">Blackjack</span>
               </div>
               <div className="dropdown-menu">
-                <button className="dropdown-button" onClick={() => { void navigate('/games/blackjack'); }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/games/blackjack");
+                  }}
+                >
                   Start Game
                 </button>
-                <button className="dropdown-button" onClick={() => {
-                  setOpenJoinBlackjackLobby(true);
-                }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    setOpenJoinBlackjackLobby(true);
+                  }}
+                >
                   Join Lobby
                 </button>
-                <button className="dropdown-button" onClick={() => {
-                  void socketManager
-                    .connect(
-                      localStorage.getItem("username") ?? "Player", // playerName
-                      "Blackjack", // gameType
-                      null, // inviteCode
-                      true // isHost
-                    )
-                    .then((data) => {
-                      void navigate('/lobby', {
-                        state: {
-                          playerName: localStorage.getItem("username") ?? "Player",
-                          gameType: "Blackjack",
-                          isCreating: true,
-                          inviteCode: data,
-                        },
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void socketManager
+                      .connect(
+                        localStorage.getItem("username") ?? "Player",
+                        "Blackjack",
+                        null,
+                        true
+                      )
+                      .then((data) => {
+                        void navigate("/lobby", {
+                          state: {
+                            playerName:
+                              localStorage.getItem("username") ?? "Player",
+                            gameType: "Blackjack",
+                            isCreating: true,
+                            inviteCode: data,
+                          },
+                        });
+                      })
+                      .catch((error) => {
+                        console.error("Error creating blackjack lobby:", error);
+                        alert("Failed to create lobby. Please try again.");
                       });
-                    })
-                    .catch((error) => {
-                      console.error("Error connecting to Blackjack lobby:", error);
-                    });
-                }}>
+                  }}
+                >
                   Create Lobby
                 </button>
               </div>
@@ -398,17 +432,30 @@ function HomePage() {
                 <span className="game-label">Poker</span>
               </div>
               <div className="dropdown-menu">
-                <button className="dropdown-button" onClick={() => { void navigate('/games/poker'); }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/games/poker");
+                  }}
+                >
                   Start Game
                 </button>
-                <button className="dropdown-button" onClick={() => {
-                  setOpenJoinPokerLobby(true);
-                }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    setOpenJoinPokerLobby(true);
+                  }}
+                >
                   Join Lobby
                 </button>
-                <button className="dropdown-button" onClick={() => { void navigate('/lobby', {
-                  state: { gameType: 'Poker', isCreating: true }
-                }); }}>
+                <button
+                  className="dropdown-button"
+                  onClick={() => {
+                    void navigate("/lobby", {
+                      state: { gameType: "Poker", isCreating: true },
+                    });
+                  }}
+                >
                   Create Lobby
                 </button>
               </div>
@@ -423,7 +470,7 @@ function HomePage() {
               <p>
                 We are a team of passionate developers who love card games and
                 cats.
-              </p> 
+              </p>
               <p>
                 Our goal is to create a fun and engaging platform for players of
                 all skill levels.
@@ -433,191 +480,211 @@ function HomePage() {
           </div>
           <div className="button-row"></div>
         </div>
-        
-      <GameDialog
-        open={openSolitaire}
-        setOpen={setOpenSolitaire}
-        game="Solitaire"
-        tabs={solitaireTabs}
-        selectedTab={selectedSolitaireTab}
-        setSelectedTab={setSelectedSolitaireTab}
-        navigateTo={(path) => {
-          void navigate(path);
-        }}
-      />
 
-      <GameDialog
-        open={openWar}
-        setOpen={setOpenWar}
-        game="War"
-        tabs={warTabs}
-        selectedTab={selectedWarTab}
-        setSelectedTab={setSelectedWarTab}
-        navigateTo={(path) => {
-          void navigate(path);
-        }}
-      />
+        <GameDialog
+          open={openSolitaire}
+          setOpen={setOpenSolitaire}
+          game="Solitaire"
+          tabs={solitaireTabs}
+          selectedTab={selectedSolitaireTab}
+          setSelectedTab={setSelectedSolitaireTab}
+          navigateTo={(path) => {
+            void navigate(path);
+          }}
+        />
 
-      <GameDialog
-        open={openPoker}
-        setOpen={setOpenPoker}
-        game="Poker"
-        tabs={pokerTabs}
-        selectedTab={selectedPokerTab}
-        setSelectedTab={setSelectedPokerTab}
-        navigateTo={(path) => {
-          void navigate(path);
-        }}
-      />
+        <GameDialog
+          open={openWar}
+          setOpen={setOpenWar}
+          game="War"
+          tabs={warTabs}
+          selectedTab={selectedWarTab}
+          setSelectedTab={setSelectedWarTab}
+          navigateTo={(path) => {
+            void navigate(path);
+          }}
+        />
 
-      <GameDialog
-        open={openBlackjack}
-        setOpen={setOpenBlackjack}
-        game="Blackjack"
-        tabs={blackjackTabs}
-        selectedTab={selectedBlackjackTab}
-        setSelectedTab={setSelectedBlackjackTab}
-        navigateTo={(path) => {
-          void navigate(path);
-        }}
-      />
+        <GameDialog
+          open={openPoker}
+          setOpen={setOpenPoker}
+          game="Poker"
+          tabs={pokerTabs}
+          selectedTab={selectedPokerTab}
+          setSelectedTab={setSelectedPokerTab}
+          navigateTo={(path) => {
+            void navigate(path);
+          }}
+        />
 
+        <GameDialog
+          open={openBlackjack}
+          setOpen={setOpenBlackjack}
+          game="Blackjack"
+          tabs={blackjackTabs}
+          selectedTab={selectedBlackjackTab}
+          setSelectedTab={setSelectedBlackjackTab}
+          navigateTo={(path) => {
+            void navigate(path);
+          }}
+        />
 
-    { /* Join War Lobby Dialog */}
-    <Dialog open={openJoinWarLobby} onClose={() => setOpenJoinWarLobby(false)}>
-        <DialogTitle>Join War Lobby</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
-          <TextField
-            label="Invite Code"
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
-            inputProps={{ maxLength: 6 }}
-            fullWidth
-          />
-          <TextField
-            label="Your Name"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenJoinWarLobby(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              if (inviteCode.length !== 6) {
-                alert("Invite code must be 6 characters.");
-                return;
-              }
-              if (!userName) {
-                alert("Please enter your name.");
-                return;
-              }
-              setOpenJoinWarLobby(false);
-              void navigate(`/games/war/lobby/${inviteCode}`);
-              setTimeout(() => setOpenJoinWarLobby(true), 300);
-            }}
-
+        {/* Join War Lobby Dialog */}
+        <Dialog
+          open={openJoinWarLobby}
+          onClose={() => setOpenJoinWarLobby(false)}
+        >
+          <DialogTitle>Join War Lobby</DialogTitle>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
           >
-            Join
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      { /* Join Poker Lobby Dialog */}
-      <Dialog open={openJoinPokerLobby} onClose={() => setOpenJoinPokerLobby(false)}>
-        <DialogTitle>Join Poker Lobby</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
-          <TextField
-            label="Invite Code"
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
-            inputProps={{ maxLength: 6 }}
-            fullWidth
-          />
-          <TextField
-            label="Your Name"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenJoinPokerLobby(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              if (inviteCode.length !== 6) {
-                alert("Invite code must be 6 characters.");
-                return;
-              }
-              if (!userName) {
-                alert("Please enter your name.");
-                return;
-              }
-              setOpenJoinPokerLobby(false);
-              void navigate(`/games/poker/lobby/${inviteCode}`);
-              setTimeout(() => setOpenJoinWarLobby(true), 300);
-            }}
-
-          >
-            Join
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      { /* Join Blackjack Lobby Dialog */}
-      <Dialog open={openJoinBlackjackLobby} onClose={() => setOpenJoinBlackjackLobby(false)}>
-        <DialogTitle>Join Blackjack Lobby</DialogTitle>
-        <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}>
-          <TextField
-            label="Invite Code"
-            value={inviteCode}
-            onChange={(e) => setInviteCode(e.target.value)}
-            inputProps={{ maxLength: 6 }}
-            fullWidth
-          />
-          <TextField
-            label="Your Name"
-            value={userName}
-            onChange={(e) => setUserName(e.target.value)}
-            fullWidth
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenJoinBlackjackLobby(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={() => {
-              if (inviteCode.length !== 6) {
-                alert("Invite code must be 6 characters.");
-                return;
-              }
-              if (!userName) {
-                alert("Please enter your name.");
-                return;
-              }
-              setOpenJoinBlackjackLobby(false);
-              void navigate("/lobby", {
-                state: {
-                  gameType: "blackjack",
-                  isCreating: false,
-                  inviteCode: inviteCode,
-                  playerName: userName
+            <TextField
+              label="Invite Code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              inputProps={{ maxLength: 6 }}
+              fullWidth
+            />
+            <TextField
+              label="Your Name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenJoinWarLobby(false)}>Cancel</Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                if (inviteCode.length !== 6) {
+                  alert("Invite code must be 6 characters.");
+                  return;
                 }
-              });
-            }}
+                if (!userName) {
+                  alert("Please enter your name.");
+                  return;
+                }
+                setOpenJoinWarLobby(false);
+                void navigate(`/games/war/lobby/${inviteCode}`);
+                setTimeout(() => setOpenJoinWarLobby(true), 300);
+              }}
+            >
+              Join
+            </Button>
+          </DialogActions>
+        </Dialog>
 
+        {/* Join Poker Lobby Dialog */}
+        <Dialog
+          open={openJoinPokerLobby}
+          onClose={() => setOpenJoinPokerLobby(false)}
+        >
+          <DialogTitle>Join Poker Lobby</DialogTitle>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
           >
-            Join
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <TextField
+              label="Invite Code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              inputProps={{ maxLength: 6 }}
+              fullWidth
+            />
+            <TextField
+              label="Your Name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenJoinPokerLobby(false)}>Cancel</Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                if (inviteCode.length !== 6) {
+                  alert("Invite code must be 6 characters.");
+                  return;
+                }
+                if (!userName) {
+                  alert("Please enter your name.");
+                  return;
+                }
+                setOpenJoinPokerLobby(false);
+                void navigate(`/games/poker/lobby/${inviteCode}`);
+                setTimeout(() => setOpenJoinWarLobby(true), 300);
+              }}
+            >
+              Join
+            </Button>
+          </DialogActions>
+        </Dialog>
 
-
+        {/* Join Blackjack Lobby Dialog */}
+        <Dialog
+          open={openJoinBlackjackLobby}
+          onClose={() => setOpenJoinBlackjackLobby(false)}
+        >
+          <DialogTitle>Join Blackjack Lobby</DialogTitle>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
+          >
+            <TextField
+              label="Invite Code"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+              inputProps={{ maxLength: 6 }}
+              fullWidth
+            />
+            <TextField
+              label="Your Name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenJoinBlackjackLobby(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                if (inviteCode.length !== 6) {
+                  alert("Invite code must be 6 characters.");
+                  return;
+                }
+                if (!userName) {
+                  alert("Please enter your name.");
+                  return;
+                }
+                void socketManager
+                  .connect(userName, "Blackjack", inviteCode)
+                  .then(() => {
+                    setOpenJoinBlackjackLobby(false);
+                    void navigate("/lobby", {
+                      state: {
+                        playerName: userName,
+                        gameType: "Blackjack",
+                        isCreating: false,
+                        inviteCode: inviteCode,
+                      },
+                    });
+                  })
+                  .catch((error) => {
+                    console.error("Error joining blackjack lobby:", error);
+                    alert(
+                      "Failed to join lobby. Please check your invite code and try again."
+                    );
+                  });
+              }}
+            >
+              Join
+            </Button>
+          </DialogActions>
+        </Dialog>
       </HomePageContainer>
-
     </AppTheme>
   );
 }

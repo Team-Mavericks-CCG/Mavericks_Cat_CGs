@@ -3,15 +3,21 @@ import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import authRoutes from "./routes/authRoutes.js";
-import gameRoutes from "./routes/gameRoutes.js";
 import leaderboardRoutes from "./routes/leaderboardRoutes.js";
 import { setupSocketServer } from "./socket/socketManager.js";
 import dotenv from "dotenv";
+import { setupAssociations } from "./models/associations.js";
 
 // Load environment variables
 dotenv.config();
 
-// Define socket event types in socketManager.ts
+try {
+  // Import models here if needed
+  setupAssociations();
+  console.log("Associations set up successfully");
+} catch (error) {
+  console.error("Error setting up associations:", error);
+}
 
 const app = express();
 // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -43,7 +49,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Define routes
 app.use("/api/auth", authRoutes);
-app.use("/api/games", gameRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
 
 // Health check endpoint

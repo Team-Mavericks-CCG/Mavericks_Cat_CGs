@@ -1,41 +1,40 @@
 .blackjack-page {
-    background-color: #033814;
-    height: 100vh;
-    width: 100%;
-    color: white;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow-x: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  
-  .blackjack-page h1 {
-    text-align: center;
-    margin-bottom: 30px;
-  
-  }
-  
-  .blackjack-table {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-    flex-grow: 1;
-    justify-content: center;
-  }
-  
-  .dealer-area,
-  .player-area {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 10px 0;
-  }
+  background-color: #033814;
+  height: 100vh;
+  width: 100%;
+  color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
 
-  .start-button{
-    padding: 0.8rem 1.5rem;
+.blackjack-page h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.blackjack-table {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.dealer-area,
+.player-area {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px 0;
+}
+
+.start-button {
+  padding: 0.8rem 1.5rem;
   background-color: green;
   border: none;
   border-radius: 15px;
@@ -44,4 +43,3 @@
   color: white;
   cursor: pointer;
 }
-  }

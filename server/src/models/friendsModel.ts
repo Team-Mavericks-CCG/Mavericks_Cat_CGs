@@ -1,13 +1,13 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/dbConfig.js";
 
-class GameStats extends Model {
+class Friendship extends Model {
   declare playerID: number;
   declare friendID: number;
   declare createdAt: Date;
 }
 
-GameStats.init(
+Friendship.init(
   {
     playerID: {
       type: DataTypes.INTEGER,
@@ -40,3 +40,5 @@ GameStats.init(
     timestamps: false, // enable timestamps
   }
 );
+
+export default Friendship;

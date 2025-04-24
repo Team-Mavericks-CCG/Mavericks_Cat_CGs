@@ -1,13 +1,14 @@
-import { Card } from "../utils/card";
+import { Card } from "./card.js";
+import { GameStatus } from "./index.js";
 
 export interface BlackjackClientGameState {
-  gameId: string;
+  gameType: "Blackjack";
   gameStatus: GameStatus;
   activePlayer: string | null;
   players: {
     id: string;
     name: string;
-    hands: Hand[];
+    hands: BlackjackHand[];
   }[];
   dealerHand: {
     cards: Card[];
@@ -15,13 +16,13 @@ export interface BlackjackClientGameState {
   };
 }
 
-export enum GameStatus {
-  READY = "READY",
-  IN_PROGRESS = "IN_PROGRESS",
-  FINISHED = "FINISHED",
+export enum BlackjackAction {
+  HIT = "hit",
+  STAND = "stand",
+  SPLIT = "split",
 }
 
-export enum HandStatus {
+export enum BlackjackHandStatus {
   // hand is dealt, not current turn
   WAITING = "waiting",
   // hand is active, player can hit or stand
@@ -34,8 +35,8 @@ export enum HandStatus {
   LOSE = "lose",
 }
 
-export interface Hand {
+export interface BlackjackHand {
   cards: Card[];
-  status: HandStatus;
+  status: BlackjackHandStatus;
   value: number; // to avoid recalculating
 }

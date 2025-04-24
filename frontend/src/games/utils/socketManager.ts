@@ -1,59 +1,11 @@
 import { io, Socket } from "socket.io-client";
 import { SERVER_URL } from "../../utils/api";
-import { BlackjackClientGameState } from "../blackjack/blackjackType";
-
-export interface Player {
-  name: string;
-  rank?: string;
-  color?: string;
-  image?: string;
-  isReady?: boolean;
-}
-
-// Socket event types
-interface ServerToClientEvents {
-  // Common events
-  error: (message: string) => void;
-  "game-started": (state: BlackjackClientGameState) => void;
-  "game-state": (state: BlackjackClientGameState) => void;
-  "lobby-created": (data: {
-    gameID: string;
-    inviteCode: string;
-    players: { name: string }[];
-    playerID: string;
-  }) => void;
-  "join-success": (data: { gameID: string; playerID: string }) => void;
-  "lobby-update": (data: { players: Player[] }) => void;
-  "lobby-list": (
-    data: {
-      gameID: string;
-      type: string;
-      playerCount: number;
-      joinable: boolean;
-    }[]
-  ) => void;
-  "game-over": (winner: string | null) => void;
-}
-
-interface ClientToServerEvents {
-  "create-lobby": (data: { playerName: string; gameType: string }) => void;
-  "join-lobby": (data: { inviteCode: string; playerName: string }) => void;
-  "get-active-games": () => void;
-  "start-game": (data: { gameID: string }) => void;
-  "new-round": (data: { gameID: string }) => void;
-  "leave-game": (data: { gameID: string }) => void;
-  // generic action event for all games and actions, individual games can handle their own actions
-  "game-action": (data: { gameID: string; action: string }) => void;
-
-  // Authentication (now optional)
-  authenticate: (
-    token: string,
-    callback: (
-      authenticated: boolean,
-      user?: { id: number; username: string }
-    ) => void
-  ) => void;
-}
+import {
+  ServerToClientEvents,
+  ClientToServerEvents,
+  ClientGameState,
+  Player,
+} from "shared";
 
 // Socket manager class for frontend usage
 class SocketManager {
@@ -69,9 +21,9 @@ class SocketManager {
   private playerUpdateCallbacks: ((players: Player[]) => void)[] = [];
   private gameID: string | null = null;
   private _inviteCode: string | null = null;
-  private _gameState: BlackjackClientGameState | null = null;
+  private _gameState: ClientGameState | null = null;
   private gameStateUpdateCallbacks: ((
-    state: BlackjackClientGameState | null
+    state: ClientGameState | null
   ) => void)[] = [];
   private _playerName: string | null = null;
   private _isHost = false;
@@ -97,11 +49,7 @@ class SocketManager {
     return [...this._players];
   }
 
-  get socketID(): string | null {
-    return this.socket?.id ?? null;
-  }
-
-  get gameState(): BlackjackClientGameState | null {
+  get gameState(): ClientGameState | null {
     return this._gameState;
   }
 
@@ -136,7 +84,7 @@ class SocketManager {
   }
 
   onGameStateUpdate(
-    callback: (state: BlackjackClientGameState | null) => void
+    callback: (state: ClientGameState | null) => void
   ): () => void {
     this.gameStateUpdateCallbacks.push(callback);
 
@@ -224,7 +172,7 @@ class SocketManager {
         );
       });
 
-      this.socket.on("game-state", (state: BlackjackClientGameState) => {
+      this.socket.on("game-state", (state: ClientGameState) => {
         console.log("Received game state:", state);
         this._gameState = state;
 
@@ -281,6 +229,7 @@ class SocketManager {
   // Disconnect from the socket server
   disconnect(): void {
     if (this.socket) {
+      localStorage.removeItem(this.socketID!);
       this.socket.disconnect();
       this.socket = null;
       this._isConnected = false;
@@ -386,13 +335,12 @@ class SocketManager {
         return;
       }
 
-      const handleError = (message: string) => {
+      const handleError = () => {
         this.socket?.off("game-started", handleSuccess);
-        reject(new Error(message));
+        reject(new Error("Failed to start game"));
       };
 
-      const handleSuccess = (state: BlackjackClientGameState) => {
-        this._gameState = state;
+      const handleSuccess = () => {
         this.socket?.off("error", handleError);
         resolve();
       };

@@ -44,6 +44,8 @@ class Snake {
   private ctx: CanvasRenderingContext2D;
   private canvas: HTMLCanvasElement;
   private directionQueue: Direction[] = [];
+  private lastAttemptedDirection: { direction: Direction; age: number } | null =
+    null;
   private food: Coordinates = { x: 0, y: 0 };
   private snake: Coordinates[] = [];
   private head: Coordinates = { x: 0, y: 0 };
@@ -88,6 +90,7 @@ class Snake {
 
     this.updateSnake();
 
+    this.directionQueue = [];
     this.direction = Direction.Right;
     this.score = 0;
     this.gameOver = false;
@@ -137,6 +140,16 @@ class Snake {
     }
   }
 
+  validateDirection(direction1: Direction, direction2: Direction): boolean {
+    return !(
+      (direction1 === Direction.Right && direction2 === Direction.Left) ||
+      (direction1 === Direction.Left && direction2 === Direction.Right) ||
+      (direction1 === Direction.Up && direction2 === Direction.Down) ||
+      (direction1 === Direction.Down && direction2 === Direction.Up) ||
+      direction1 === direction2
+    );
+  }
+
   setDirection(direction: Direction): void {
     // Get the direction to check against (last in queue or current direction)
     const checkAgainst =
@@ -145,15 +158,21 @@ class Snake {
         : this.direction;
 
     // Prevent the snake from reversing direction
-    if (checkAgainst === Direction.Right && direction === Direction.Left)
+    if (!this.validateDirection(direction, checkAgainst)) {
+      this.lastAttemptedDirection = { direction, age: 0 };
       return;
-    if (checkAgainst === Direction.Left && direction === Direction.Right)
-      return;
-    if (checkAgainst === Direction.Up && direction === Direction.Down) return;
-    if (checkAgainst === Direction.Down && direction === Direction.Up) return;
+    }
 
     if (this.directionQueue.length < 3) {
       this.directionQueue.push(direction);
+    }
+
+    if (
+      this.lastAttemptedDirection !== null &&
+      this.validateDirection(direction, this.lastAttemptedDirection.direction)
+    ) {
+      this.directionQueue.push(this.lastAttemptedDirection.direction);
+      this.lastAttemptedDirection = null;
     }
   }
 
@@ -197,6 +216,15 @@ class Snake {
 
   move(): void {
     this.direction = this.directionQueue.shift() ?? this.direction;
+    // remove the last attempted direction if it is older than 5 frames
+    // this is to prevent old moves being used unexpectedly
+    if (this.lastAttemptedDirection !== null) {
+      if (this.lastAttemptedDirection.age < 5) {
+        this.lastAttemptedDirection.age += 1;
+      } else {
+        this.lastAttemptedDirection = null;
+      }
+    }
     const newHead = { ...this.snake[this.snake.length - 1] };
 
     switch (this.direction) {
@@ -231,7 +259,6 @@ class Snake {
     }
 
     this.draw();
-
     this.gameLoop = setTimeout(
       () => {
         if (!this.gameOver) {
@@ -253,7 +280,7 @@ class Snake {
           );
         }
       },
-      3000 / (30 + this.score * 4)
+      Math.max(1000 / (10 + this.score), 25)
     );
   }
 
