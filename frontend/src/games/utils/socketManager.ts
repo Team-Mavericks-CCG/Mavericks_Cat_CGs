@@ -229,7 +229,7 @@ class SocketManager {
   // Disconnect from the socket server
   disconnect(): void {
     if (this.socket) {
-      localStorage.removeItem(this.socketID!);
+      localStorage.removeItem(this.playerID!);
       this.socket.disconnect();
       this.socket = null;
       this._isConnected = false;
