@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./LobbyPage.css";
+import "./lobbyPage.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SnakeGame } from "./snake";
 import { socketManager } from "../games/utils/socketManager";
