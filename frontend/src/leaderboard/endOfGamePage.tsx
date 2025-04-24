@@ -4,15 +4,6 @@ import { getPlayers, getScores } from "./leaderboardpage"; // assuming they're e
 import { Player } from "./leaderboardpage";
 import { Score } from "./leaderboardpage";
 
-const PodiumItem = ({ playerName, score, rank, position }) => (
-  <div>
-    <p>Name:{playerName}</p>
-    <p>Score: {score}</p>
-    <p>Rank: {rank}</p>
-    <p>Position:{position}</p>
-  </div>
-);
-
 // React Component
 const EndOfGamePage: React.FC = () => {
   const [players, setPlayers] = useState<Player[]>([]);
