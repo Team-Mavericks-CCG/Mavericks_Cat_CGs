@@ -11,6 +11,12 @@ import {
 } from "shared";
 
 export class War extends Game {
+  handleAction(playerId: string, action: string): unknown {
+    throw new Error("Method not implemented.");
+  }
+  newGame(): void {
+    throw new Error("Method not implemented.");
+  }
   public static override MAX_PLAYERS = 2;
 
   private deck: Deck;
@@ -233,6 +239,21 @@ export class War extends Game {
         status: WarHandStatus.INACTIVE,
       },
     ]);
+  }
+
+  public getClientGameState(): WarClientGameState {
+    return {
+      gameType: "War",
+      gameStatus: this.status,
+      players: Array.from(this.hands.entries()).map(([id, hands]) => ({
+        id,
+        name: this.players.get(id) ?? "Unknown",
+        hands: hands.map((hand) => ({
+          cards: hand.cards,
+          status: hand.status,
+        })),
+      })),
+    };
   }
 
   private endGame(winnerId: string): void {

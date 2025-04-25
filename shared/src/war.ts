@@ -3,8 +3,7 @@ import { GameStatus } from "./index.js";
 
 export interface WarClientGameState {
   gameType: "War";
-  gameStatus: GameStatus;
-  activePlayer: string | null;
+  gameStatus: GameStatus;\
   players: {
     id: string;
     name: string;
