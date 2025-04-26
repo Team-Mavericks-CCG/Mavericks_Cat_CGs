@@ -3,13 +3,15 @@ FROM node:23-slim AS builder
 
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-COPY frontend/package.json ./frontend/
-COPY shared/package.json ./shared/
+COPY package*.json ./
+COPY frontend/package*.json ./frontend/
+COPY shared/package*.json ./shared/
 
 RUN npm install
 
 COPY . .
+
+COPY frontend/.env.production ./frontend/.env.production
 
 RUN npm run build --workspace=shared
 

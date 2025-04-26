@@ -1,5 +1,10 @@
 import { Server, Socket } from "socket.io";
-import { gameStore, GameType, isValidGameType } from "../games/gameStore.js";
+import {
+  gameStore,
+  GameType,
+  isValidGameType,
+  inviteCodeMap,
+} from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
 import jwt from "jsonwebtoken";
 import PlayerModel from "../models/userModel.js";
@@ -35,9 +40,6 @@ const playerSocketMap = new Map<
     SocketData
   >
 >();
-
-// Invite code to game ID mapping
-const inviteCodeMap = new Map<string, string>();
 
 function generateInviteCode(): string {
   // Get current timestamp + random number
@@ -375,8 +377,8 @@ export function setupSocketServer(
       }
     });
 
-    // Handle disconnection
-    socket.on("disconnect", () => {
+    // handle leave function
+    function handleLeave() {
       console.log(`Socket disconnected: ${socket.id}`);
 
       const playerID = socket.id;
@@ -391,6 +393,7 @@ export function setupSocketServer(
 
             // Notify remaining players
             socket.to(gameID).emit("game-state", game.getClientGameState());
+            socket.to(gameID).emit("lobby-update", getPlayersInGame(game));
 
             // If the game is now empty, remove it
             if (game.getPlayerCount() === 0) {
@@ -404,6 +407,13 @@ export function setupSocketServer(
 
       // Remove from player-socket map
       playerSocketMap.delete(playerID);
+    }
+
+    socket.on("leave", handleLeave);
+
+    // Handle disconnection
+    socket.on("disconnect", () => {
+      handleLeave();
     });
   });
 }

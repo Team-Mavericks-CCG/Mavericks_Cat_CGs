@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { saveGameStats } from "../controllers/leaderboardController.js";
+import {
+  saveGameStats,
+  getGameStats,
+} from "../controllers/leaderboardController.js";
 import { verifyToken } from "../middleware/auth.js";
 
 // routes are appended to the default /api/auth route
@@ -7,5 +10,7 @@ import { verifyToken } from "../middleware/auth.js";
 const router = Router();
 
 router.post("/save-stats", verifyToken, saveGameStats);
+
+router.get("/get-stats", getGameStats);
 
 export default router;

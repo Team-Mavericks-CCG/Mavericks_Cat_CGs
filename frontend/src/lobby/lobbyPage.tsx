@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./LobbyPage.css";
+import "./lobbyPage.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { SnakeGame } from "./snake";
 import { socketManager } from "../games/utils/socketManager";
@@ -27,9 +27,8 @@ const LobbyPage: React.FC = () => {
     // Subscribe to player updates
     const unsubscribe = socketManager.onPlayersUpdate(setPlayers);
 
-    socketManager.on("game-started", (state) => {
-      console.log("Game started, navigating to game page", state);
-      void navigate(`/games/${gameType}`, { state: state });
+    socketManager.on("game-started", () => {
+      void navigate(`/games/${gameType}`);
     });
 
     // Clean up on unmount

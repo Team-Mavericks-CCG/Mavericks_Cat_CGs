@@ -13,5 +13,8 @@
     "dev:frontend": "npm run dev --workspace=frontend",
     "dev:server": "npm run dev --workspace=server",
     "dev": "concurrently \"npm:dev:frontend\" \"npm:dev:server\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

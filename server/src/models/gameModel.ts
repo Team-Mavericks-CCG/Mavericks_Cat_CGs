@@ -1,11 +1,11 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/dbConfig.js";
 
-class GameStats extends Model {
+class Game extends Model {
   declare gameName: string;
 }
 
-GameStats.init(
+Game.init(
   {
     gameName: {
       type: DataTypes.STRING,
@@ -18,3 +18,5 @@ GameStats.init(
     timestamps: false, // enable timestamps
   }
 );
+
+export default Game;

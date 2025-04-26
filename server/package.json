@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/app.js",
     "dev:server": "tsx watch src/app.ts",
-    "dev": "npx concurrently --kill-others --names \"SERVER,SHARED\" -c \"bgGreen.bold,bgMagenta.bold\" \"node --watch --import=tsx src/app.ts\" \"npx tsc --watch --preserveSymlinks --preserveWatchOutput --project ../shared/tsconfig.json\"",
+    "dev": "npx concurrently --kill-others --names \"SERVER,SHARED\" -c \"bgGreen.bold,bgMagenta.bold\" \"tsx watch src/app.ts\" \"tsc --watch --preserveSymlinks --preserveWatchOutput --project ../shared/tsconfig.json\"",
     "lint": "eslint . --ext .ts src/",
     "typecheck": "tsc --noEmit"
   },
@@ -41,7 +41,8 @@
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.28.0",
     "undici-types": "^5.28.3",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "concurrently": "^9.1.2"
   },
   "engines": {
     "node": ">=20.0.0"
