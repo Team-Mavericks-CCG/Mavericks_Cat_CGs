@@ -3,13 +3,13 @@ import { GameStatus } from "./index.js";
 
 export interface WarClientGameState {
   gameType: "War";
-  gameStatus: GameStatus;\
+  gameStatus: GameStatus;
   players: {
     id: string;
     name: string;
     hands: WarHand[];
   }[];
-};
+}
 
 export enum WarAction {
   Play = "",
