@@ -15,8 +15,10 @@ import {
   Suit,
 } from "shared";
 import { socketManager } from "../utils/socketManager";
+import { useNavigate } from "react-router-dom";
 
 const BlackjackPage: React.FC = () => {
+  const navigate = useNavigate();
   const [isGameOver, setIsGameOver] = useState(false);
   const [gameResult, setGameResult] = useState("");
   const [playerHand, setPlayerHand] = useState<Map<string, Hand[]>>(new Map());
@@ -126,7 +128,7 @@ const BlackjackPage: React.FC = () => {
 
   const stand = () => {
     if (activePlayer !== socketManager.playerID) {
-      console.error("It's not your turn to hit!");
+      console.error("It's not your turn to stand!");
       return;
     }
     void socketManager.gameAction("stand");
@@ -148,20 +150,26 @@ const BlackjackPage: React.FC = () => {
   );
 
   return (
+    //title
     <Box className="blackjack-page">
       <Typography variant="h4" align="center" gutterBottom>
         Blackjack <GameRules gameType="blackjack" />
       </Typography>
 
-      <Box display="flex" justifyContent="right" gap={2}>
-        <GameButton
-          className="start-btn"
-          variant="contained"
-          onClick={startGame}
-          disabled={!isGameOver}
-        >
-          Start New Game
-        </GameButton>
+      {/* Leaderboard button, IDK if it should stay here */}
+      <Box
+        sx={{ maxWidth: "300px", justifyContent: "right", padding: "5px 20px" }}
+      >
+        {isGameOver && (
+          <GameButton
+            className="game-button other-button"
+            variant="contained"
+            onClick={() => void navigate("/leaderboard")}
+            disabled={!isGameOver}
+          >
+            Leaderboard
+          </GameButton>
+        )}
       </Box>
 
       {/* Deck Display */}
@@ -188,19 +196,71 @@ const BlackjackPage: React.FC = () => {
         </Box>
       </Box>
 
-      {/* All players' cards */}
+      {/* New game button*/}
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2,
+          maxWidth: "800px",
+          margin: "0 auto",
+          padding: "5px 20px",
+        }}
+      >
+        <GameButton
+          className="game-button other-button"
+          variant="contained"
+          onClick={startGame}
+          disabled={!isGameOver}
+        >
+          New Game
+        </GameButton>
+      </Box>
+
+      {/* hit and stand button  */}
       <Box display="flex" flexDirection="column" gap={2} mb={2}>
+        <Box
+          className="game-controls"
+          sx={{
+            display: "flex",
+            gap: 2,
+            maxWidth: "800px",
+            margin: "0 auto",
+            padding: "5px 20px",
+          }}
+        >
+          <GameButton
+            className="game-button hit-button"
+            variant="contained"
+            onClick={hit}
+            disabled={isGameOver || activePlayer !== socketManager.playerID}
+          >
+            Hit
+          </GameButton>
+
+          <GameButton
+            className="game-button stand-button"
+            variant="contained"
+            onClick={stand}
+            disabled={isGameOver || activePlayer !== socketManager.playerID}
+          >
+            Stand
+          </GameButton>
+        </Box>
+
+        {/* Card spots and all player hands w/ boarder*/}
         {Array.from(playerHand.entries()).map(([id, hands]) => (
           <Box
             key={id}
-            display=""
-            justifyContent={id === socketManager.playerID ? "right" : "left"}
+            display="flex"
+            justifyContent={id === socketManager.playerID ? "center" : "left"}
             gap={2}
             sx={{
               opacity: activePlayer === id ? 1 : 0.7,
               border: activePlayer === id ? "2px solid gold" : "none",
               padding: "10px",
               borderRadius: "5px",
+              width: "100%",
+              justifyContent: "center",
             }}
           >
             <Typography variant="h6">
@@ -213,50 +273,18 @@ const BlackjackPage: React.FC = () => {
             {renderHand(hands[0]?.cards ?? [])}
             <Typography variant="body2">
               Total: {hands[0]?.value}
-              {hands[0]?.status === HandStatus.BUSTED && " (Busted)"}
-              {hands[0]?.status === HandStatus.WIN && " (Winner!)"}
-              {hands[0]?.status === HandStatus.LOSE && " (Lost)"}
+              {hands[0]?.status === BlackjackHandStatus.BUSTED && " (Busted)"}
+              {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
+              {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
             </Typography>
           </Box>
         ))}
       </Box>
+
+      {/* Game result display */}
       <Typography variant="h6" align="center" gutterBottom>
         {gameResult}
       </Typography>
-
-      {/* hit button  */}
-      <Box display="flex" justifyContent="right" gap={2}>
-        <GameButton
-          className="hit-btn"
-          variant="contained"
-          onClick={hit}
-          disabled={isGameOver}
-        >
-          Hit
-        </GameButton>
-
-        {/* stand button  */}
-        <GameButton
-          className="stand-btn"
-          variant="contained"
-          onClick={stand}
-          disabled={isGameOver}
-        >
-          Stand
-        </GameButton>
-      </Box>
-
-      {/* leaderboard button*/}
-      {isGameOver && (
-        <GameButton
-          className="leaderboard"
-          variant="contained"
-          onClick={() => alert("Go to leaderboard")}
-          disabled={!isGameOver}
-        >
-          See Leaderboard
-        </GameButton>
-      )}
     </Box>
   );
 };
