@@ -1,5 +1,6 @@
 import { Game } from "./game.js";
 import { Blackjack } from "./blackjack.js";
+import { War } from "./war.js";
 import { v4 } from "uuid";
 import { GameType } from "shared";
 
@@ -41,6 +42,10 @@ export const gameStore = {
     playerName: string
   ): Blackjack {
     return new Blackjack(gameID, hostID, playerName);
+  },
+
+  createWarGame(gameID: string, hostID: string, playerName: string): War {
+    return new War(gameID, hostID, playerName);
   },
 
   // Add similar methods for other game types

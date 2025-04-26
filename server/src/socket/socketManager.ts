@@ -5,6 +5,7 @@ import {
   inviteCodeMap,
 } from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
+import { War } from "../games/war.js";
 import jwt from "jsonwebtoken";
 import PlayerModel from "../models/userModel.js";
 import { Game } from "../games/game.js";
@@ -160,6 +161,7 @@ export function setupSocketServer(
         // get max player count for this game type
         const gameTypeMaxPlayers = {
           [GameType.BLACKJACK]: Blackjack.MAX_PLAYERS,
+          [GameType.WAR]: War.MAX_PLAYERS,
           // Add other game types here
         };
 
@@ -172,7 +174,7 @@ export function setupSocketServer(
             gameInfo.type === GameType.BLACKJACK
               ? gameInfo.game.getPlayerCount() <
                 gameTypeMaxPlayers[gameInfo.type]
-              : true, // Blackjack allows up to 4 players
+              : true,
         }));
 
         socket.emit("lobby-list", activeGames);
@@ -244,6 +246,17 @@ export function setupSocketServer(
                   socket.data.playerID,
                   data.playerName
                 )
+            );
+            gameID = result.gameID;
+            game = result.game;
+            break;
+          }
+          case GameType.WAR: {
+            // Create a War game
+            const result = gameStore.createGame(
+              GameType.WAR,
+              (gameID: string) =>
+                gameStore.createWarGame(gameID, socket.id, data.playerName)
             );
             gameID = result.gameID;
             game = result.game;
