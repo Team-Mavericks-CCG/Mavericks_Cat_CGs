@@ -156,38 +156,30 @@ const BlackjackPage: React.FC = () => {
         Blackjack <GameRules gameType="blackjack" />
       </Typography>
 
-      {/* Leaderboard button, IDK if it should stay here */}
-      <Box
-        sx={{ maxWidth: "300px", justifyContent: "right", padding: "5px 20px" }}
-      >
-        {isGameOver && (
-          <GameButton
-            className="game-button other-button"
-            variant="contained"
-            onClick={() => void navigate("/leaderboard")}
-            disabled={!isGameOver}
-          >
-            Leaderboard
-          </GameButton>
-        )}
-      </Box>
+
+          
 
       {/* Deck Display */}
       <Box
         display="flex"
-        textAlign="center"
-        justifyContent="center"
         gap={4}
-        mb={2}
+        flexDirection="row"
+        alignItems="flex-start" 
+        justifyContent="center"
+        mb={5}
       >
-        <CardComponent
-          // fake card for deck display
-          card={new Card(Rank.ACE, Suit.SPADES, {}, false)}
-          isClickable={false}
-          onClick={() => console.log("Deck clicked")}
-        />
-        {/* dealers cards  */}
-        <Box mb={5}>
+        {/* Deck label */}
+        <Box display="flex" flexDirection="column" alignItems="center">
+          <Typography variant="h6">Deck</Typography>
+          <CardComponent
+            card={new Card(Rank.ACE, Suit.SPADES, {}, false)}
+            isClickable={false}
+            onClick={() => console.log("Deck clicked")}
+          />
+        </Box>
+
+        {/* Dealer's cards */}
+        <Box display="flex" flexDirection="column" alignItems="center" mb={5}>
           <Typography variant="h6">Dealer's Hand</Typography>
           {renderHand(dealerHand)}
           {revealDealer && dealerValue !== null && (
@@ -195,6 +187,7 @@ const BlackjackPage: React.FC = () => {
           )}
         </Box>
       </Box>
+
 
       {/* New game button*/}
       <Box
@@ -214,6 +207,21 @@ const BlackjackPage: React.FC = () => {
         >
           New Game
         </GameButton>
+        {/* Leaderboard button, IDK if it should stay here */}  
+        <Box
+                sx={{ maxWidth: "300px", justifyContent: "right"}}
+              >
+                {isGameOver && (
+                  <GameButton
+                    className="game-button other-button"
+                    variant="contained"
+                    onClick={() => void navigate("/leaderboard")}
+                    disabled={!isGameOver}
+                  >
+                    Leaderboard
+                  </GameButton>
+                )}
+              </Box>
       </Box>
 
       {/* hit and stand button  */}
@@ -255,11 +263,11 @@ const BlackjackPage: React.FC = () => {
             justifyContent={id === socketManager.playerID ? "center" : "left"}
             gap={2}
             sx={{
+              width: "fit-content",
               opacity: activePlayer === id ? 1 : 0.7,
               border: activePlayer === id ? "2px solid gold" : "none",
               padding: "10px",
               borderRadius: "5px",
-              width: "100%",
               justifyContent: "center",
             }}
           >
@@ -270,6 +278,8 @@ const BlackjackPage: React.FC = () => {
                     Array.from(playerHand.keys()).indexOf(id) + 1
                   }'s Hand`}
             </Typography>
+            
+
             {renderHand(hands[0]?.cards ?? [])}
             <Typography variant="body2">
               Total: {hands[0]?.value}
@@ -277,7 +287,11 @@ const BlackjackPage: React.FC = () => {
               {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
               {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
             </Typography>
+
           </Box>
+        
+
+
         ))}
       </Box>
 
@@ -285,7 +299,13 @@ const BlackjackPage: React.FC = () => {
       <Typography variant="h6" align="center" gutterBottom>
         {gameResult}
       </Typography>
+            
+
+
+
     </Box>
+
+    
   );
 };
 
