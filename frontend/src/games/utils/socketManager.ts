@@ -123,7 +123,7 @@ class SocketManager {
       // Set up event listeners
       this.socket.on("connect", () => {
         // register session ID
-        const sessionID = localStorage.getItem("playerID");
+        const sessionID = sessionStorage.getItem("playerID");
         this.socket?.emit("register-session", {
           sessionID: sessionID,
         });
@@ -131,7 +131,7 @@ class SocketManager {
         this.socket?.once("session-registered", (sessionID: string | null) => {
           console.log("Session registered:", sessionID);
           if (sessionID) {
-            localStorage.setItem("playerID", sessionID);
+            sessionStorage.setItem("playerID", sessionID);
           }
           resolve(sessionID);
         });
@@ -214,7 +214,7 @@ class SocketManager {
   // Disconnect from the socket server
   disconnect(): void {
     if (this.socket) {
-      localStorage.removeItem("playerID");
+      sessionStorage.removeItem("playerID");
       this.socket.disconnect();
       this.socket = null;
       this._isConnected = false;
