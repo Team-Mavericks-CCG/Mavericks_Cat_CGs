@@ -255,40 +255,47 @@ const BlackjackPage: React.FC = () => {
           </GameButton>
         </Box>
 
-        {/* Card spots and all player hands w/ boarder*/}
-        {Array.from(playerHand.entries()).map(([id, hands]) => (
-          <Box
-            key={id}
-            display="flex"
-            justifyContent={id === socketManager.playerID ? "center" : "left"}
-            gap={2}
-            sx={{
-              width: "fit-content",
-              opacity: activePlayer === id ? 1 : 0.7,
-              border: activePlayer === id ? "2px solid gold" : "none",
-              padding: "10px",
-              borderRadius: "5px",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="h6">
-              {id === socketManager.playerID
-                ? "Your Hand"
-                : `Player ${
-                    Array.from(playerHand.keys()).indexOf(id) + 1
-                  }'s Hand`}
-            </Typography>
-            
+        {/* Card spots and all player hands w/ border */}
+<Box
+  display="grid"
+  gridTemplateColumns="repeat(2, 1fr)" // two columns
+  gap={4}
+  justifyItems="center"
+  alignItems="start"
+>
+  {Array.from(playerHand.entries()).map(([id, hands]) => (
+    <Box
+      key={id}
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      gap={1}
+      sx={{
+        width: "fit-content",
+        opacity: activePlayer === id ? 1 : 0.7,
+        border: activePlayer === id ? "2px solid gold" : "none",
+        padding: "10px",
+        borderRadius: "5px",
+      }}
+    >
+      <Typography variant="h6">
+        {id === socketManager.playerID
+          ? "Your Hand"
+          : `Player ${Array.from(playerHand.keys()).indexOf(id) + 1}'s Hand`}
+      </Typography>
 
-            {renderHand(hands[0]?.cards ?? [])}
-            <Typography variant="body2">
-              Total: {hands[0]?.value}
-              {hands[0]?.status === BlackjackHandStatus.BUSTED && " (Busted)"}
-              {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
-              {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
-            </Typography>
+      {renderHand(hands[0]?.cards ?? [])}
 
-          </Box>
+      <Typography variant="body2">
+        Total: {hands[0]?.value}
+        {hands[0]?.status === BlackjackHandStatus.BUSTED && " (Busted)"}
+        {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
+        {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
+      </Typography>
+    </Box>
+  ))}
+</Box>
+
         
 
 
