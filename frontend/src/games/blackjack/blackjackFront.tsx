@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./blackjackStyle.css";
-import { Typography, Box } from "@mui/material";
+import { Typography, Box, CircularProgress } from "@mui/material";
 import { GameRules } from "../components/GameRules";
 import { GameButton } from "../components/GameButton";
 import { CardComponent } from "../components/CardComponent";
@@ -13,6 +13,7 @@ import {
   ClientGameState,
   Rank,
   Suit,
+  GameType,
 } from "shared";
 import { socketManager } from "../utils/socketManager";
 import { useNavigate } from "react-router-dom";
@@ -26,63 +27,102 @@ const BlackjackPage: React.FC = () => {
   const [revealDealer, setRevealDealer] = useState(false);
   const [activePlayer, setActivePlayer] = useState<string | null>(null);
   const [dealerValue, setDealerValue] = useState<number | null>(null);
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const updateState = (state: ClientGameState | null): void => {
-      if (!state || state.gameType !== "Blackjack") {
-        console.error("Game state is not a valid Blackjack game state.");
-        return;
-      }
+    if (!socketManager.isConnected) {
+      setIsConnecting(true);
 
-      const tempDealerHand: Card[] = [];
-      state.dealerHand.cards.forEach((card) => {
-        tempDealerHand.push(new Card(card.rank, card.suit, {}, card.faceUp));
+      // Connect socket with a timeout
+      const connectPromise = socketManager.connect();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Connection timed out")), 10000); // 10 second timeout
       });
-      setDealerHand(tempDealerHand);
-      setDealerValue(state.dealerHand.value);
 
-      state.players.forEach((player) => {
-        const tempPlayerHands: Hand[] = [];
-        player.hands.forEach((hand) => {
-          const tempPlayerHand: Card[] = [];
-          hand.cards.forEach((card) => {
-            tempPlayerHand.push(
+      // Race between connection and timeout
+      void Promise.race([connectPromise, timeoutPromise])
+        .then(() => {
+          setIsConnected(true);
+          setIsConnecting(false);
+        })
+        .catch((error) => {
+          console.error("Socket connection failed:", error);
+          setIsConnecting(false);
+        });
+    } else {
+      setIsConnected(true);
+    }
+
+    const handleDisconnect = () => {
+      setIsConnected(false);
+      // Optional: Try to reconnect automatically
+    };
+
+    socketManager.socket?.on("disconnect", handleDisconnect);
+
+    let unsubscribe: () => void;
+
+    if (isConnected) {
+      unsubscribe = socketManager.onGameStateUpdate(
+        (state: ClientGameState | null) => {
+          if (!state || state.gameType !== GameType.BLACKJACK) {
+            console.error("Game state is not a valid Blackjack game state.");
+            return;
+          }
+
+          const tempDealerHand: Card[] = [];
+          state.dealerHand.cards.forEach((card) => {
+            tempDealerHand.push(
               new Card(card.rank, card.suit, {}, card.faceUp)
             );
           });
-          tempPlayerHands.push({
-            cards: tempPlayerHand,
-            status: hand.status,
-            value: hand.value,
+          setDealerHand(tempDealerHand);
+          setDealerValue(state.dealerHand.value);
+
+          state.players.forEach((player) => {
+            const tempPlayerHands: Hand[] = [];
+            player.hands.forEach((hand) => {
+              const tempPlayerHand: Card[] = [];
+              hand.cards.forEach((card) => {
+                tempPlayerHand.push(
+                  new Card(card.rank, card.suit, {}, card.faceUp)
+                );
+              });
+              tempPlayerHands.push({
+                cards: tempPlayerHand,
+                status: hand.status,
+                value: hand.value,
+              });
+            });
+
+            setPlayerHand((prev) => {
+              const newHand = new Map(prev);
+              newHand.set(player.id, tempPlayerHands);
+              return newHand;
+            });
           });
-        });
 
-        setPlayerHand((prev) => {
-          const newHand = new Map(prev);
-          newHand.set(player.id, tempPlayerHands);
-          return newHand;
-        });
-      });
+          setActivePlayer(state.activePlayer ?? null);
+          if (state.gameStatus === GameStatus.FINISHED) {
+            setIsGameOver(true);
 
-      setActivePlayer(state.activePlayer ?? null);
-      if (state.gameStatus === GameStatus.FINISHED) {
-        setIsGameOver(true);
+            resolveGame(state);
+          }
 
-        resolveGame(state);
-      }
-
-      if (state.gameStatus === GameStatus.IN_PROGRESS) {
-        setIsGameOver(false);
-        setGameResult("");
-        setRevealDealer(false);
-      }
-    };
-
-    const unsubscribe = socketManager.onGameStateUpdate(updateState);
+          if (state.gameStatus === GameStatus.IN_PROGRESS) {
+            setIsGameOver(false);
+            setGameResult("");
+            setRevealDealer(false);
+          }
+        }
+      );
+    }
     return () => {
-      unsubscribe();
+      socketManager.socket?.off("disconnect", handleDisconnect);
+      if (unsubscribe) unsubscribe();
     };
-  }, []);
+  }, [isConnected]);
 
   // This function is called when the game is over to determine the result
   const resolveGame = (state: BlackjackClientGameState) => {
@@ -148,6 +188,62 @@ const BlackjackPage: React.FC = () => {
       ))}
     </Box>
   );
+
+  // Render loading state if socket is connecting or disconnected
+  if (isConnecting || !isConnected) {
+    return (
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        height="80vh"
+      >
+        <Typography variant="h5" gutterBottom>
+          {isConnecting
+            ? "Connecting to game server..."
+            : "Not connected to game server"}
+        </Typography>
+
+        {isConnecting ? (
+          <CircularProgress size={60} />
+        ) : (
+          <>
+            <GameButton
+              className="game-button other-button"
+              variant="contained"
+              onClick={() => {
+                setIsConnecting(true);
+                void socketManager
+                  .connect()
+                  .then(() => {
+                    setIsConnected(true);
+                    setIsConnecting(false);
+                  })
+                  .catch((error) => {
+                    console.error("Reconnection failed:", error);
+                    setIsConnecting(false);
+                  });
+              }}
+              disabled={isConnecting}
+            >
+              {isConnecting ? "Connecting..." : "Connect"}
+            </GameButton>
+          </>
+        )}
+
+        <Box mt={4}>
+          <GameButton
+            className="game-button other-button"
+            variant="outlined"
+            onClick={() => void navigate("/")}
+          >
+            Return to Home
+          </GameButton>
+        </Box>
+      </Box>
+    );
+  }
 
   return (
     //title

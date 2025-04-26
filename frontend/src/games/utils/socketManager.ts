@@ -5,6 +5,7 @@ import {
   ClientToServerEvents,
   ClientGameState,
   Player,
+  GameType,
 } from "shared";
 
 // Socket manager class for frontend usage
@@ -16,7 +17,7 @@ class SocketManager {
   private _isAuthenticated = false;
   private _playerID: string | null = null;
   private _username: string | null = null;
-  private _gameType: string | null = null;
+  private _gameType: GameType | null = null;
   private _players: Player[] = [];
   private playerUpdateCallbacks: ((players: Player[]) => void)[] = [];
   private gameID: string | null = null;
@@ -99,26 +100,8 @@ class SocketManager {
     };
   }
 
-  handleLobbyConnection(
-    playerName: string,
-    gameType: string,
-    inviteCode: string | null
-  ): Promise<boolean> {
-    if (inviteCode) {
-      console.log("Joining lobby with invite code:", inviteCode);
-      return this.joinLobby(playerName, inviteCode).then(() => true);
-    }
-    console.log("Creating lobby");
-    return this.createLobby(playerName, gameType).then(() => true);
-  }
-
   // TODO handle failed connections better
-  connect(
-    playerName: string,
-    gameType: string,
-    inviteCode: string | null,
-    isHost = false
-  ): Promise<string | null> {
+  connect(): Promise<string | null> {
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
         this._isConnected = true;
@@ -137,24 +120,24 @@ class SocketManager {
         transports: ["websocket", "polling"],
       });
 
-      this._playerName = playerName;
-      this._gameType = gameType;
-      this._isHost = isHost;
-
       // Set up event listeners
       this.socket.on("connect", () => {
+        // register session ID
+        const sessionID = localStorage.getItem("playerID");
+        this.socket?.emit("register-session", {
+          sessionID: sessionID,
+        });
+
+        this.socket?.once("session-registered", (sessionID: string | null) => {
+          console.log("Session registered:", sessionID);
+          if (sessionID) {
+            localStorage.setItem("playerID", sessionID);
+          }
+          resolve(sessionID);
+        });
+
         console.log("Socket connected");
         this._isConnected = true;
-        this.handleLobbyConnection(playerName, gameType, inviteCode)
-          .then(() => {
-            resolve(this.inviteCode);
-          })
-          .catch((error: Error) => {
-            console.error("Error handling lobby connection:", error);
-            this._isConnected = false;
-            this._isAuthenticated = false;
-            reject(error);
-          });
       });
 
       this.socket.on("lobby-update", (data) => {
@@ -191,13 +174,6 @@ class SocketManager {
         this.gameID = null;
       });
 
-      this.socket.on("connect_error", (error) => {
-        console.error("Socket connection error:", error);
-        this._isConnected = false;
-        this._isAuthenticated = false;
-        reject(error);
-      });
-
       // Listen for errors
       this.socket.on("error", (message) => {
         console.error("Socket error:", message);
@@ -226,10 +202,19 @@ class SocketManager {
     });
   }
 
+  // Leave the current game
+  leave(): void {
+    if (!this.socket || !this._isConnected) {
+      return;
+    }
+
+    this.socket.emit("leave", { gameID: this.gameID! });
+  }
+
   // Disconnect from the socket server
   disconnect(): void {
     if (this.socket) {
-      localStorage.removeItem(this.playerID!);
+      localStorage.removeItem("playerID");
       this.socket.disconnect();
       this.socket = null;
       this._isConnected = false;
@@ -244,7 +229,7 @@ class SocketManager {
   }
 
   // TODO implement enum for gametype on front end
-  private createLobby(playerName: string, gameType: string): Promise<void> {
+  createLobby(playerName: string, gameType: GameType): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -273,6 +258,8 @@ class SocketManager {
           image: "🐱",
           isReady: false,
         }));
+        this._isHost = true;
+        this._gameType = gameType;
 
         this.socket?.off("error", handleError);
         resolve();
@@ -294,7 +281,7 @@ class SocketManager {
     });
   }
 
-  private joinLobby(playerName: string, inviteCode: string): Promise<void> {
+  joinLobby(playerName: string, inviteCode: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (!this.socket || !this._isConnected) {
         reject(new Error("Socket not connected"));
@@ -306,18 +293,18 @@ class SocketManager {
         reject(new Error(message));
       };
 
-      const handleSuccess = (data: { gameID: string; playerID: string }) => {
-        console.log("Joined lobby:", data);
-        this.gameID = data.gameID;
-        this._inviteCode = inviteCode;
-        this._playerID = data.playerID;
+      const handleSuccess = () => {
         this.socket?.off("error", handleError);
         resolve();
       };
 
       // Set up a one-time event handler for game action
       this.socket.once("join-success", (data) => {
-        handleSuccess(data);
+        this.gameID = data.gameID;
+        this._inviteCode = inviteCode;
+        this._playerID = data.playerID;
+        this._gameType = data.gameType;
+        handleSuccess();
       });
 
       // Set up a one-time error handler

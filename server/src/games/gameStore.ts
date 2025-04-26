@@ -1,14 +1,7 @@
 import { Game } from "./game.js";
 import { Blackjack } from "./blackjack.js";
 import { v4 } from "uuid";
-
-// Define game types
-export enum GameType {
-  BLACKJACK = "Blackjack",
-  // Add other game types as you create them
-  POKER = "Poker",
-  WAR = "War",
-}
+import { GameType } from "shared";
 
 // Store game instance with its type
 interface GameInfo {
