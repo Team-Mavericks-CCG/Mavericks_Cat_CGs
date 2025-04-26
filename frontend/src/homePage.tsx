@@ -113,7 +113,7 @@ const GameDialog: React.FC<GameDialogProps> = ({
 
 function HomePage() {
   useEffect(() => {
-    // disconnect from any games/lobbies if connected
+    // Disconnect from any games/lobbies if connected
     socketManager.disconnect();
 
     // Cleanup function if needed
@@ -136,8 +136,46 @@ function HomePage() {
   const [openJoinWarLobby, setOpenJoinWarLobby] = useState(false);
   const [openJoinPokerLobby, setOpenJoinPokerLobby] = useState(false);
   const [openJoinBlackjackLobby, setOpenJoinBlackjackLobby] = useState(false);
+  const [openCreateLobbyDialog, setOpenCreateLobbyDialog] = useState(false);
   const [inviteCode, setInviteCode] = useState("");
   const [userName, setUserName] = useState("");
+  const [createLobbyGameType, setCreateLobbyGameType] = useState<string | null>(
+    null
+  );
+
+  // Reusable function for connecting to a lobby
+  const connectToLobby = async (
+    gameType: string,
+    inviteCode: string | null,
+    isCreating: boolean
+  ) => {
+    try {
+      const playerName = isCreating
+        ? userName // Use the username from the "Create Lobby" dialog
+        : localStorage.getItem("username") ?? "Player";
+
+      const data = await socketManager.connect(
+        playerName,
+        gameType,
+        inviteCode,
+        isCreating
+      );
+
+      void navigate("/lobby", {
+        state: {
+          playerName,
+          gameType,
+          isCreating,
+          inviteCode: isCreating ? data : inviteCode,
+        },
+      });
+    } catch (error) {
+      console.error(`Error connecting to ${gameType} lobby:`, error);
+      alert(
+        `Failed to ${isCreating ? "create" : "join"} lobby. Please try again.`
+      );
+    }
+  };
 
   const solitaireTabs = [
     {
@@ -161,11 +199,11 @@ function HomePage() {
       content: (
         <>
           <p>Click the 'Start' button to begin War, or create/join a lobby.</p>
-
           <Button
             onClick={() => {
               setOpenWar(false);
-              void navigate("/lobby");
+              setCreateLobbyGameType("War");
+              setTimeout(() => setOpenCreateLobbyDialog(true), 300);
             }}
           >
             Create Lobby
@@ -203,9 +241,8 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenPoker(false);
-              void navigate("/lobby", {
-                state: { gameType: "Poker", isCreating: true },
-              });
+              setCreateLobbyGameType("Poker");
+              setTimeout(() => setOpenCreateLobbyDialog(true), 300);
             }}
           >
             Create Lobby
@@ -243,11 +280,8 @@ function HomePage() {
           <Button
             onClick={() => {
               setOpenBlackjack(false);
-              void socketManager
-                .connect("default", "Blackjack", null, true)
-                .then(() => {
-                  void navigate("/lobby");
-                });
+              setCreateLobbyGameType("Blackjack");
+              setTimeout(() => setOpenCreateLobbyDialog(true), 300);
             }}
           >
             Create Lobby
@@ -257,16 +291,6 @@ function HomePage() {
             onClick={() => {
               setOpenBlackjack(false);
               setTimeout(() => setOpenJoinBlackjackLobby(true), 300);
-
-              void socketManager
-                .connect("default", "Blackjack", inviteCode)
-                .then(() => {
-                  void navigate("/lobby");
-                })
-                .catch((error) => {
-                  console.error(error);
-                  socketManager.disconnect();
-                });
             }}
           >
             Join Lobby
@@ -324,8 +348,9 @@ function HomePage() {
                 </button>
               </div>
             </div>
-
+            {/* blackjack game container*/}
             <div className="game-button-container">
+              {/* blackjack button*/}
               <div className="game-button">
                 <img
                   src="/assets/images/warIcon.png"
@@ -334,6 +359,7 @@ function HomePage() {
                 />
                 <span className="game-label">War</span>
               </div>
+              {/* War dropdown munue*/}
               <div className="dropdown-menu">
                 <button
                   className="dropdown-button"
@@ -354,9 +380,8 @@ function HomePage() {
                 <button
                   className="dropdown-button"
                   onClick={() => {
-                    void navigate("/lobby", {
-                      state: { gameType: "War", isCreating: true },
-                    });
+                    setCreateLobbyGameType("War");
+                    setOpenCreateLobbyDialog(true);
                   }}
                 >
                   Create Lobby
@@ -364,7 +389,9 @@ function HomePage() {
               </div>
             </div>
 
+            {/* blackjack game container*/}
             <div className="game-button-container">
+              {/* blackjack button*/}
               <div className="game-button">
                 <img
                   src="/assets/images/blackjackButton.png"
@@ -373,6 +400,7 @@ function HomePage() {
                 />
                 <span className="game-label">Blackjack</span>
               </div>
+              {/* blackjack dropdown munue*/}
               <div className="dropdown-menu">
                 <button
                   className="dropdown-button"
@@ -393,36 +421,17 @@ function HomePage() {
                 <button
                   className="dropdown-button"
                   onClick={() => {
-                    void socketManager
-                      .connect(
-                        localStorage.getItem("username") ?? "Player",
-                        "Blackjack",
-                        null,
-                        true
-                      )
-                      .then((data) => {
-                        void navigate("/lobby", {
-                          state: {
-                            playerName:
-                              localStorage.getItem("username") ?? "Player",
-                            gameType: "Blackjack",
-                            isCreating: true,
-                            inviteCode: data,
-                          },
-                        });
-                      })
-                      .catch((error) => {
-                        console.error("Error creating blackjack lobby:", error);
-                        alert("Failed to create lobby. Please try again.");
-                      });
+                    setCreateLobbyGameType("Blackjack");
+                    setOpenCreateLobbyDialog(true);
                   }}
                 >
                   Create Lobby
                 </button>
               </div>
             </div>
-
+            {/* Poker game container*/}
             <div className="game-button-container">
+              {/* Poker button*/}
               <div className="game-button">
                 <img
                   src="/assets/images/pokerButton.png"
@@ -431,6 +440,7 @@ function HomePage() {
                 />
                 <span className="game-label">Poker</span>
               </div>
+              {/* Poker dropdown menu*/}
               <div className="dropdown-menu">
                 <button
                   className="dropdown-button"
@@ -451,15 +461,15 @@ function HomePage() {
                 <button
                   className="dropdown-button"
                   onClick={() => {
-                    void navigate("/lobby", {
-                      state: { gameType: "Poker", isCreating: true },
-                    });
+                    setCreateLobbyGameType("Poker");
+                    setOpenCreateLobbyDialog(true);
                   }}
                 >
                   Create Lobby
                 </button>
               </div>
             </div>
+
             <section className="aboutUs">
               <h2>About Us</h2>
               <img
@@ -566,8 +576,7 @@ function HomePage() {
                   return;
                 }
                 setOpenJoinWarLobby(false);
-                void navigate(`/games/war/lobby/${inviteCode}`);
-                setTimeout(() => setOpenJoinWarLobby(true), 300);
+                void connectToLobby("War", inviteCode, false);
               }}
             >
               Join
@@ -612,8 +621,7 @@ function HomePage() {
                   return;
                 }
                 setOpenJoinPokerLobby(false);
-                void navigate(`/games/poker/lobby/${inviteCode}`);
-                setTimeout(() => setOpenJoinWarLobby(true), 300);
+                void connectToLobby("Poker", inviteCode, false);
               }}
             >
               Join
@@ -659,28 +667,69 @@ function HomePage() {
                   alert("Please enter your name.");
                   return;
                 }
-                void socketManager
-                  .connect(userName, "Blackjack", inviteCode)
-                  .then(() => {
-                    setOpenJoinBlackjackLobby(false);
-                    void navigate("/lobby", {
-                      state: {
-                        playerName: userName,
-                        gameType: "Blackjack",
-                        isCreating: false,
-                        inviteCode: inviteCode,
-                      },
-                    });
-                  })
-                  .catch((error) => {
-                    console.error("Error joining blackjack lobby:", error);
-                    alert(
-                      "Failed to join lobby. Please check your invite code and try again."
-                    );
-                  });
+                setOpenJoinBlackjackLobby(false);
+                void connectToLobby("Blackjack", inviteCode, false);
               }}
             >
               Join
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Create Lobby Dialog */}
+        <Dialog
+          open={openCreateLobbyDialog}
+          onClose={() => {
+            setOpenCreateLobbyDialog(false);
+            setUserName(""); // Clear the username when the dialog is closed
+          }}
+        >
+          <DialogTitle>Create Lobby</DialogTitle>
+          <DialogContent
+            sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 2 }}
+          >
+            <TextField
+              label="Your Name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              fullWidth
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setOpenCreateLobbyDialog(false);
+                setUserName(""); // Clear the username when the dialog is canceled
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => {
+                void (async () => {
+                  if (!userName.trim()) {
+                    alert("Please enter a username.");
+                    return;
+                  }
+
+                  if (createLobbyGameType) {
+                    try {
+                      await connectToLobby(createLobbyGameType, null, true);
+                      setOpenCreateLobbyDialog(false);
+                      setUserName(""); // Clear the username after successful creation
+                    } catch (error) {
+                      console.error(
+                        `Error creating ${createLobbyGameType} lobby:`,
+                        error
+                      );
+                      alert("Failed to create lobby. Please try again.");
+                    }
+                  }
+                })();
+              }}
+            >
+              Create
             </Button>
           </DialogActions>
         </Dialog>
