@@ -203,7 +203,9 @@ function HomePage() {
     } catch (error) {
       console.error(`Error connecting to ${gameType} lobby:`, error);
       alert(
-        `Failed to ${inviteCode === null ? "create" : "join"} lobby. Please try again.`
+        `Failed to ${
+          inviteCode === null ? "create" : "join"
+        } lobby. Please try again.`
       );
     }
   };
@@ -568,6 +570,20 @@ function HomePage() {
         <Dialog
           open={openJoinWarLobby}
           onClose={() => setOpenJoinWarLobby(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (inviteCode.length !== 6) {
+                alert("Invite code must be 6 characters.");
+                return;
+              }
+              if (!userName) {
+                alert("Please enter your name.");
+                return;
+              }
+              setOpenJoinWarLobby(false);
+              void connectToLobby(GameType.WAR, inviteCode);
+            }
+          }}
         >
           <DialogTitle>Join War Lobby</DialogTitle>
           <DialogContent
@@ -613,6 +629,20 @@ function HomePage() {
         <Dialog
           open={openJoinPokerLobby}
           onClose={() => setOpenJoinPokerLobby(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (inviteCode.length !== 6) {
+                alert("Invite code must be 6 characters.");
+                return;
+              }
+              if (!userName) {
+                alert("Please enter your name.");
+                return;
+              }
+              setOpenJoinPokerLobby(false);
+              void connectToLobby(GameType.POKER, inviteCode);
+            }
+          }}
         >
           <DialogTitle>Join Poker Lobby</DialogTitle>
           <DialogContent
@@ -658,6 +688,20 @@ function HomePage() {
         <Dialog
           open={openJoinBlackjackLobby}
           onClose={() => setOpenJoinBlackjackLobby(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (inviteCode.length !== 6) {
+                alert("Invite code must be 6 characters.");
+                return;
+              }
+              if (!userName) {
+                alert("Please enter your name.");
+                return;
+              }
+              setOpenJoinBlackjackLobby(false);
+              void connectToLobby(GameType.BLACKJACK, inviteCode);
+            }
+          }}
         >
           <DialogTitle>Join Blackjack Lobby</DialogTitle>
           <DialogContent
@@ -707,6 +751,27 @@ function HomePage() {
           onClose={() => {
             setOpenCreateLobbyDialog(false);
             setUserName(""); // Clear the username when the dialog is closed
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              if (!userName.trim()) {
+                alert("Please enter a username.");
+                return;
+              }
+              if (createLobbyGameType) {
+                try {
+                  connectToLobby(createLobbyGameType as GameType, null);
+                  setOpenCreateLobbyDialog(false);
+                  setUserName(""); // Clear the username after successful creation
+                } catch (error) {
+                  console.error(
+                    `Error creating ${createLobbyGameType} lobby:`,
+                    error
+                  );
+                  alert("Failed to create lobby. Please try again.");
+                }
+              }
+            }
           }}
         >
           <DialogTitle>Create Lobby</DialogTitle>
