@@ -8,6 +8,7 @@ import {
   BlackjackAction,
   GameAction,
   BlackjackClientGameState,
+  GameType,
 } from "shared";
 
 export class Blackjack extends Game {
@@ -296,7 +297,7 @@ export class Blackjack extends Game {
   // Convert the game state to client-friendly format
   public getClientGameState(): BlackjackClientGameState {
     return {
-      gameType: "Blackjack",
+      gameType: GameType.BLACKJACK,
       gameStatus: this.status,
       activePlayer: this.activePlayer,
       players: Array.from(this.hands.entries()).map(([id, hands]) => ({

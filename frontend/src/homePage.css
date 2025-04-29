@@ -5,16 +5,20 @@ body {
   padding: 0;
 }
 
+html {
+  font-size: clamp(14px, 1.5vw, 18px); /* Responsive font size */
+}
+
 .aboutUs {
   text-align: center;
   margin-top: -45px;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .aboutUs p {
   font-size: 18px;
   margin-top: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 5px;
   text-align: center;
 }
 
@@ -27,9 +31,9 @@ body {
 footer {
   font-size: 14px;
   text-align: center;
-  padding: 10px;
+  padding: 5px;
   position: relative;
-  bottom: -10px;
+  bottom: -20px;
   width: 100%;
 }
 
@@ -53,9 +57,9 @@ body {
 
 .button-row1 {
   display: flex;
+  flex-wrap: wrap; /* Allow buttons to wrap */
   justify-content: center;
-  gap: 20px; /* Space between buttons in a row */
-  flex-wrap: wrap; /* Allow buttons to wrap to the next line if needed */
+  gap: 1rem; /* Use relative spacing */
   padding-top: 10px; /* Reduced padding-top to move buttons higher */
   padding-bottom: 3rem;
 }
@@ -82,15 +86,15 @@ button {
 
 .game-button-container {
   position: relative;
-  width: 300px;
-  margin: 10px;
+  width: 20rem; /* Use rem for width */
+  margin: 1rem; /* Use rem for spacing */
 }
 
 .game-button {
   width: 100%;
-  height: 200px;
-  border-radius: 16px;
-  background-color: rgba(249, 202, 81, 0.95);
+  height: 12rem; /* Use rem for height */
+  border-radius: 1rem; /* Use rem for border radius */
+  background-color: rgb(46, 71, 174);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -102,19 +106,23 @@ button {
   transition: transform 0.2s ease;
 }
 
+.game-button-container:hover .game-button {
+  background-color: rgb(46, 71, 174); /* Keep the same color on hover */
+}
+
+/* Adjust dropdown menu to overlap the game button */
 .dropdown-menu {
   position: absolute;
   align-items: center;
-  top: 100%;
+  top: 97%; /* Adjust to overlap the game button */
   left: 0;
   width: 100%;
-  background-color: rgba(249, 202, 81, 0.95);
+  background-color: rgb(46, 71, 174);
   border-radius: 0 0 16px 16px;
   display: none;
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   z-index: 10;
 }
 
@@ -148,11 +156,7 @@ button {
   z-index: 1; /* Ensure text is on top */
   font-size: 14px;
   font-weight: bold;
-  color: rgba(
-    1,
-    141,
-    227
-  ); /* Change text color to white for better visibility */
+  color: white; /* Change text color to white for better visibility */
   /* Make the text stand out against the image */
   padding: 0px 0; /* Adjust padding to position the text at the bottom */
   text-align: center;
@@ -162,7 +166,17 @@ button {
 
 .cat-pawprint {
   width: 200px;
-  height: 200px;
+  height: 175px;
   margin-right: 5px;
   vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .game-button-container {
+    width: 90%; /* Adjust width for smaller screens */
+  }
+
+  .dropdown-menu {
+    top: 85%; /* Adjust dropdown position */
+  }
 }

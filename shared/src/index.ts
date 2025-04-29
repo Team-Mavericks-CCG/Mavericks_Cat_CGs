@@ -27,7 +27,7 @@ export interface Hand {
 }
 
 export interface PokerClientGameState {
-  gameType: "Poker"; // Discriminator property
+  gameType: GameType.POKER; // Discriminator property
   gameStatus: GameStatus;
   activePlayer: string | null;
   // ... other Poker specific properties
@@ -66,4 +66,11 @@ export interface PlayerInfo {
   id: string;
   name: string;
   // Add other shared player properties if needed
+}
+
+export enum GameType {
+  BLACKJACK = "Blackjack",
+  // Add other game types as you create them
+  POKER = "Poker",
+  WAR = "War",
 }
