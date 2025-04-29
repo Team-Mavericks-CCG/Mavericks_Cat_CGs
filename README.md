@@ -11,7 +11,7 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
    git clone https://github.com/Team-Mavericks-CCG/Mavericks_Cat_CGs.git
    ```
    
-3. Set PASSWORD and JWT_SECRET
+3. Set PASSWORD and JWT_SECRET in docker-compose.yml
 4. To run the docker containers:
 
    Prod:
@@ -26,4 +26,7 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
    ```bash
    docker:build:dev
    docker:dev
-```
+   ```
+5. Connect to frontend, address will change if running prod or dev, docker output will provide url.
+
+
