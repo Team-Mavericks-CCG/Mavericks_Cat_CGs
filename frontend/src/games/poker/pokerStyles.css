@@ -1,0 +1,33 @@
+.poker-page {
+  padding: 20px;
+  background-color: #033814; 
+  min-height: 100vh;
+  color: white;
+}
+
+.start-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.start-btn:hover {
+  background-color: #45a049;
+}
+
+.replace-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.replace-btn:hover {
+  background-color: #e53935;
+}
+
+.keep-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.keep-btn:hover {
+  background-color: #45a049;
+}
