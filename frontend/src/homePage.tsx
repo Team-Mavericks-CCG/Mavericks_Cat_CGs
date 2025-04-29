@@ -761,7 +761,7 @@ function HomePage() {
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               if (!userName.trim()) {
-                alert("Please enter a username tehe! uwu!");
+                alert("Please enter a username.");
                 return;
               }
               if (createLobbyGameType) {
