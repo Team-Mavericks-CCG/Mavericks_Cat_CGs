@@ -1,28 +1,27 @@
 import { Card } from "../utils/card.js";
 import { Game } from "./game.js";
-import { 
+import {
   Deck,
-  GameStatus, 
-  WarHand, 
-  WarHandStatus, 
+  GameStatus,
+  WarHand,
+  WarHandStatus,
   WarAction,
-  GameAction, 
-  WarClientGameState 
+  WarClientGameState,
+  GameType,
+  GameAction,
 } from "shared";
 
 export class War extends Game {
-  handleAction(playerId: string, action: string): unknown {
-    throw new Error("Method not implemented.");
-  }
-  newGame(): void {
-    throw new Error("Method not implemented.");
-  }
   public static override MAX_PLAYERS = 2;
 
   private deck: Deck;
   private hands = new Map<string, WarHand>(); // Updated to use WarHand interface
-  private currentCards: Record<string, Card> = {}; // Store the current cards played by each player
+  private currentCards = new Map<string, Card>(); // Store the current cards played by each player
   private cpuID = "cpu";
+  private isWar = false;
+  private warPile: Card[] = []; // Single war pile to hold all cards in the current war
+  private roundWinner: string | null = null;
+  private winReason = "";
 
   constructor(gameId: string, hostID: string, playerName: string) {
     super(gameId, hostID, playerName);
@@ -37,6 +36,13 @@ export class War extends Game {
       throw new Error("Game is already started or in progress");
     }
     this.deal();
+    this.status = GameStatus.IN_PROGRESS;
+
+    // Set all hands to PLAYING
+    for (const hand of this.hands.values()) {
+      hand.status = WarHandStatus.PLAYING;
+    }
+
     this.updateActivity();
   }
 
@@ -52,28 +58,27 @@ export class War extends Game {
 
   private deal(): void {
     if (this.status !== GameStatus.READY) {
-      throw new Error("Cannot deal now")
+      throw new Error("Cannot deal now");
     }
 
-    this.hands = new Map();
+    this.hands = new Map<string, WarHand>();
     for (const playerId of this.players.keys()) {
-      this.hands.set(playerId, [
-        {
-          cards: [],  
-          status: WarHandStatus.WAITING,
-        },
-      ]);
+      this.initializeHand(playerId);
     }
+
+    if (this.hands.size < 2) {
+      // add a cpu player if there is only one player
+      this.players.set(this.cpuID, "CPU Opponent");
+      this.initializeHand(this.cpuID);
+    }
+
+    // get hands to add cards to
+    const hands = Array.from(this.hands.values());
 
     // Deal the entire deck to both players
     for (let i = 0; this.deck.getCount() > 0; i++) {
       // Alternate between players
-      const playerId = Array.from(this.hands.keys())[i % this.hands.size];
-      const hand = this.hands.get(playerId)?.[0]; // Directly access the first hand
-
-      if (!hand) {
-        throw new Error(`Player with ID ${playerId} does not have a valid hand`);
-      }
+      const hand = hands[i % 2];
 
       // Add a card to the player's hand
       hand.cards.push(this.draw());
@@ -84,8 +89,9 @@ export class War extends Game {
     if (this.status !== GameStatus.IN_PROGRESS) {
       throw new Error("Game is not in progress");
     }
-  
-    const hand = this.hands.get(playerID)?.[0]; // Access the player's hand
+
+    const hand = this.hands.get(playerID); // Access the player's hand
+
     if (!hand) {
       throw new Error(`Player with ID ${playerID} not found`);
     }
@@ -95,169 +101,191 @@ export class War extends Game {
     }
 
     hand.status = WarHandStatus.WAITING;
+
     // Take the top card from the player's hand
     const topCard = hand.cards.shift();
     if (!topCard) {
-      throw new Error("No cards left to play");
+      // Player has run out of cards
+      this.endGame(this.getOtherPlayerId(playerID));
+      return;
     }
-  
-    // Put the card into play
-    this.currentCards[playerID] = topCard;
-  
-    console.log(`Player ${playerID} played ${topCard.rank} of ${topCard.suit}`);
-  
+
+    // Plue card into play
+    this.currentCards.set(playerID, topCard);
+
+    // If the other player is a cpu, play their turn as well
+    if (this.hands.has(this.cpuID) && playerID != this.cpuID) {
+      this.play(this.cpuID);
+    }
+
     // Check if all players have played their cards
-    if (Object.keys(this.currentCards).length === this.hands.size) {
+    if (this.currentCards.size === this.hands.size) {
       this.resolvePlay();
     }
   }
 
+  private getOtherPlayerId(playerId: string): string {
+    // In a 2-player game, get the ID of the other player
+    for (const id of this.players.keys()) {
+      if (id !== playerId) {
+        return id;
+      }
+    }
+    return this.cpuID; // Fallback to CPU if no other player found
+  }
+
   private resolvePlay(): void {
-    const playerCards = Object.entries(this.currentCards).map(([playerId, card]) => ({ playerId, card }));
-    const winningCard = playerCards.reduce((prev, curr) => (prev.card.rank > curr.card.rank ? prev : curr));
-  
-    // Check if the cards are equal (tie)
-    const isTie = playerCards.every(({ card }) => card.rank === winningCard.card.rank);
-  
-    if (isTie) {
-      console.log("It's a tie! Entering war...");
-      this.handleWar(playerCards);
+    // Get the current cards played by each player
+    const player1Id = Array.from(this.players.keys())[0];
+    const player2Id = this.getOtherPlayerId(player1Id);
+
+    const card1 = this.currentCards.get(player1Id);
+    const card2 = this.currentCards.get(player2Id);
+
+    if (!card1 || !card2) {
+      console.error("Missing cards in resolvePlay");
       return;
     }
-  
-    // Determine the winner and loser
-    for (const { playerId, card } of playerCards) {
-      const hand = this.hands.get(playerId)?.[0]; // Access the player's hand
-      if (!hand) {
-        throw new Error(`Player with ID ${playerId} not found`);
-      }
-  
-      if (card === winningCard.card) {
-        hand.status = WarHandStatus.WIN;
-      } else {
-        hand.status = WarHandStatus.LOSE;
-      }
+
+    // Add current cards to the war pile
+    this.warPile.push(...this.currentCards.values());
+
+    // Compare the cards
+    const value1 = card1.getValue();
+    const value2 = card2.getValue();
+
+    if (value1 > value2) {
+      this.resolveRound(player1Id);
+      this.winReason = `${card1.toString()} beats ${card2.toString()}`;
+    } else if (value2 > value1) {
+      this.resolveRound(player2Id);
+      this.winReason = `${card2.toString()} beats ${card1.toString()}`;
+    } else {
+      // It's a war!
+      this.isWar = true;
+      this.winReason = "WAR! Play again to continue the war.";
+
+      // In a war, both players place 3 cards face down
+      this.placeWarCards(player1Id, 3);
+      this.placeWarCards(player2Id, 3);
     }
-  
-    // Transfer cards from the loser to the winner
-    const winner = playerCards.find(({ playerId }) => {
-      const hand = this.hands.get(playerId)?.[0];
-      return hand?.status === WarHandStatus.WIN;
-    });
-  
-    const loser = playerCards.find(({ playerId }) => {
-      const hand = this.hands.get(playerId)?.[0];
-      return hand?.status === WarHandStatus.LOSE;
-    });
-  
-    if (winner && loser) {
-      const winnerHand = this.hands.get(winner.playerId)?.[0];
-      const loserHand = this.hands.get(loser.playerId)?.[0];
-  
-      if (winnerHand && loserHand) {
-        // Winner takes the cards
-        winnerHand.cards.push(...loserHand.cards.splice(0, loserHand.cards.length));
-        console.log(`Player ${winner.playerId} wins the round and takes all cards from Player ${loser.playerId}`);
-      }
-    }
-  
-    // Clear the current cards for the next round
-    this.currentCards = {};
-  
-    // Set all players' hands to PLAYING for the next round
-    for (const hands of this.hands.values()) {
-      const hand = hands[0];
+
+    // Reset for the next round
+    this.currentCards.clear();
+
+    // Set all players' hands back to PLAYING for the next round
+    for (const hand of this.hands.values()) {
       hand.status = WarHandStatus.PLAYING;
     }
   }
 
-  private handleWar(playerCards: { playerId: string; card: Card }[]): void {
-    console.log("War! Each player places 3 cards face down and 1 card face up.");
-  
-    const warCards: { playerId: string; faceDown: Card[]; faceUp: Card | null }[] = [];
-  
-    for (const { playerId } of playerCards) {
-      const hand = this.hands.get(playerId)?.[0];
-      if (!hand || hand.cards.length < 4) {
-        console.log(`Player ${playerId} does not have enough cards for war. They lose.`);
-        this.endGame(playerId === playerCards[0].playerId ? playerCards[1].playerId : playerCards[0].playerId);
-        return;
+  private placeWarCards(playerId: string, count: number): void {
+    const hand = this.hands.get(playerId);
+    if (!hand) return;
+
+    // Place up to 'count' cards face down in the war pile
+    for (let i = 0; i < count && hand.cards.length > 0; i++) {
+      const card = hand.cards.shift();
+      if (card) {
+        card.flip(); // Face down for war
+        this.warPile.push(card);
       }
-  
-      // Each player places 3 cards face down and 1 card face up
-      const faceDown = [hand.cards.shift(), hand.cards.shift(), hand.cards.shift()].filter(Boolean) as Card[];
-      const faceUp = hand.cards.shift() || null;
-  
-      warCards.push({ playerId, faceDown, faceUp });
     }
-  
-    // Compare the face-up cards
-    const winningCard = warCards.reduce((prev, curr) => (prev.faceUp!.rank > curr.faceUp!.rank ? prev : curr));
-  
-    const isTie = warCards.every(({ faceUp }) => faceUp!.rank === winningCard.faceUp!.rank);
-  
-    if (isTie) {
-      console.log("War continues! Another tie.");
-      this.handleWar(warCards.map(({ playerId, faceUp }) => ({ playerId, card: faceUp! })));
-      return;
+
+    // Check if player ran out of cards during war
+    if (hand.cards.length === 0) {
+      this.endGame(this.getOtherPlayerId(playerId));
     }
-  
-    // Winner takes all cards in play
-    const winnerId = winningCard.playerId;
-    const winnerHand = this.hands.get(winnerId)?.[0];
-    if (!winnerHand) {
-      throw new Error(`Winner with ID ${winnerId} not found`);
+  }
+
+  private resolveRound(winnerId: string): void {
+    const winnerHand = this.hands.get(winnerId);
+    if (!winnerHand) return;
+
+    // Winner gets all cards in the war pile
+    winnerHand.cards.push(...this.warPile);
+
+    // Update winner info for the client
+    this.roundWinner = winnerId;
+
+    // Reset the war state
+    this.warPile = [];
+    this.isWar = false;
+  }
+
+  handleAction(playerId: string, action: GameAction) {
+    if (this.status !== GameStatus.IN_PROGRESS) {
+      throw new Error("Game is not in progress");
     }
-  
-    console.log(`Player ${winnerId} wins the war and takes all cards!`);
-    for (const { faceDown, faceUp } of warCards) {
-      winnerHand.cards.push(...faceDown);
-      if (faceUp) winnerHand.cards.push(faceUp);
+
+    if (action === WarAction.Play) {
+      this.play(playerId);
+    } else {
+      throw new Error(`Invalid action: ${action}`);
     }
-  
-    // Clear the current cards for the next round
-    this.currentCards = {};
-  
-    // Set all players' hands to PLAYING for the next round
-    for (const hands of this.hands.values()) {
-      const hand = hands[0];
-      hand.status = WarHandStatus.PLAYING;
-    }
+  }
+
+  newGame(): void {
+    this.deck = Deck.createShuffled({}, 1); // Create a new deck with 1 deck
+    this.hands.clear(); // Clear the hands for a new game
+    this.status = GameStatus.READY;
   }
 
   public initializeHand(playerID: string): void {
-    if (!this.hands) {
-      return;
-    }
+    this.hands.set(playerID, {
+      cards: [],
+      status: WarHandStatus.INACTIVE,
+    });
+  }
+
+  addPlayer(playerId: string, playerName: string): void {
     if (this.hands.size >= War.MAX_PLAYERS) {
       throw new Error("Game is full");
     }
 
-    this.hands.set(playerID, [
-      {
-        cards: [],
-        status: WarHandStatus.INACTIVE,
-      },
-    ]);
+    super.addPlayer(playerId, playerName);
+    this.initializeHand(playerId);
+  }
+
+  removePlayer(playerId: string): void {
+    super.removePlayer(playerId);
+
+    // Remove the player's hand
+    this.hands.delete(playerId);
+
+    // If the player is the CPU, remove the CPU hand
+    if (playerId === this.cpuID) {
+      this.hands.delete(this.cpuID);
+    }
   }
 
   public getClientGameState(): WarClientGameState {
     return {
-      gameType: "War",
+      gameType: GameType.WAR,
       gameStatus: this.status,
-      players: Array.from(this.hands.entries()).map(([id, hands]) => ({
+      isWar: this.isWar,
+      warPileCount: this.warPile.length,
+      roundWinner: this.roundWinner,
+      winReason: this.winReason,
+      currentCards: Object.fromEntries(
+        Array.from(this.currentCards.entries()).map(([id, card]) => [id, card])
+      ),
+      players: Array.from(this.hands.entries()).map(([id, hand]) => ({
         id,
         name: this.players.get(id) ?? "Unknown",
-        hands: hands.map((hand) => ({
-          cards: hand.cards,
+        cardCount: hand.cards.length,
+        hand: {
+          cards: [], // Only send count, not actual cards for security
           status: hand.status,
-        })),
+        },
       })),
     };
   }
 
   private endGame(winnerId: string): void {
     console.log(`Game over! Player ${winnerId} wins.`);
-    this.status = GameStatus.ENDED;
+    this.roundWinner = winnerId;
+    this.winReason = `${this.players.get(winnerId) ?? "Player"} wins the game!`;
+    this.status = GameStatus.FINISHED;
   }
 }

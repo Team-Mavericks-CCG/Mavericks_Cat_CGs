@@ -4,6 +4,7 @@ import {
   BlackjackClientGameState,
   BlackjackHandStatus,
 } from "./blackjack.js";
+import { WarAction, WarClientGameState } from "./war.js";
 
 export * from "./card.js";
 
@@ -12,6 +13,8 @@ export * from "./deck.js";
 export * from "./blackjack.js";
 
 export * from "./socket.js";
+
+export * from "./war.js";
 
 // --- Common Types ---
 export enum GameStatus {
@@ -56,10 +59,13 @@ export enum PokerAction {
 // export interface WarClientGameState { gameType: "War"; ... }
 
 // --- Discriminated Union of All Client Game States ---
-export type ClientGameState = BlackjackClientGameState | PokerClientGameState;
+export type ClientGameState =
+  | BlackjackClientGameState
+  | PokerClientGameState
+  | WarClientGameState;
 // | WarClientGameState // Add other game states here
 
-export type GameAction = BlackjackAction | PokerAction;
+export type GameAction = BlackjackAction | PokerAction | WarAction;
 
 // --- Player Type (if shared) ---
 export interface PlayerInfo {

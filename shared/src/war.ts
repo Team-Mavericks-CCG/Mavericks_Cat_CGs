@@ -1,18 +1,26 @@
 import { Card } from "./card.js";
-import { GameStatus } from "./index.js";
+import { GameStatus, GameType } from "./index.js";
 
 export interface WarClientGameState {
-  gameType: "War";
+  gameType: GameType.WAR;
   gameStatus: GameStatus;
+  isWar: boolean;
+  warPileCount: number; // Number of cards in the war pile
+  roundWinner: string | null; // ID of the player who won the last round
+  winReason: string; // Explanation of why a player won (e.g. "K of Spades beats 10 of Hearts")
+  // Current face-up cards played by each player
+  currentCards: {
+    [playerId: string]: Card;
+  };
   players: {
     id: string;
     name: string;
-    hands: WarHand[];
+    hand: WarHand;
   }[];
 }
 
 export enum WarAction {
-  Play = "",
+  Play = "play",
 }
 
 export enum WarHandStatus {
