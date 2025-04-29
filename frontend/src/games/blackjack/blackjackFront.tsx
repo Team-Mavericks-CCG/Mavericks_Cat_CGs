@@ -157,7 +157,6 @@ const BlackjackPage: React.FC = () => {
       </Typography>
 
 
-          
 
       {/* Deck Display */}
       <Box
@@ -190,15 +189,13 @@ const BlackjackPage: React.FC = () => {
 
 
       {/* New game button*/}
-      <Box
-        sx={{
+      <Box sx={{
           display: "flex",
           gap: 2,
           maxWidth: "800px",
           margin: "0 auto",
           padding: "5px 20px",
-        }}
-      >
+        }}>
         <GameButton
           className="game-button other-button"
           variant="contained"
@@ -207,22 +204,46 @@ const BlackjackPage: React.FC = () => {
         >
           New Game
         </GameButton>
-        {/* Leaderboard button, IDK if it should stay here */}  
-        <Box
-                sx={{ maxWidth: "300px", justifyContent: "right"}}
-              >
-                {isGameOver && (
-                  <GameButton
-                    className="game-button other-button"
-                    variant="contained"
-                    onClick={() => void navigate("/leaderboard")}
-                    disabled={!isGameOver}
-                  >
-                    Leaderboard
-                  </GameButton>
-                )}
-              </Box>
-      </Box>
+        </Box>
+         
+        {/* Leaderboard button, sends the game data to end of game page for podium using navigate */}  
+        <Box sx={{ maxWidth: "300px", justifyContent: "right" }}>
+                    <GameButton
+            className="game-button other-button"
+            variant="contained"
+            onClick={() => {
+              const playersArray = socketManager.gameState?.players.map((player) => {
+                const hand = player.hands[0];
+                return {
+                  name: player.name,
+                  score: hand?.value ?? 0,
+                };
+              }) ?? [];
+
+              if (playersArray.length === 0) {
+                console.error("No players found to navigate.");
+                return;
+              }
+
+              const winnerPlayer = playersArray.reduce((best, player) =>
+                player.score > best.score ? player : best,
+                playersArray[0]
+              );
+
+              navigate("/endOfGamePage", {
+                state: {
+                  player: playersArray,  
+                  winner: winnerPlayer.name,
+                  finalScore: winnerPlayer.score,
+                }
+              });
+              
+            }}
+          >
+            Leaderboard
+          </GameButton>
+        </Box>
+
 
       {/* hit and stand button  */}
       <Box display="flex" flexDirection="column" gap={2} mb={2}>
@@ -234,14 +255,12 @@ const BlackjackPage: React.FC = () => {
             maxWidth: "800px",
             margin: "0 auto",
             padding: "5px 20px",
-          }}
-        >
+          }}>
           <GameButton
             className="game-button hit-button"
             variant="contained"
             onClick={hit}
-            disabled={isGameOver || activePlayer !== socketManager.playerID}
-          >
+            disabled={isGameOver || activePlayer !== socketManager.playerID}>
             Hit
           </GameButton>
 
