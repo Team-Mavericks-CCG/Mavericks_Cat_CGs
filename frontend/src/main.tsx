@@ -15,6 +15,7 @@ import Profile from "./profile/profilePage";
 import LobbyPage from "./lobby/lobbyPage";
 import Leaderboard from "./leaderboard/leaderboardpage";
 import EndOfGamePage from "./leaderboard/endOfGamePage";
+import PokerPage from "./games/poker/pokerPage";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -35,7 +36,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/games">
               <Route path="solitaire" element={<SolitairePage />} />
               <Route path="blackjack" element={<BlackjackPage />} />
-              <Route path="undefined" element={<BlackjackPage />} />
+              <Route path = "poker" element={<PokerPage />} />
               <Route
                 path="/games/:game/lobby/:inviteCode"
                 element={<LobbyPage />}
