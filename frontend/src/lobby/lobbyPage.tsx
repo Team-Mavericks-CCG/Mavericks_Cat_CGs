@@ -77,7 +77,6 @@ const LobbyPage: React.FC = () => {
             >
               <div className="player-icon">{player.image}</div>
               <div className="player-name">{player.name}</div>
-              <div className="player-rank">{player.rank}</div>
             </div>
           ))}
 
