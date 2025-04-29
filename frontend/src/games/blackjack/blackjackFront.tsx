@@ -252,14 +252,12 @@ const BlackjackPage: React.FC = () => {
         Blackjack <GameRules gameType="blackjack" />
       </Typography>
 
-
-
       {/* Deck Display */}
       <Box
         display="flex"
         gap={4}
         flexDirection="row"
-        alignItems="flex-start" 
+        alignItems="flex-start"
         justifyContent="center"
         mb={5}
       >
@@ -283,15 +281,16 @@ const BlackjackPage: React.FC = () => {
         </Box>
       </Box>
 
-
       {/* New game button*/}
-      <Box sx={{
+      <Box
+        sx={{
           display: "flex",
           gap: 2,
           maxWidth: "800px",
           margin: "0 auto",
           padding: "5px 20px",
-        }}>
+        }}
+      >
         <GameButton
           className="game-button other-button"
           variant="contained"
@@ -300,15 +299,18 @@ const BlackjackPage: React.FC = () => {
         >
           New Game
         </GameButton>
-        </Box>
-         
-        {/* Leaderboard button, sends the game data to end of game page for podium using navigate */}  
-        <Box sx={{ maxWidth: "300px", justifyContent: "right" }}>
-                    <GameButton
-            className="game-button other-button"
-            variant="contained"
-            onClick={() => {
-              const playersArray = socketManager.gameState?.players.map((player) => {
+      </Box>
+
+      {/* Leaderboard button, sends the game data to end of game page for podium using navigate */}
+      <Box sx={{ maxWidth: "300px", justifyContent: "right" }}>
+        <GameButton
+          className="game-button other-button"
+          variant="contained"
+          onClick={() => {
+            const gameState =
+              socketManager.gameState as BlackjackClientGameState;
+            const playersArray =
+              gameState.players.map((player) => {
                 const hand = player.hands[0];
                 return {
                   name: player.name,
@@ -316,30 +318,28 @@ const BlackjackPage: React.FC = () => {
                 };
               }) ?? [];
 
-              if (playersArray.length === 0) {
-                console.error("No players found to navigate.");
-                return;
-              }
+            if (playersArray.length === 0) {
+              console.error("No players found to navigate.");
+              return;
+            }
 
-              const winnerPlayer = playersArray.reduce((best, player) =>
-                player.score > best.score ? player : best,
-                playersArray[0]
-              );
+            const winnerPlayer = playersArray.reduce(
+              (best, player) => (player.score > best.score ? player : best),
+              playersArray[0]
+            );
 
-              navigate("/endOfGamePage", {
-                state: {
-                  player: playersArray,  
-                  winner: winnerPlayer.name,
-                  finalScore: winnerPlayer.score,
-                }
-              });
-              
-            }}
-          >
-            Leaderboard
-          </GameButton>
-        </Box>
-
+            void navigate("/endOfGamePage", {
+              state: {
+                player: playersArray,
+                winner: winnerPlayer.name,
+                finalScore: winnerPlayer.score,
+              },
+            });
+          }}
+        >
+          Leaderboard
+        </GameButton>
+      </Box>
 
       {/* hit and stand button  */}
       <Box display="flex" flexDirection="column" gap={2} mb={2}>
@@ -351,12 +351,14 @@ const BlackjackPage: React.FC = () => {
             maxWidth: "800px",
             margin: "0 auto",
             padding: "5px 20px",
-          }}>
+          }}
+        >
           <GameButton
             className="game-button hit-button"
             variant="contained"
             onClick={hit}
-            disabled={isGameOver || activePlayer !== socketManager.playerID}>
+            disabled={isGameOver || activePlayer !== socketManager.playerID}
+          >
             Hit
           </GameButton>
 
@@ -370,64 +372,52 @@ const BlackjackPage: React.FC = () => {
           </GameButton>
         </Box>
 
-                  <Box
-            display="grid"
-            gridTemplateColumns="repeat(2, 1fr)" // two columns
-            gap={4}
-            justifyItems="center"
-            alignItems="start"
-          >
+        <Box
+          display="grid"
+          gridTemplateColumns="repeat(2, 1fr)" // two columns
+          gap={4}
+          justifyItems="center"
+          alignItems="start"
+        >
+          {/* Card spots and all player hands w/ boarder*/}
+          {Array.from(playerHand.entries()).map(([id, hands]) => (
+            <Box
+              key={id}
+              display="flex"
+              justifyContent={id === socketManager.playerID ? "center" : "left"}
+              gap={2}
+              sx={{
+                width: "fit-content",
+                opacity: activePlayer === id ? 1 : 0.7,
+                border: activePlayer === id ? "2px solid gold" : "none",
+                padding: "10px",
+                borderRadius: "5px",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="h6">
+                {id === socketManager.username
+                  ? "Your Hand"
+                  : `${socketManager.gameState?.players.find((p) => p.id === id)?.name ?? "Unknown"}'s Hand`}
+              </Typography>
 
-        {/* Card spots and all player hands w/ boarder*/}
-        {Array.from(playerHand.entries()).map(([id, hands]) => (
-          <Box
-            key={id}
-            display="flex"
-            justifyContent={id === socketManager.playerID ? "center" : "left"}
-            gap={2}
-            sx={{
-              width: "fit-content",
-              opacity: activePlayer === id ? 1 : 0.7,
-              border: activePlayer === id ? "2px solid gold" : "none",
-              padding: "10px",
-              borderRadius: "5px",
-              justifyContent: "center",
-            }}
-          >
-            <Typography variant="h6">
-              {id === socketManager.username
-                ? "Your Hand"
-                : `${socketManager.gameState?.players.find((p) => p.id === id)?.name ?? "Unknown"}'s Hand`}
-            </Typography>
-            
-
-            {renderHand(hands[0]?.cards ?? [])}
-            <Typography variant="body2">
-              Total: {hands[0]?.value}
-              {hands[0]?.status === BlackjackHandStatus.BUSTED && " (Busted)"}
-              {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
-              {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
-            </Typography>
-
-          </Box>
-        
-
-
-        ))}
-      </Box>
+              {renderHand(hands[0]?.cards ?? [])}
+              <Typography variant="body2">
+                Total: {hands[0]?.value}
+                {hands[0]?.status === BlackjackHandStatus.BUSTED && " (Busted)"}
+                {hands[0]?.status === BlackjackHandStatus.WIN && " (Winner!)"}
+                {hands[0]?.status === BlackjackHandStatus.LOSE && " (Lost)"}
+              </Typography>
+            </Box>
+          ))}
+        </Box>
       </Box>
 
       {/* Game result display */}
       <Typography variant="h6" align="center" gutterBottom>
         {gameResult}
       </Typography>
-            
-
-
-
     </Box>
-
-    
   );
 };
 
