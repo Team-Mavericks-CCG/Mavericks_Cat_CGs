@@ -1,111 +1,79 @@
-import React, { useEffect, useState } from "react";
-import "./endOfGamePage.css"; // Import  CSS
-import { getPlayers, getScores } from "./leaderboardpage"; // assuming they're exported from here
-import { Player } from "./leaderboardpage";
-import { Score } from "./leaderboardpage";
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { GameButton } from "../games/components/GameButton";
+import "./endOfGamePage.css";
 
-// React Component
 const EndOfGamePage: React.FC = () => {
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [scores, setScores] = useState<Score[]>([]);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const fetchedPlayers = await getPlayers();
-        const fetchedScores = await getScores();
+  console.log("location.state:", location.state);
 
-        // Ensure dates are properly formatted
-        setPlayers(
-          fetchedPlayers.map((player) => ({
-            ...player,
-            createdAt: new Date(player.createdAt),
-            updatedAt: new Date(player.updatedAt),
-            lastLogin: new Date(player.lastLogin),
-          }))
-        );
-
-        setScores(fetchedScores);
-      } catch (error) {
-        console.error("Error fetching leaderboard data:", error);
-      }
-    };
-    void fetchData();
-  }, []);
-
-  // Sort scores before rendering & separate top 3 scores
-  const sortedScores = [...scores].sort((a, b) => a.rank - b.rank);
-  const topThreeScores = sortedScores.slice(0, 3);
-  const restofScores = sortedScores.slice(3);
-
-  //create podium
-  const Podium = () => {
-    const first = topThreeScores[0];
-    const second = topThreeScores[1];
-    const third = topThreeScores[2];
-
-    const getPlayerName = (score: Score | null) => {
-      if (!score) return "Unknown";
-      const player = players.find((p) => p.playerId === score.playerId);
-      return player ? `${player.firstName} ${player.lastName}` : "Unknown";
-    };
-
-    return (
-      <div className="podium-wrapper">
-        {/* 2nd */}
-        <div className="second">
-          <div className="podium-label">🥈 2nd</div>
-          <div className="podium-name">{getPlayerName(second)}</div>
-          <div className="podium-score">Score: {second?.scores ?? "-"}</div>
-        </div>
-
-        {/* 1st*/}
-        <div className="first">
-          <div className="podium-label">🥇 1st</div>
-          <div className="podium-name">{getPlayerName(first)}</div>
-          <div className="podium-score">Score: {first?.scores ?? "-"}</div>
-        </div>
-
-        {/* 3rd*/}
-        <div className="third">
-          <div className="podium-label">🥉 3rd</div>
-          <div className="podium-name">{getPlayerName(third)}</div>
-          <div className="podium-score">Score: {third?.scores ?? "-"}</div>
-        </div>
-      </div>
-    );
+  // use the data sent from blackjack
+  const { player, winner, finalScore } = location.state as {
+    player: { name: string; score: number }[];
+    winner: string;
+    finalScore: number;
   };
+
+  // players score descending
+  const sortedPlayers = [...player].sort((a, b) => b.score - a.score);
+
+  // top 3 players
+  const topThreePlayers = sortedPlayers.slice(0, 3);
+  const restOfPlayers = sortedPlayers.slice(3);
 
   return (
     <div className="leaderboard-container">
-      <Podium />
+      {/* Podium */}
+      <div className="podium-wrapper">
+        {topThreePlayers.map((player, index) => (
+          <div
+            key={index}
+            className={`podium ${index === 0 ? "first" : index === 1 ? "second" : "third"}`}
+          >
+            <div className="podium-label">
+              {index === 0 ? "🥇 1st" : index === 1 ? "🥈 2nd" : "🥉 3rd"}
+            </div>
+            <div className="podium-name">{player.name}</div>
+            <div className="podium-score">Score: {player.score}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Leaderboard Table */}
       <table className="leaderboard-table">
         <thead>
           <tr>
             <th>Player</th>
             <th>Score</th>
-            <th>Rank</th>
-            <th>Rewards</th>
           </tr>
         </thead>
         <tbody>
-          {restofScores.map((score) => {
-            const player = players.find((p) => p.playerId === score.playerId);
-            return (
-              <tr key={score.scoreId}>
-                <td>
-                  {player
-                    ? `${player.firstName} ${player.lastName}`
-                    : "Unknown"}
-                </td>
-                <td>{score.scores}</td>
-                <td>{score.rank}</td>
-                <td>{score.rewards}</td>
-              </tr>
-            );
-          })}
+          {restOfPlayers.map((player, index) => (
+            <tr key={index}>
+              <td>{player.name}</td>
+              <td>{player.score}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
+
+      {/* Navigation Buttons */}
+      <GameButton
+        className="new-game-button"
+        onClick={() => navigate("/lobby")}
+        aria-label="New game"
+      >
+        Go back to Lobby
+      </GameButton>
+      <GameButton
+        className="new-game-button"
+        onClick={() => navigate("/")}
+        aria-label="Home page"
+      >
+        Go back to Home Page
+      </GameButton>
     </div>
   );
 };

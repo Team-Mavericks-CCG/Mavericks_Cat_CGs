@@ -1,8 +1,8 @@
 import { Card } from "./card.js";
-import { GameStatus } from "./index.js";
+import { GameStatus, GameType } from "./index.js";
 
 export interface BlackjackClientGameState {
-  gameType: "Blackjack";
+  gameType: GameType.BLACKJACK;
   gameStatus: GameStatus;
   activePlayer: string | null;
   players: {

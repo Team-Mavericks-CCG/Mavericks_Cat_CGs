@@ -1,11 +1,11 @@
 import { Server, Socket } from "socket.io";
 import {
   gameStore,
-  GameType,
   isValidGameType,
   inviteCodeMap,
 } from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
+import { War } from "../games/war.js";
 import jwt from "jsonwebtoken";
 import PlayerModel from "../models/userModel.js";
 import { Game } from "../games/game.js";
@@ -15,7 +15,9 @@ import {
   ClientToServerEvents,
   Player,
   GameStatus,
+  GameType,
 } from "shared";
+import { v4 as uuidv4 } from "uuid";
 
 interface InterServerEvents {
   ping: () => void;
@@ -24,14 +26,25 @@ interface InterServerEvents {
 interface SocketData {
   userId?: number;
   username?: string;
-  playerID?: string;
-  currentGameId?: string;
+  playerID: string;
+  gameID: string;
   playerName?: string;
   isAuthenticated: boolean;
 }
 
-// Player-to-Socket mapping
+// playerID-to-Socket mapping
 const playerSocketMap = new Map<
+  string,
+  Socket<
+    ClientToServerEvents,
+    ServerToClientEvents,
+    InterServerEvents,
+    SocketData
+  >
+>();
+
+// map socket ID to player socket
+const socketPlayerMap = new Map<
   string,
   Socket<
     ClientToServerEvents,
@@ -94,7 +107,50 @@ export function setupSocketServer(
 
     // Initialize socket with unauthenticated status
     socket.data.isAuthenticated = false;
-    socket.data.playerID = socket.id;
+
+    socket.on("register-session", (data) => {
+      // no sessionID means new session, not trying to reconnect
+      // if sessionID isnt in the map, also new session
+      if (!data.sessionID || !playerSocketMap.has(data.sessionID)) {
+        if (data.sessionID) {
+          console.log(
+            `Session ID ${data.sessionID} not found in [${Array.from(playerSocketMap.keys()).join(", ")}]. Creating new session.`
+          );
+        }
+        socket.data.playerID = uuidv4();
+        socketPlayerMap.set(socket.id, socket);
+        playerSocketMap.set(socket.data.playerID, socket);
+        socket.emit("session-registered", socket.data.playerID);
+        return;
+      }
+
+      // reconnection
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      const oldSocket = playerSocketMap.get(data.sessionID)!;
+
+      socket.data = { ...oldSocket.data };
+      console.log(
+        `Reconnecting socket: ${socket.id} with playerID ${socket.data.playerID}`
+      );
+
+      socketPlayerMap.delete(data.sessionID);
+      socketPlayerMap.set(socket.id, socket);
+      playerSocketMap.set(socket.data.playerID, socket);
+
+      socket.emit("session-registered", null);
+
+      const game = gameStore.getGame(socket.data.gameID);
+      if (!game) {
+        return;
+      }
+
+      game.markPlayerReconnected(socket.data.playerID);
+
+      void socket.join(socket.data.gameID);
+
+      socket.emit("lobby-update", getPlayersInGame(game));
+      socket.emit("game-state", game.getClientGameState());
+    });
 
     // Handle get active games request (anonymous users can see available games)
     socket.on("get-active-games", () => {
@@ -105,6 +161,7 @@ export function setupSocketServer(
         // get max player count for this game type
         const gameTypeMaxPlayers = {
           [GameType.BLACKJACK]: Blackjack.MAX_PLAYERS,
+          [GameType.WAR]: War.MAX_PLAYERS,
           // Add other game types here
         };
 
@@ -117,7 +174,7 @@ export function setupSocketServer(
             gameInfo.type === GameType.BLACKJACK
               ? gameInfo.game.getPlayerCount() <
                 gameTypeMaxPlayers[gameInfo.type]
-              : true, // Blackjack allows up to 4 players
+              : true,
         }));
 
         socket.emit("lobby-list", activeGames);
@@ -186,9 +243,20 @@ export function setupSocketServer(
               (gameID: string) =>
                 gameStore.createBlackjackGame(
                   gameID,
-                  socket.id,
+                  socket.data.playerID,
                   data.playerName
                 )
+            );
+            gameID = result.gameID;
+            game = result.game;
+            break;
+          }
+          case GameType.WAR: {
+            // Create a War game
+            const result = gameStore.createGame(
+              GameType.WAR,
+              (gameID: string) =>
+                gameStore.createWarGame(gameID, socket.id, data.playerName)
             );
             gameID = result.gameID;
             game = result.game;
@@ -201,14 +269,12 @@ export function setupSocketServer(
           }
         }
 
-        socket.data.currentGameId = gameID;
+        socket.data.gameID = gameID;
         let inviteCode = generateInviteCode();
         while (inviteCodeMap.has(inviteCode)) {
           inviteCode = generateInviteCode(); // Regenerate if already exists
         }
         inviteCodeMap.set(inviteCode, gameID);
-
-        playerSocketMap.set(socket.id, socket);
 
         // Join socket to a room with the game ID
         void socket.join(gameID);
@@ -219,7 +285,7 @@ export function setupSocketServer(
           gameID,
           inviteCode,
           players: players.players,
-          playerID: socket.id,
+          playerID: socket.data.playerID,
         });
       } catch (error) {
         console.error("Error creating game:", error);
@@ -246,37 +312,26 @@ export function setupSocketServer(
           return;
         }
 
-        // Check game type
-        if (gameInfo.type !== GameType.BLACKJACK) {
-          socket.emit(
-            "error",
-            "Invalid game type. This is not a Blackjack game."
-          );
-          return;
-        }
-
         // Get the game
-        const game = gameInfo.game as Blackjack;
+        const game = gameInfo.game;
 
         // Set player data
         socket.data.playerName = playerName;
-        socket.data.currentGameId = gameID;
+        socket.data.gameID = gameID;
 
         // Add the player to the game
         try {
-          game.addPlayer(socket.id, playerName);
+          game.addPlayer(socket.data.playerID, playerName);
         } catch {
           socket.emit("error", "Game is full. Please try another game.");
           return;
         }
 
-        playerSocketMap.set(socket.id, socket);
-
         // Join socket to the game room
         void socket.join(gameID);
 
         console.log(
-          `Player ${playerName} joined game ${gameID} with socket ID ${socket.id}`
+          `Player ${playerName} joined game ${gameID} with socket ID ${socket.data.playerID}`
         );
 
         // print all the sockets in the room
@@ -286,9 +341,15 @@ export function setupSocketServer(
         );
 
         // Notify of successful join
-        socket.emit("join-success", { gameID, playerID: socket.id });
+        socket.emit("join-success", {
+          gameID,
+          playerID: socket.data.playerID,
+          gameType: gameInfo.type,
+        });
 
-        console.log(`Sending lobby update to ${socket.id} for game ${gameID}`);
+        console.log(
+          `Sending lobby update to ${socket.data.playerID} for game ${gameID}`
+        );
         io.to(gameID).emit("lobby-update", getPlayersInGame(game));
 
         // Update all other players
@@ -310,7 +371,7 @@ export function setupSocketServer(
           return;
         }
 
-        if (game.getHost() != socket.id) {
+        if (game.getHost() != socket.data.playerID) {
           socket.emit("error", "Only the host can start the game.");
           return;
         }
@@ -335,7 +396,7 @@ export function setupSocketServer(
     socket.on("game-action", (data) => {
       try {
         const { gameID, action } = data;
-        const playerID = socket.id;
+        const playerID = socket.data.playerID;
 
         const game = gameStore.getGame(gameID);
         if (game === undefined) {
@@ -379,10 +440,15 @@ export function setupSocketServer(
 
     // handle leave function
     function handleLeave() {
-      console.log(`Socket disconnected: ${socket.id}`);
+      console.log(
+        `Socket disconnected: ${socket.id} with playerID ${socket.data.playerID}`
+      );
 
-      const playerID = socket.id;
-      const gameID = socket.data.currentGameId;
+      const playerID = socket.data.playerID;
+      const gameID = socket.data.gameID;
+
+      playerSocketMap.delete(playerID);
+      socketPlayerMap.delete(socket.id);
 
       if (gameID) {
         try {
@@ -413,7 +479,26 @@ export function setupSocketServer(
 
     // Handle disconnection
     socket.on("disconnect", () => {
-      handleLeave();
+      console.log(
+        `Socket disconnected: ${socket.id} with playerID ${socket.data.playerID}`
+      );
+
+      const playerID = socket.data.playerID;
+      const gameID = socket.data.gameID;
+
+      // Remove socket from mapping
+      socketPlayerMap.delete(socket.id);
+
+      if (gameID && playerID) {
+        try {
+          const game = gameStore.getGame(gameID);
+          if (game) {
+            game.markPlayerDisconnected(playerID);
+          }
+        } catch (error) {
+          console.error("Error handling player disconnect:", error);
+        }
+      }
     });
   });
 }

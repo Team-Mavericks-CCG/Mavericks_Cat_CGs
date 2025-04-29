@@ -1,9 +1,10 @@
-import { ClientGameState } from "./index.js";
+import { ClientGameState, GameType } from "./index.js";
 
 // Socket event types
 export interface ServerToClientEvents {
   // Common events
   error: (message: string) => void;
+  "session-registered": (sessionID: string | null) => void;
   "game-started": () => void;
   "game-state": (state: ClientGameState) => void;
   "lobby-created": (data: {
@@ -12,7 +13,11 @@ export interface ServerToClientEvents {
     players: Player[];
     playerID: string;
   }) => void;
-  "join-success": (data: { gameID: string; playerID: string }) => void;
+  "join-success": (data: {
+    gameID: string;
+    playerID: string;
+    gameType: GameType;
+  }) => void;
   "lobby-update": (data: { players: Player[] }) => void;
   "lobby-list": (
     data: {
@@ -24,8 +29,8 @@ export interface ServerToClientEvents {
   ) => void;
   "game-over": (winner: string | null) => void;
 }
-
 export interface ClientToServerEvents {
+  "register-session": (data: { sessionID: string | null }) => void;
   "create-lobby": (data: { playerName: string; gameType: string }) => void;
   "join-lobby": (data: { inviteCode: string; playerName: string }) => void;
   "get-active-games": () => void;
