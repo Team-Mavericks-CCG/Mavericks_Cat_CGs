@@ -10,18 +10,20 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
    ```bash
    git clone https://github.com/Team-Mavericks-CCG/Mavericks_Cat_CGs.git
    ```
-To run the docker containers:
+   
+3. Set PASSWORD and JWT_SECRET
+4. To run the docker containers:
 
-Prod:
-
-```bash
-docker:build:prod
-docker:prod
-```
-
-Dev:
-
-```bash
-docker:build:dev
-docker:dev
+   Prod:
+   
+   ```bash
+   docker:build:prod
+   docker:prod
+   ```
+   
+   Dev:
+   
+   ```bash
+   docker:build:dev
+   docker:dev
 ```
