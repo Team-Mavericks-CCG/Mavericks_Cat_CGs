@@ -144,10 +144,46 @@ function HomePage() {
   const [createLobbyGameType, setCreateLobbyGameType] = useState<string | null>(
     null
   );
+  const [usernameError, setUsernameError] = React.useState(false);
+  const [usernameErrorMessage, setUsernameErrorMessage] = React.useState("");
+
+  const [inviteCodeError, setInviteCodeError] = React.useState(false);
+  const [inviteCodeErrorMessage, setInviteCodeErrorMessage] =
+    React.useState("");
+
+  // Updated validateUsername function to allow usernames longer than 3 characters
+  const validateUsername = (): boolean => {
+    if (!userName || userName.trim().length < 3) {
+      setUsernameError(true);
+      setUsernameErrorMessage("Username must be at least 3 characters long.");
+      return false;
+    }
+    setUsernameError(false);
+    setUsernameErrorMessage("");
+    return true;
+  };
+
+  // Updated validateInviteCode function to ensure proper validation
+  const validateInviteCode = (): boolean => {
+    if (!inviteCode || inviteCode.trim().length !== 6) {
+      setInviteCodeError(true);
+      setInviteCodeErrorMessage(
+        "Invite code must be exactly 6 characters long."
+      );
+      return false;
+    }
+    setInviteCodeError(false);
+    setInviteCodeErrorMessage("");
+    return true;
+  };
 
   const startGame = (gameType: GameType) => {
     const playerName = userName.trim(); // Use the userName state directly
     sessionStorage.setItem("username", playerName);
+
+    if (usernameError || inviteCodeError) {
+      return;
+    }
 
     try {
       void socketManager
@@ -175,8 +211,6 @@ function HomePage() {
     sessionStorage.setItem("username", playerName);
 
     try {
-      const playerName = localStorage.getItem("username") ?? "Player";
-
       if (!inviteCode) {
         //create lobby
         void socketManager
@@ -578,12 +612,7 @@ function HomePage() {
           onClose={() => setOpenJoinWarLobby(false)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              if (inviteCode.length !== 6) {
-                alert("Invite code must be 6 characters.");
-                return;
-              }
-              if (!userName) {
-                alert("Please enter your name.");
+              if (!validateInviteCode() || !validateUsername()) {
                 return;
               }
               setOpenJoinWarLobby(false);
@@ -597,6 +626,7 @@ function HomePage() {
           >
             <TextField
               label="Invite Code"
+              helperText={inviteCodeErrorMessage}
               value={inviteCode.toUpperCase()}
               onChange={(e) => setInviteCode(e.target.value)}
               inputProps={{ maxLength: 6 }}
@@ -604,6 +634,7 @@ function HomePage() {
             />
             <TextField
               label="Your Name"
+              helperText={usernameErrorMessage}
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               fullWidth
@@ -614,12 +645,10 @@ function HomePage() {
             <Button
               variant="contained"
               onClick={() => {
-                if (inviteCode.length !== 6) {
-                  alert("Invite code must be 6 characters.");
+                if (!validateInviteCode()) {
                   return;
                 }
-                if (!userName) {
-                  alert("Please enter your name.");
+                if (!validateUsername()) {
                   return;
                 }
                 setOpenJoinWarLobby(false);
@@ -637,12 +666,7 @@ function HomePage() {
           onClose={() => setOpenJoinPokerLobby(false)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              if (inviteCode.length !== 6) {
-                alert("Invite code must be 6 characters.");
-                return;
-              }
-              if (!userName) {
-                alert("Please enter your name.");
+              if (!validateInviteCode() || !validateUsername()) {
                 return;
               }
               setOpenJoinPokerLobby(false);
@@ -656,6 +680,7 @@ function HomePage() {
           >
             <TextField
               label="Invite Code"
+              helperText={inviteCodeErrorMessage}
               value={inviteCode.toUpperCase()}
               onChange={(e) => setInviteCode(e.target.value)}
               inputProps={{ maxLength: 6 }}
@@ -663,6 +688,7 @@ function HomePage() {
             />
             <TextField
               label="Your Name"
+              helperText={usernameErrorMessage}
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               fullWidth
@@ -673,12 +699,10 @@ function HomePage() {
             <Button
               variant="contained"
               onClick={() => {
-                if (inviteCode.length !== 6) {
-                  alert("Invite code must be 6 characters.");
+                if (!validateInviteCode()) {
                   return;
                 }
-                if (!userName) {
-                  alert("Please enter your name.");
+                if (!validateUsername()) {
                   return;
                 }
                 setOpenJoinPokerLobby(false);
@@ -696,12 +720,7 @@ function HomePage() {
           onClose={() => setOpenJoinBlackjackLobby(false)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              if (inviteCode.length !== 6) {
-                alert("Invite code must be 6 characters.");
-                return;
-              }
-              if (!userName) {
-                alert("Please enter your name.");
+              if (!validateInviteCode() || !validateUsername()) {
                 return;
               }
               setOpenJoinBlackjackLobby(false);
@@ -715,6 +734,7 @@ function HomePage() {
           >
             <TextField
               label="Invite Code"
+              helperText={inviteCodeErrorMessage}
               value={inviteCode.toUpperCase()}
               onChange={(e) => setInviteCode(e.target.value)}
               inputProps={{ maxLength: 6 }}
@@ -722,6 +742,7 @@ function HomePage() {
             />
             <TextField
               label="Your Name"
+              helperText={usernameErrorMessage}
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               fullWidth
@@ -734,12 +755,10 @@ function HomePage() {
             <Button
               variant="contained"
               onClick={() => {
-                if (inviteCode.length !== 6) {
-                  alert("Invite code must be 6 characters.");
+                if (!validateInviteCode()) {
                   return;
                 }
-                if (!userName) {
-                  alert("Please enter your name.");
+                if (!validateUsername()) {
                   return;
                 }
                 setOpenJoinBlackjackLobby(false);
@@ -760,8 +779,7 @@ function HomePage() {
           }}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
-              if (!userName.trim()) {
-                alert("Please enter a username.");
+              if (!validateUsername()) {
                 return;
               }
               if (createLobbyGameType) {
@@ -786,6 +804,7 @@ function HomePage() {
           >
             <TextField
               label="Your Name"
+              helperText={usernameErrorMessage}
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               fullWidth
@@ -804,8 +823,7 @@ function HomePage() {
               variant="contained"
               onClick={() => {
                 void (() => {
-                  if (!userName.trim()) {
-                    alert("Please enter a username.");
+                  if (!validateUsername()) {
                     return;
                   }
 
