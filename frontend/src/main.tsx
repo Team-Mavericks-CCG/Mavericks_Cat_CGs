@@ -7,6 +7,7 @@ import { SolitairePage } from "./games/solitaire/solitairePage";
 import HomePage from "./homePage";
 import Register from "./register/register";
 import BlackjackPage from "./games/blackjack/blackjackFront";
+import WarPage from "./games/war/WarFront";
 import MainLayout from "./foundation-components/MainLayout";
 import AuthLayout from "./foundation-components/AuthLayout";
 import AppTheme from "./shared-theme/AppTheme";
@@ -14,6 +15,7 @@ import { CssBaseline } from "@mui/material";
 import Profile from "./profile/profilePage";
 import LobbyPage from "./lobby/lobbyPage";
 import Leaderboard from "./leaderboard/leaderboardpage";
+
 import EndOfGamePage from "./leaderboard/endOfGamePage";
 
 createRoot(document.getElementById("root")!).render(
@@ -35,6 +37,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/games">
               <Route path="solitaire" element={<SolitairePage />} />
               <Route path="blackjack" element={<BlackjackPage />} />
+              <Route path="war" element={<WarPage />} />
               <Route path="undefined" element={<BlackjackPage />} />
               <Route
                 path="/games/:game/lobby/:inviteCode"
