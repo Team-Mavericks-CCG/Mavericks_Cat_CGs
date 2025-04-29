@@ -10,7 +10,7 @@ const EndOfGamePage: React.FC = () => {
   console.log("location.state:", location.state);
 
   // use the data sent from blackjack
-  const { player, winner, finalScore } = location.state as {
+  const { player } = location.state as {
     player: { name: string; score: number }[];
     winner: string;
     finalScore: number;
@@ -62,14 +62,14 @@ const EndOfGamePage: React.FC = () => {
       {/* Navigation Buttons */}
       <GameButton
         className="new-game-button"
-        onClick={() => navigate("/lobby")}
+        onClick={() => void navigate("/lobby")}
         aria-label="New game"
       >
         Go back to Lobby
       </GameButton>
       <GameButton
         className="new-game-button"
-        onClick={() => navigate("/")}
+        onClick={() => void navigate("/")}
         aria-label="Home page"
       >
         Go back to Home Page
