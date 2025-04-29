@@ -36,7 +36,6 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/games">
               <Route path="solitaire" element={<SolitairePage />} />
               <Route path="blackjack" element={<BlackjackPage />} />
-              <Route path="undefined" element={<BlackjackPage />} />
               <Route path = "poker" element={<PokerPage />} />
               <Route
                 path="/games/:game/lobby/:inviteCode"
