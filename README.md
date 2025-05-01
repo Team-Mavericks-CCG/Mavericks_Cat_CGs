@@ -12,22 +12,35 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
    ```
    
 3. Set PASSWORD and JWT_SECRET in docker-compose.yml
-4. To run the docker containers:
+4. To build the docker containers:
 
    Prod:
    
    ```bash
    docker:build:prod
-   docker:prod
    ```
    
    Dev:
    
    ```bash
    docker:build:dev
+   ```
+# Usage Instructions
+1. To run the built docker containers:
+   Prod:
+   
+   ```bash
+   docker:prod
+   ```
+
+   Dev:
+   
+   ```bash
    docker:dev
    ```
-5. Connect to frontend, address will change if running prod or dev, docker output will provide url.
+
+2. Connect to frontend, address will change if running prod or dev, docker output will provide url. Dev defaults to localhost:5173
+   
 
 
 # Codebase Structure
