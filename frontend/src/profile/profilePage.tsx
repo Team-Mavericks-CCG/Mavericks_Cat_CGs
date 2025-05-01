@@ -7,20 +7,22 @@ import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import MuiCard from "@mui/material/Card";
 import Avatar from "@mui/material/Avatar";
-import List from "@mui/material/List";
+//import List from "@mui/material/List";
 import FormLabel from "@mui/material/FormLabel";
-import ListItem from "@mui/material/ListItem";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemText from "@mui/material/ListItemText";
+//import ListItem from "@mui/material/ListItem";
+//import ListItemAvatar from "@mui/material/ListItemAvatar";
+//import ListItemText from "@mui/material/ListItemText";
 import EditIcon from "@mui/icons-material/Edit";
 import IconButton from "@mui/material/IconButton";
 import { styled } from "@mui/material/styles";
 import AppTheme from "../shared-theme/AppTheme";
 import ColorModeSelect from "../shared-theme/ColorModeSelect";
 import { AuthAPI } from "../utils/api";
-import { AxiosError } from "axios";
+//import { AxiosError } from "axios";
 import { useNavigate } from "react-router-dom";
 import { FormControl } from "@mui/material";
+import { useContext } from "react";
+import { ProfileContext } from "../shared-theme/ProfileContext";
 
 const Card = styled(MuiCard)(({ theme }) => ({
   display: "flex",
@@ -32,7 +34,7 @@ const Card = styled(MuiCard)(({ theme }) => ({
   gap: theme.spacing(2),
   margin: "auto",
   [theme.breakpoints.up("sm")]: {
-    maxWidth: "650px",
+    maxWidth: "850px", // Increased maxWidth to make the card wider
   },
   boxShadow:
     "hsla(220, 30%, 5%, 0.05) 0px 5px 15px 0px, hsla(220, 25%, 10%, 0.05) 0px 15px 35px -5px",
@@ -50,6 +52,10 @@ const ProfileHeader = styled(Box)(({ theme }) => ({
     flexDirection: "column",
     alignItems: "center",
   },
+  [theme.breakpoints.up("sm")]: {
+    flexDirection: "row", // Ensure proper layout for wider cards
+    alignItems: "flex-start",
+  },
 }));
 
 interface UserData {
@@ -59,7 +65,11 @@ interface UserData {
   confirmPassword: string;
   avatarUrl: string;
   joinDate: string;
+  profilePicture: number;
 }
+
+const getProfilePictureUrl = (profilePicture: number): string =>
+  `/assets/pfp/catPFP${profilePicture}.webp`;
 
 export default function ProfilePage(props: {
   disableCustomTheme?: boolean;
@@ -73,6 +83,7 @@ export default function ProfilePage(props: {
     confirmPassword: "",
     avatarUrl: "",
     joinDate: "",
+    profilePicture: 1, // Default value for profilePicture
   });
   const [editData, setEditData] = React.useState(userData);
   const [passwordError, setPasswordError] = React.useState(false);
@@ -80,11 +91,12 @@ export default function ProfilePage(props: {
   const [confirmPasswordError, setConfirmPasswordError] = React.useState(false);
   const [confirmPasswordErrorMessage, setConfirmPasswordErrorMessage] =
     React.useState("");
+  const { setProfilePicture } = useContext(ProfileContext);
 
   React.useEffect(() => {
-    console.log(localStorage.getItem("authToken"));
     const token = localStorage.getItem("authToken");
     if (token === null) {
+      setUserData({ ...userData, avatarUrl: "/assets/pfp/defaultAvatar.webp" }); // Default avatar when signed out
       void navigate("/signin");
       return;
     }
@@ -96,7 +108,10 @@ export default function ProfilePage(props: {
         setUserData({
           ...userData,
           username: data.user.username,
-          joinDate: `Joined ${new Date(data.user.createdAt).toLocaleDateString()}`,
+          joinDate: `Joined ${new Date(
+            data.user.createdAt
+          ).toLocaleDateString()}`,
+          avatarUrl: getProfilePictureUrl(data.user.profilePicture),
         });
         setEditData({
           ...editData,
@@ -107,7 +122,7 @@ export default function ProfilePage(props: {
         console.error("Error fetching user data", e);
         void navigate("/signin");
       });
-  }, [navigate]);
+  }, [navigate, userData.profilePicture]); // Add dependency to re-fetch when profile picture changes
 
   const validatePassword = (value: string): boolean => {
     if (!value || value.length < 6) {
@@ -137,6 +152,33 @@ export default function ProfilePage(props: {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    // Update profile picture
+    const match = /catPFP(\d+)/.exec(editData.avatarUrl);
+    const profilePicNum = parseInt(match?.[1] ?? "1", 10);
+    if (profilePicNum !== userData.profilePicture) {
+      try {
+        await AuthAPI.updateProfilePicture(profilePicNum);
+        const updatedProfile = await AuthAPI.getProfile(); // Fetch updated profile
+        setUserData({
+          ...userData,
+          profilePicture: updatedProfile.data.user.profilePicture,
+        }); // Update userData
+        setProfilePicture(
+          getProfilePictureUrl(updatedProfile.data.user.profilePicture)
+        ); // Update global state
+      } catch (error) {
+        console.error("Error updating profile picture", error);
+        alert("Failed to update profile picture. Please try again.");
+        return;
+      }
+    }
+
+    setIsEditing(false);
+  };
+
+  const handlePasswordChange = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     if (
       !validatePassword(editData.password) ||
       !validatePassword(editData.newPassword) ||
@@ -151,16 +193,16 @@ export default function ProfilePage(props: {
         editData.password,
         editData.newPassword
       );
-      setIsEditing(false);
+      alert("Password changed successfully");
+      setEditData({
+        ...editData,
+        password: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
     } catch (err) {
-      if (err instanceof AxiosError && err.response) {
-        if (err.response.status === 401) {
-          setPasswordError(true);
-          setPasswordErrorMessage("Current password is incorrect");
-        } else {
-          alert("An error occurred while changing password");
-        }
-      }
+      console.error("Error changing password", err);
+      alert("Failed to change password. Please try again.");
     }
   };
 
@@ -199,149 +241,199 @@ export default function ProfilePage(props: {
             </Box>
           </ProfileHeader>
 
-          {isEditing ? (
-            <Box
-              component="form"
-              onSubmit={(e) => {
-                void handleSubmit(e);
-              }}
-              sx={{ display: "flex", flexDirection: "column", gap: 0.1 }}
-            >
-              <FormControl sx={{ height: "90px", mb: 1 }}>
-                <FormLabel htmlFor="current-password">
-                  Current Password
-                </FormLabel>
-                <TextField
-                  error={passwordError}
-                  helperText={passwordErrorMessage}
-                  name="password"
-                  placeholder="••••••"
-                  type="password"
-                  id="current-password"
-                  autoComplete="current-password"
-                  required
-                  fullWidth
-                  variant="outlined"
-                  value={editData.password}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setEditData({ ...editData, password: value });
-                    validatePassword(value);
-                  }}
-                  color={passwordError ? "error" : "primary"}
-                  sx={{
-                    "& .MuiFormHelperText-root": {
-                      minHeight: "20px",
-                      margin: "3px 14px 0",
-                    },
-                  }}
-                />
-              </FormControl>
-              <FormControl sx={{ height: "90px", mb: 1 }}>
-                <FormLabel htmlFor="new-password">New Password</FormLabel>
-                <TextField
-                  error={passwordError}
-                  helperText={passwordErrorMessage}
-                  name="newPassword"
-                  placeholder="••••••"
-                  type="password"
-                  id="new-password"
-                  autoComplete="new-password"
-                  required
-                  fullWidth
-                  variant="outlined"
-                  value={editData.newPassword}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setEditData({ ...editData, newPassword: value });
-                    validatePassword(value);
-                    if (editData.confirmPassword) {
-                      validateConfirmPassword(value, editData.confirmPassword);
-                    }
-                  }}
-                  color={passwordError ? "error" : "primary"}
-                  sx={{
-                    "& .MuiFormHelperText-root": {
-                      minHeight: "20px",
-                      margin: "3px 14px 0",
-                    },
-                  }}
-                />
-              </FormControl>
-              <FormControl sx={{ height: "90px", mb: 1 }}>
-                <FormLabel htmlFor="confirm-password">
-                  Confirm New Password
-                </FormLabel>
-                <TextField
-                  error={confirmPasswordError}
-                  helperText={confirmPasswordErrorMessage}
-                  name="confirmPassword"
-                  placeholder="••••••"
-                  type="password"
-                  id="confirm-password"
-                  autoComplete="new-password"
-                  required
-                  fullWidth
-                  variant="outlined"
-                  value={editData.confirmPassword}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setEditData({ ...editData, confirmPassword: value });
-                    validateConfirmPassword(editData.newPassword, value);
-                  }}
-                  color={confirmPasswordError ? "error" : "primary"}
-                  sx={{
-                    "& .MuiFormHelperText-root": {
-                      minHeight: "20px",
-                      margin: "3px 14px 0",
-                    },
-                  }}
-                />
-              </FormControl>
+          <Box>
+            {isEditing ? (
+              <Box
+                component="form"
+                onSubmit={(e) => {
+                  void handleSubmit(e);
+                }}
+                sx={{ display: "flex", flexDirection: "column", gap: 0.1 }}
+              >
+                {/* Profile Picture Section */}
+                <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+                  Profile Picture
+                </Typography>
+                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", mb: 4 }}>
+                  {Array.from({ length: 16 }, (_, i) => i + 1).map((num) => (
+                    <Avatar
+                      key={num}
+                      src={`/assets/pfp/catPFP${num}.webp`}
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        cursor: "pointer",
+                        border:
+                          editData.avatarUrl === `/assets/pfp/catPFP${num}.webp`
+                            ? "2px solid #1976d2"
+                            : "none",
+                      }}
+                      onClick={() =>
+                        setEditData({
+                          ...editData,
+                          avatarUrl: `/assets/pfp/catPFP${num}.webp`,
+                        })
+                      }
+                    />
+                  ))}
+                </Box>
 
-              <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                  >
+                    Save Changes
+                  </Button>
+                  <Button
+                    fullWidth
+                    variant="outlined"
+                    onClick={() => {
+                      setIsEditing(false);
+                      setEditData(userData);
+                      setPasswordError(false);
+                      setPasswordErrorMessage("");
+                      setConfirmPasswordError(false);
+                      setConfirmPasswordErrorMessage("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </Box>
+              </Box>
+            ) : (
+              <>
+                <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
+                  Friends:
+                </Typography>
+              </>
+            )}
+
+            {/* Change Password Section */}
+            {isEditing && (
+              <Box
+                component="form"
+                onSubmit={(e) => {
+                  void handlePasswordChange(e);
+                }}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.1,
+                  mt: 4,
+                }}
+              >
+                <Typography variant="h6" sx={{ mb: 2 }}>
+                  Change Password
+                </Typography>
+                <FormControl sx={{ height: "90px", mb: 1 }}>
+                  <FormLabel htmlFor="current-password">
+                    Current Password
+                  </FormLabel>
+                  <TextField
+                    error={passwordError}
+                    helperText={passwordErrorMessage}
+                    name="password"
+                    placeholder="••••••"
+                    type="password"
+                    id="current-password"
+                    autoComplete="current-password"
+                    required
+                    fullWidth
+                    variant="outlined"
+                    value={editData.password}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setEditData({ ...editData, password: value });
+                      validatePassword(value);
+                    }}
+                    color={passwordError ? "error" : "primary"}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        minHeight: "20px",
+                        margin: "3px 14px 0",
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormControl sx={{ height: "90px", mb: 1 }}>
+                  <FormLabel htmlFor="new-password">New Password</FormLabel>
+                  <TextField
+                    error={passwordError}
+                    helperText={passwordErrorMessage}
+                    name="newPassword"
+                    placeholder="••••••"
+                    type="password"
+                    id="new-password"
+                    autoComplete="new-password"
+                    required
+                    fullWidth
+                    variant="outlined"
+                    value={editData.newPassword}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setEditData({ ...editData, newPassword: value });
+                      validatePassword(value);
+                      if (editData.confirmPassword) {
+                        validateConfirmPassword(
+                          value,
+                          editData.confirmPassword
+                        );
+                      }
+                    }}
+                    color={passwordError ? "error" : "primary"}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        minHeight: "20px",
+                        margin: "3px 14px 0",
+                      },
+                    }}
+                  />
+                </FormControl>
+                <FormControl sx={{ height: "90px", mb: 1 }}>
+                  <FormLabel htmlFor="confirm-password">
+                    Confirm New Password
+                  </FormLabel>
+                  <TextField
+                    error={confirmPasswordError}
+                    helperText={confirmPasswordErrorMessage}
+                    name="confirmPassword"
+                    placeholder="••••••"
+                    type="password"
+                    id="confirm-password"
+                    autoComplete="new-password"
+                    required
+                    fullWidth
+                    variant="outlined"
+                    value={editData.confirmPassword}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setEditData({ ...editData, confirmPassword: value });
+                      validateConfirmPassword(editData.newPassword, value);
+                    }}
+                    color={confirmPasswordError ? "error" : "primary"}
+                    sx={{
+                      "& .MuiFormHelperText-root": {
+                        minHeight: "20px",
+                        margin: "3px 14px 0",
+                      },
+                    }}
+                  />
+                </FormControl>
                 <Button
                   type="submit"
                   fullWidth
                   variant="contained"
                   color="primary"
+                  sx={{ mt: 2 }}
                 >
-                  Save Changes
-                </Button>
-                <Button
-                  fullWidth
-                  variant="outlined"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setEditData(userData);
-                    setPasswordError(false);
-                    setPasswordErrorMessage("");
-                    setConfirmPasswordError(false);
-                    setConfirmPasswordErrorMessage("");
-                  }}
-                >
-                  Cancel
+                  Change Password
                 </Button>
               </Box>
-            </Box>
-          ) : (
-            <>
-              <Typography variant="h6" sx={{ mt: 4, mb: 2 }}>
-                Profile Information
-              </Typography>
-              <List>
-                <ListItem>
-                  <ListItemAvatar>
-                    <Avatar>{userData.username[0]}</Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={userData.username}
-                    secondary={userData.joinDate}
-                  />
-                </ListItem>
-              </List>
-            </>
-          )}
+            )}
+          </Box>
         </Card>
       </Stack>
     </AppTheme>

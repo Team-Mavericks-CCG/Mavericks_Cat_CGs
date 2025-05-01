@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   AppBar,
   Toolbar,
   Typography,
   IconButton,
   Box,
-  Avatar,
   Menu,
   MenuItem,
   Tooltip,
@@ -16,14 +15,32 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ThemeToggle from "../shared-theme/ColorModeToggle";
 import { useColorScheme } from "@mui/material/styles";
 import CardThemeSelector from "./CardThemeSelector";
+import { ProfileContext } from "../shared-theme/ProfileContext";
+import { AuthAPI } from "../utils/api";
 
 const TopBar: React.FC = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const { mode } = useColorScheme();
+  const { setProfilePicture } = useContext(ProfileContext);
+  const [avatarUrl, setAvatarUrl] = useState<string>(
+    "/assets/pfp/defaultAvatar.webp"
+  );
 
-  // Get user info from localStorage or other state management
-  const username = localStorage.getItem("username") ?? "Guest";
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      try {
+        const response = await AuthAPI.getProfilePicture();
+        const profilePictureId = response.data.profilePicture;
+        setAvatarUrl(`/assets/pfp/catPFP${profilePictureId}.webp`);
+        setProfilePicture(`/assets/pfp/catPFP${profilePictureId}.webp`);
+      } catch (error) {
+        console.error("Error fetching profile picture:", error);
+      }
+    };
+
+    void fetchProfilePicture();
+  }, [setProfilePicture]);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -37,6 +54,7 @@ const TopBar: React.FC = () => {
     // Clear user data from localStorage
     localStorage.removeItem("authToken");
     localStorage.removeItem("username");
+    localStorage.removeItem("profilePicture");
     // Navigate to home page
     void navigate("/");
     handleMenuClose();
@@ -57,7 +75,9 @@ const TopBar: React.FC = () => {
             ? "rgba(18, 18, 18, 0.85)"
             : "rgba(255, 255, 255, 0.85)",
         backdropFilter: "blur(8px)",
-        borderBottom: `1px solid ${mode === "dark" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.12)"}`,
+        borderBottom: `1px solid ${
+          mode === "dark" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.12)"
+        }`,
         zIndex: (theme) => theme.zIndex.drawer + 1,
       }}
     >
@@ -136,16 +156,11 @@ const TopBar: React.FC = () => {
                 },
               }}
             >
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: "primary.main",
-                  boxShadow: "none",
-                }}
-              >
-                {username.charAt(0).toUpperCase()}
-              </Avatar>
+              <img
+                src={avatarUrl}
+                alt="User Avatar"
+                style={{ width: "32px", height: "32px", borderRadius: "50%" }}
+              />
             </IconButton>
           </Tooltip>
 
@@ -182,7 +197,6 @@ const TopBar: React.FC = () => {
                 },
               }}
             >
-              <AccountCircleIcon sx={{ mr: 1, color: "primary.main" }} />{" "}
               Profile
             </MenuItem>
             <MenuItem

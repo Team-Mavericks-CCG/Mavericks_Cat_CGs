@@ -73,6 +73,17 @@ export const AuthAPI = {
       password,
       newPassword,
     }),
+
+  updateProfilePicture: (profilePictureId: number) =>
+    API.post<{ success: boolean; message: string }>(
+      "/auth/update-profile-picture",
+      {
+        profilePicture: profilePictureId,
+      }
+    ),
+
+  getProfilePicture: () =>
+    API.get<{ profilePicture: number }>("/auth/profile-picture"),
 };
 
 export const LeaderboardAPI = {
