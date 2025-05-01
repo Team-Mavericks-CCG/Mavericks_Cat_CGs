@@ -87,7 +87,7 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
 ├── tsconfig.json               # TypeScript configuration for the entire project
 └── README.md                   # Project documentation
 ```
-# Contributing'
+# Contributing
 ```
 1. Fork the repo
 2. Create a new branch (`git checkout -b feature-branch`)
