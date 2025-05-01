@@ -146,6 +146,9 @@ function HomePage() {
   );
 
   const startGame = (gameType: GameType) => {
+    const playerName = userName.trim(); // Use the userName state directly
+    sessionStorage.setItem("username", playerName);
+
     try {
       void socketManager
         .connect()
@@ -168,6 +171,9 @@ function HomePage() {
 
   // Reusable function for connecting to a lobby
   const connectToLobby = (gameType: GameType, inviteCode: string | null) => {
+    const playerName = userName.trim(); // Use the userName state directly
+    sessionStorage.setItem("username", playerName);
+
     try {
       const playerName = localStorage.getItem("username") ?? "Player";
 
@@ -591,7 +597,7 @@ function HomePage() {
           >
             <TextField
               label="Invite Code"
-              value={inviteCode}
+              value={inviteCode.toUpperCase()}
               onChange={(e) => setInviteCode(e.target.value)}
               inputProps={{ maxLength: 6 }}
               fullWidth
@@ -650,7 +656,7 @@ function HomePage() {
           >
             <TextField
               label="Invite Code"
-              value={inviteCode}
+              value={inviteCode.toUpperCase()}
               onChange={(e) => setInviteCode(e.target.value)}
               inputProps={{ maxLength: 6 }}
               fullWidth
@@ -709,7 +715,7 @@ function HomePage() {
           >
             <TextField
               label="Invite Code"
-              value={inviteCode}
+              value={inviteCode.toUpperCase()}
               onChange={(e) => setInviteCode(e.target.value)}
               inputProps={{ maxLength: 6 }}
               fullWidth
