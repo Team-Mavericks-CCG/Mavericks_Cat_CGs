@@ -1,5 +1,6 @@
 -- permission for postgres user: GRANT INSERT, SELECT, UPDATE ON players TO <username>;
 
+-- creates the players table to store player information
 CREATE TABLE players (
    playerid INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
    username VARCHAR(255) UNIQUE NOT NULL,
@@ -12,6 +13,7 @@ CREATE TABLE players (
    "lastLogin" TIMESTAMP WITH TIME ZONE
 );
 
+-- creates the friendships table to store player friendships
 CREATE TABLE friendships (
    playerid INT NOT NULL,
    friendid INT NOT NULL,
@@ -22,12 +24,15 @@ CREATE TABLE friendships (
    CONSTRAINT check_not_self_friend CHECK (playerid <> friendid)
 );
 
+-- creates the games table to store game information
 CREATE TABLE games(
     "gameName" VARCHAR(255) PRIMARY KEY
 );
 
+-- insert predefined game names into the games table
 INSERT INTO games ("gameName") VALUES ('Solitaire'), ('Poker'), ('Blackjack'), ('War');
 
+-- creates the gameStats table to store player game statistics
 CREATE TABLE gameStats(
     playerid INT NOT NULL,
     "gameName" VARCHAR(255) NOT NULL,

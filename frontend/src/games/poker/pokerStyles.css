@@ -1,33 +1,40 @@
+/* Styles for the poker page container */
 .poker-page {
-  padding: 20px;
-  background-color: #033814; 
-  min-height: 100vh;
-  color: white;
+  padding: 20px; /* Add padding around the page */
+  background-color: #033814; /* Dark green background for the poker theme */
+  min-height: 100vh; /* Ensure the page takes up the full viewport height */
+  color: white; /* Set text color to white for contrast */
 }
 
+/* Styles for the "Start Game" button */
 .start-btn {
-  background-color: #4caf50;
-  color: white;
+  background-color: #4caf50; /* Green background for the button */
+  color: white; /* White text for contrast */
 }
 
+/* Hover effect for the "Start Game" button */
 .start-btn:hover {
-  background-color: #45a049;
+  background-color: #45a049; /* Slightly darker green on hover */
 }
 
+/* Styles for the "Replace" button */
 .replace-btn {
-  background-color: #f44336;
-  color: white;
+  background-color: #f44336; /* Red background for the button */
+  color: white; /* White text for contrast */
 }
 
+/* Hover effect for the "Replace" button */
 .replace-btn:hover {
-  background-color: #e53935;
+  background-color: #e53935; /* Slightly darker red on hover */
 }
 
+/* Styles for the "Keep" button */
 .keep-btn {
-  background-color: #4caf50;
-  color: white;
+  background-color: #4caf50; /* Green background for the button */
+  color: white; /* White text for contrast */
 }
 
+/* Hover effect for the "Keep" button */
 .keep-btn:hover {
-  background-color: #45a049;
+  background-color: #45a049; /* Slightly darker green on hover */
 }

@@ -1,5 +1,6 @@
 -- permission for postgres user: GRANT INSERT, SELECT, UPDATE ON players TO <username>;
-
+-- resets the database by dropping existing tables and creating new ones
+-- This is the same table structure as in Database.sql
 
 DROP TABLE IF EXISTS friendships;
 DROP TABLE IF EXISTS gameStats;

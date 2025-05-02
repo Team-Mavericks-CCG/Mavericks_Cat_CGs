@@ -1,3 +1,4 @@
+/* Styles for the blackjack page container */
 .blackjack-page {
   background-color: #033814;
   height: 100vh;
@@ -11,11 +12,13 @@
   position: relative;
 }
 
+/* styles for the blackjack page header */
 .blackjack-page h1 {
   text-align: center;
   margin-bottom: 30px;
 }
 
+/* styles for the blackjack table */
 .blackjack-table {
   display: flex;
   flex-direction: column;
@@ -25,6 +28,7 @@
   justify-content: center;
 }
 
+/* styles for the dealer and player areas */
 .dealer-area {
   display: flex;
   justify-content: center;
@@ -42,6 +46,7 @@
   align-items: center;
 }
 
+/* styles for the game controls section and buttons */
 .game-controls {
   display: flex;
   justify-content: space-between;
@@ -100,6 +105,7 @@
   cursor: pointer;
 }
 
+/* styles for the leaderboard section */
 .leaderboard-holder {
   position: absolute;
   bottom: 20px;
