@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ThemeToggle from "../shared-theme/ColorModeToggle";
 import { useColorScheme } from "@mui/material/styles";
 import CardThemeSelector from "./CardThemeSelector";

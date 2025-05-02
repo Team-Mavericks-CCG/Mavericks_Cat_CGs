@@ -7,7 +7,7 @@ import { SolitairePage } from "./games/solitaire/solitairePage";
 import HomePage from "./homePage";
 import Register from "./register/register";
 import BlackjackPage from "./games/blackjack/blackjackFront";
-import WarPage from "./games/war/WarFront";
+import WarPage from "./games/war/warFront";
 import MainLayout from "./foundation-components/MainLayout";
 import AuthLayout from "./foundation-components/AuthLayout";
 import AppTheme from "./shared-theme/AppTheme";
@@ -39,7 +39,7 @@ createRoot(document.getElementById("root")!).render(
               <Route path="solitaire" element={<SolitairePage />} />
               <Route path="blackjack" element={<BlackjackPage />} />
               <Route path="war" element={<WarPage />} />
-              <Route path = "poker" element={<PokerPage />} />
+              <Route path="poker" element={<PokerPage />} />
               <Route
                 path="/games/:game/lobby/:inviteCode"
                 element={<LobbyPage />}
