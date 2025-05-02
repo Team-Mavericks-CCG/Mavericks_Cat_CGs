@@ -114,18 +114,36 @@ const WarPage: React.FC = () => {
       };
 
       const play = () => {
-        void socketManager.gameAction("play");
+        void socketManager.WarAction("play");
+
+      
       };
 
-      const war = () => {
-        void socketManager.gameAction("play");
-      };
+      const renderHand = (hand: Card[]) => (
+        <Box display="flex" gap={1}>
+          {hand.map((card, index) => (
+            <CardComponent
+              key={`${card.rank}-${card.suit}-${index}`}
+              card={card}
+              isClickable={false}
+              onClick={() =>
+                console.log(`Card clicked: ${card.rank} of ${card.suit}`)
+              }
+            />
+          ))}
+        </Box>
+      );
+
+    
+
 
       return (
         <Box className="war-page">
           <Typography variant="h4" align="center" gutterBottom>
             War <GameRules gameType="war" />
           </Typography>
+          
+
     
           {!isConnecting && (
             <>
@@ -156,18 +174,10 @@ const WarPage: React.FC = () => {
               <Box display="flex" justifyContent="center" gap={2}>
                 <GameButton
                   variant="contained"
-                  onClick={play}
+                  onClick={playGame}
                   disabled={isGameOver}
                 >
                   Play
-                </GameButton>
-    
-                <GameButton
-                  variant="contained"
-                  onClick={startGame}
-                  disabled={!isGameOver}
-                >
-                  New Game
                 </GameButton>
               </Box>
             </>

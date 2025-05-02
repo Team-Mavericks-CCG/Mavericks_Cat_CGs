@@ -166,6 +166,7 @@ export default function ProfilePage(props: {
         setProfilePicture(
           getProfilePictureUrl(updatedProfile.data.user.profilePicture)
         ); // Update global state
+        window.location.reload(); // Reload the page to reflect changes
       } catch (error) {
         console.error("Error updating profile picture", error);
         alert("Failed to update profile picture. Please try again.");

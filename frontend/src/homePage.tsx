@@ -197,7 +197,7 @@ function HomePage() {
         .then(() => {
           void socketManager.createLobby("Player", gameType).then(() => {
             void socketManager.startGame().then(() => {
-              void navigate("/lobby");
+              void navigate(`/games/${gameType.toLowerCase()}`);
             });
           });
         })
@@ -224,7 +224,6 @@ function HomePage() {
           .then(() => {
             console.log("Connected to socket server.");
             void socketManager.createLobby(playerName, gameType).then(() => {
-              console.log("Lobby created successfully.");
               void navigate("/lobby");
             });
           })
@@ -441,7 +440,7 @@ function HomePage() {
                 <button
                   className="dropdown-button"
                   onClick={() => {
-                    void navigate("/games/war");
+                    startGame(GameType.WAR);
                   }}
                 >
                   Start Game
@@ -482,7 +481,7 @@ function HomePage() {
                 <button
                   className="dropdown-button"
                   onClick={() => {
-                    void navigate("/games/blackjack");
+                    startGame(GameType.BLACKJACK);
                   }}
                 >
                   Start Game
@@ -522,7 +521,7 @@ function HomePage() {
                 <button
                   className="dropdown-button"
                   onClick={() => {
-                    void navigate("/games/poker");
+                    startGame(GameType.POKER);
                   }}
                 >
                   Start Game
