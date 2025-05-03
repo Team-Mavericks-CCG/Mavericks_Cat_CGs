@@ -57,6 +57,7 @@ const TopBar: React.FC = () => {
     // Navigate to home page
     void navigate("/");
     handleMenuClose();
+    window.location.reload(); // Reload the page to reflect changes
   };
 
   const handleProfile = () => {
