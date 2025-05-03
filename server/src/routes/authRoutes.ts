@@ -37,10 +37,13 @@ router.get("/verify", verifyToken, (req: Request, res: Response): void => {
   });
 });
 
+// route for getting user profile
 router.get("/profile", verifyToken, getProfile);
 
+// Route for updating profile picture
 router.post("/update-profile-picture", verifyToken, updateProfilePicture);
 
+// Route for getting profile picture
 router.get("/profile-picture", verifyToken, getProfilePicture);
 
 // Route for testing auth middleware

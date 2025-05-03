@@ -6,8 +6,6 @@ import {
 } from "../games/gameStore.js";
 import { Blackjack } from "../games/blackjack.js";
 import { War } from "../games/war.js";
-import jwt from "jsonwebtoken";
-import PlayerModel from "../models/userModel.js";
 import { Game } from "../games/game.js";
 import crypto from "crypto";
 import {
@@ -63,7 +61,6 @@ function generateInviteCode(): string {
   const combined = `${now.toString()}-${randomBytes}-${Math.random().toString()}`;
   const hash = crypto.createHash("sha256").update(combined).digest("hex");
 
-  // Extract 6 characters from the hash (uppercase alphanumeric only)
   let code = "";
   const allowedChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // Omitting confusing chars
 
@@ -77,6 +74,7 @@ function generateInviteCode(): string {
 
   return code;
 }
+
 // function for getting players in a game
 function getPlayersInGame(game: Game): { players: Player[] } {
   return {
@@ -98,10 +96,12 @@ export function setupSocketServer(
   const CLEANUP_INTERVAL = 15 * 60 * 1000; // 15 minutes
   const MAX_INACTIVE_TIME = 60 * 60 * 1000; // 1 hour of inactivity
 
+  // Cleanup function to remove inactive games
   setInterval(() => {
     gameStore.cleanupInactiveGames(MAX_INACTIVE_TIME);
   }, CLEANUP_INTERVAL);
 
+  // Handle socket connections
   io.on("connection", (socket) => {
     console.log(`New connection: ${socket.id}`);
 
@@ -133,7 +133,9 @@ export function setupSocketServer(
         `Reconnecting socket: ${socket.id} with playerID ${socket.data.playerID}`
       );
 
+      // Remove old socket from mapping
       socketPlayerMap.delete(data.sessionID);
+      // add new socket to mapping
       socketPlayerMap.set(socket.id, socket);
       playerSocketMap.set(socket.data.playerID, socket);
 
@@ -184,40 +186,6 @@ export function setupSocketServer(
       }
     });
 
-    // Handle authentication (optional)
-    socket.on("authenticate", async (token, callback) => {
-      try {
-        if (!process.env.JWT_SECRET) {
-          throw new Error("JWT_SECRET is not defined");
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
-          id: number;
-        };
-        const user = await PlayerModel.findByPk(decoded.id);
-
-        if (!user) {
-          callback(false);
-          return;
-        }
-
-        // Store user data in socket
-        socket.data.userId = user.playerid;
-        socket.data.username = user.username;
-        socket.data.isAuthenticated = true;
-
-        // Success
-        callback(true, {
-          id: user.playerid,
-          username: user.username,
-        });
-      } catch (error) {
-        console.error("Authentication error:", error);
-        callback(false);
-      }
-    });
-
-    // TODO: handle lobby separate from game
     socket.on("create-lobby", (data) => {
       try {
         // Set player name (works for both authenticated and anonymous users)
@@ -293,7 +261,6 @@ export function setupSocketServer(
       }
     });
 
-    // TODO: handle join game
     socket.on("join-lobby", (data) => {
       try {
         console.log("Join lobby data:", data);
@@ -360,7 +327,6 @@ export function setupSocketServer(
       }
     });
 
-    // TODO: handle starting game
     socket.on("start-game", (data) => {
       try {
         const { gameID } = data;
@@ -411,7 +377,6 @@ export function setupSocketServer(
       }
     });
 
-    // TODO: implement new round
     socket.on("new-round", (data) => {
       try {
         const { gameID } = data;
