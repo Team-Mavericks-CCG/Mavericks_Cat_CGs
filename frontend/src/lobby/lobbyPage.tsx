@@ -54,19 +54,25 @@ const LobbyPage: React.FC = () => {
     }
   };
 
+
   return (
     <div className="lobby-container">
+      {/* display the game type or a default lobby header */}
       <h1 className="lobby-header">
         {gameType ? gameType.toUpperCase() : "Game Lobby "}
       </h1>
+
+      {/* button to invite other friends */}
       <button className="invite-btn">INVITE</button>
 
+      {/* Snake game component for players to play while waiting */}
       <div className="snake-box">
         <SnakeGame />
       </div>
 
       <div className="lobby-title-wrapper"></div>
 
+      {/* Player cards */}
       <div className="lobby-and-cards-container">
         <div className="player-cards">
           {players.map((player, index) => (
@@ -85,7 +91,8 @@ const LobbyPage: React.FC = () => {
       </div>
 
       <div className="invite-code">INVITE CODE: {inviteCode}</div>
-
+      
+      {/* bottom panel with ready and start buttons */}
       <div className="bottom-panel">
         <div className="bottom-left">Play snake while you wait!</div>
 

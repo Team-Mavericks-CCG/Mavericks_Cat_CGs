@@ -22,6 +22,7 @@ import { socketManager } from "./games/utils/socketManager";
 import catPlaying from "/assets/images/catPlaying.webp";
 import { GameType } from "shared";
 
+// Styled container for the HomePage
 const HomePageContainer = styled(Stack)(({ theme }) => ({
   height: "calc((1 - var(--template-frame-height, 0)) * 100dvh)",
   minHeight: "100%",
@@ -40,6 +41,7 @@ const HomePageContainer = styled(Stack)(({ theme }) => ({
   },
 }));
 
+// Props for the GameDialog component
 interface GameDialogProps {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -55,6 +57,7 @@ interface GameDialogProps {
   navigateTo: (path: string) => void;
 }
 
+// Components for displaying a dialog with game options
 const GameDialog: React.FC<GameDialogProps> = ({
   open,
   setOpen,
@@ -79,6 +82,7 @@ const GameDialog: React.FC<GameDialogProps> = ({
         </IconButton>
       </DialogTitle>
       <DialogActions>
+        {/* Tabs for navigating between different game options */}
         <Tabs
           value={selectedTab}
           onChange={(_, newValue: number) => setSelectedTab(newValue)}
@@ -124,6 +128,7 @@ function HomePage() {
     };
   }, []);
 
+  // State variable for managing dialogs and tabs 
   const navigate = useNavigate();
   const [openSolitaire, setOpenSolitaire] = useState(false);
   const [openWar, setOpenWar] = useState(false);
@@ -177,6 +182,7 @@ function HomePage() {
     return true;
   };
 
+  // Function to start a game
   const startGame = (gameType: GameType) => {
     const playerName = userName.trim(); // Use the userName state directly
     sessionStorage.setItem("username", playerName);
@@ -249,6 +255,8 @@ function HomePage() {
     }
   };
 
+  // tabs for solitaire, war, poker, and blackjack
+  // Each tab contains a label, content, button label, and navigation path
   const solitaireTabs = [
     {
       label: "Start",
@@ -377,6 +385,8 @@ function HomePage() {
 
   return (
     <AppTheme>
+      {/* Main container for the HomePage */}
+      {/* The container is styled using the HomePageContainer component */}
       <HomePageContainer direction="column" justifyContent="space-between">
         <Typography component="h1" variant="h2" sx={{ width: "100%" }}>
           Welcome to Mavericks Cat-tastic Card Games!
@@ -536,6 +546,7 @@ function HomePage() {
               </div>
             </div>
 
+             {/* About Us section */}
             <section className="aboutUs">
               <h2>About Us</h2>
               <img
@@ -557,6 +568,7 @@ function HomePage() {
           <div className="button-row"></div>
         </div>
 
+        {/* Game Dialogs for each game */}
         <GameDialog
           open={openSolitaire}
           setOpen={setOpenSolitaire}

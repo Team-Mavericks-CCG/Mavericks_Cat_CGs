@@ -1,3 +1,4 @@
+/* Styles for the Home Page */
 html,
 body {
   height: 100%;
@@ -9,6 +10,7 @@ html {
   font-size: clamp(14px, 1.5vw, 18px); /* Responsive font size */
 }
 
+/* Styles for the About Us section */
 .aboutUs {
   text-align: center;
   margin-top: -45px;
@@ -28,6 +30,7 @@ html {
   margin-top: 30px;
 }
 
+/* Styles for the footer */
 footer {
   font-size: 14px;
   text-align: center;
@@ -55,6 +58,7 @@ body {
   padding-bottom: 3rem;
 }
 
+/* styles for the game buttons */
 .button-row1 {
   display: flex;
   flex-wrap: wrap; /* Allow buttons to wrap */
@@ -130,6 +134,7 @@ button {
   display: flex;
 }
 
+/* Dropdown button styles */
 .dropdown-button {
   padding: 8px 16px;
   border: none;
@@ -164,6 +169,7 @@ button {
   background: none;
 }
 
+/* Styles for the cat pawprint image */
 .cat-pawprint {
   width: 200px;
   height: 175px;

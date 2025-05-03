@@ -9,8 +9,10 @@ import { verifyToken } from "../middleware/auth.js";
 // e.g. /api/auth/login
 const router = Router();
 
+// Route for saving game stats
 router.post("/save-stats", verifyToken, saveGameStats);
 
+// Route for getting game stats
 router.get("/get-stats", getGameStats);
 
 export default router;

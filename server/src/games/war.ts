@@ -232,6 +232,14 @@ export class War extends Game {
   }
 
   public initializeHand(playerID: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!this.hands) {
+      return;
+    }
+    if (this.hands.size >= War.MAX_PLAYERS) {
+      throw new Error("Game is full");
+    }
+
     this.hands.set(playerID, {
       cards: [],
       status: WarHandStatus.INACTIVE,
@@ -239,10 +247,6 @@ export class War extends Game {
   }
 
   addPlayer(playerId: string, playerName: string): void {
-    if (this.hands.size >= War.MAX_PLAYERS) {
-      throw new Error("Game is full");
-    }
-
     super.addPlayer(playerId, playerName);
     this.initializeHand(playerId);
   }
