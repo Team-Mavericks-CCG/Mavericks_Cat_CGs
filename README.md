@@ -17,13 +17,13 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
    Prod:
 
    ```bash
-   docker:build:prod
+   npm run docker:build:prod
    ```
 
    Dev:
 
    ```bash
-   docker:build:dev
+   npm run docker:build:dev
    ```
 
 ## Usage Instructions
@@ -33,13 +33,13 @@ This repository contains the codebase for **Team Maverick's Cat Card Game**, dev
    Prod:
 
    ```bash
-   docker:prod
+   npm run docker:prod
    ```
 
    Dev:
 
    ```bash
-   docker:dev
+   npm run docker:dev
    ```
 
 2. Connect to frontend, address will change if running prod or dev, docker output will provide url. Dev defaults to localhost:5173
